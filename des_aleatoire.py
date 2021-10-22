@@ -6,11 +6,11 @@ size = 1 #valeur sans importance
 cercleSize = size/8 #/6 est la taille max avant les problèmes /10 peut être meilleur
 tirage = int(input('tirage:\t'))
 racineTirage = floor(tirage**(1/2))
-setworldcoordinates(0, 0, (racineTirage+(not(tirage==racineTirage**2)))*(size+size/3), (racineTirage+(not(tirage==racineTirage**2)))*(size+size/3)) #ajustement de la taille de la carte
+setworldcoordinates(0, 0, (racineTirage+(tirage-racineTirage**2)//racineTirage)*(size+size/3), (racineTirage+(tirage-racineTirage**2)//racineTirage)*(size+size/3)) #ajustement de la taille de la carte
 t = Turtle()#création de la tortue
 t.speed(0)
 t.fillcolor('red')
-rows = [racineTirage]*racineTirage+[tirage-racineTirage**2]  #création du tableau/matris
+rows = [racineTirage]*racineTirage+[racineTirage]*((tirage-racineTirage**2)//racineTirage)+[tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)]  #création du tableau/matris
 tour=0  #varible qui compte le nombre de tour 
 
 for row in rows:
