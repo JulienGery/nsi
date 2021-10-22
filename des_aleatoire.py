@@ -20,21 +20,20 @@ for row in rows:
         t.goto(nbcarre*(size+size/3), posY)
         t.pendown()
         de = randint(1,6)   #numéro du dé
+        print(de)
         for _ in range(4):  #création du carré
             t.forward(size)
             t.left(90)
         t.penup()
         if de in [1, 3, 5]: #dé de 1, 3, 5 cercles
-            t.forward(size/2)
-            t.sety((size/2)-(cercleSize)+posY)
+            t.goto(nbcarre*(size+size/3)+size/2,(size/2)-(cercleSize)+posY)
             t.begin_fill()
             t.circle(cercleSize)
             t.end_fill()
         if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles
             if de != 2:
                 for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles
-                    t.goto(nbcarre*(size+size/3), i/4*size-cercleSize+posY)
-                    t.forward(size*i/4)
+                    t.goto(nbcarre*(size+size/3)+size*i/4, i/4*size-cercleSize+posY)
                     t.begin_fill()
                     t.circle(cercleSize)
                     t.end_fill()
@@ -47,8 +46,7 @@ for row in rows:
                         t.circle(cercleSize)
                         t.end_fill()
                 for i in [3,1]: #dé de 2, 4, 5, 6 cercles
-                    t.goto(nbcarre*(size+size/3),size-(i/4*size)-cercleSize+posY)
-                    t.forward(size*i/4)
+                    t.goto(nbcarre*(size+size/3)+size*i/4,size-(i/4*size)-cercleSize+posY)
                     t.begin_fill()
                     t.circle(cercleSize)
                     t.end_fill()
