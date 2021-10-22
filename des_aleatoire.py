@@ -2,7 +2,7 @@ from math import floor
 from turtle import Turtle, exitonclick, setworldcoordinates
 from random import randint
 
-size = 1 #valeur sans importance
+size = 1 #valeur sans importance doit être != 0
 cercleSize = size/8 #/6 est la taille max avant les problèmes /10 peut être meilleur
 tirage = int(input('tirage:\t'))
 racineTirage = floor(tirage**(1/2))
@@ -12,6 +12,8 @@ t.speed(0)
 t.fillcolor('red')
 rows = [racineTirage]*racineTirage+[racineTirage]*((tirage-racineTirage**2)//racineTirage)+[tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)]  #création du tableau/matris
 tour=0  #varible qui compte le nombre de tour 
+print(rows)
+exit()
 
 for row in rows:
     posY = (size+size/3)*tour   #position sur l'axe y
