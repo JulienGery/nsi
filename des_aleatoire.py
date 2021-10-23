@@ -14,10 +14,10 @@ rows = [racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTira
 tour=0  #varible qui compte le nombre de tour 
 
 for row in rows:
-    posY = (size+size/3)*tour   #position sur l'axe y. peux être supprimer pour gagnier 1 ligne
+    posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     tour+=1
     for nbcarre in range(row):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
-        posX = nbcarre*(size+size/3)
+        posX = nbcarre*(size+size/3)  #position sur l'axe x. peut être supprimer pour gagner 1 ligne
         t.goto(posX, posY)
         t.pendown()
         de = randint(1,6)   #numéro du dé
