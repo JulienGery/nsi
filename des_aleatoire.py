@@ -10,10 +10,8 @@ setworldcoordinates(0, 0, (racineTirage+(tirage-racineTirage**2)//racineTirage+(
 t = Turtle()#création de la tortue
 t.speed(0)
 t.fillcolor('red')
-rows = [racineTirage+((tirage-racineTirage**2)//racineTirage)]*racineTirage  #création du tableau/"matris"
+rows = [racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))+[racineTirage+((tirage-racineTirage**2)//racineTirage)]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matris"
 tour=0  #varible qui compte le nombre de tour 
-for i in range(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)):
-    rows[i] += 1
 
 for row in rows:
     posY = (size+size/3)*tour   #position sur l'axe y
