@@ -6,11 +6,11 @@ size = 1 #valeur sans importance doit être != 0
 cercleSize = size/10 #/6 est la taille max avant les problèmes /8 est pas mal /10 peut être meilleur
 tirage = int(input('tirage:\t'))
 racineTirage = floor(tirage**(1/2))
-setworldcoordinates(0, 0, (racineTirage+(tirage-racineTirage**2)//racineTirage+(not(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)==0)))*(size+size/3), (racineTirage+(tirage-racineTirage**2)//racineTirage+(not(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)==0)))*(size+size/3)) #ajustement de la taille de la carte
+rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [tirage//racineTirage]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
+setworldcoordinates(0, 0, max(rows[0], len(rows))*(size+size/3), max(rows[0], len(rows))*(size+size/3)) #ajustement de la taille de la carte
 t = Turtle()#création de la tortue
 t.speed(0)
 t.fillcolor('red')
-rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [racineTirage+((tirage-racineTirage**2)//racineTirage)]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
 tour=0  #varible qui compte le nombre de tour 
 
 for row in rows:
