@@ -73,7 +73,7 @@ def myCerlce(turtle):
     turtle.circle(cercleSize)
     turtle.end_fill()
 
-def myRow(turtle, posY):
+def myRow(turtle, posY, row):
     turtle.penup()
     for nbcarre in range(row):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
         posX = nbcarre*(size+size/3)  #position sur l'axe x. peut être supprimer pour gagner 1 ligne
@@ -107,7 +107,7 @@ for row in rows:
     t = Turtle()#création de la tortue
     t.speed(0)
     t.fillcolor('red')
-    thread = Thread(target=(myRow), args=(t, posY), daemon=True)
+    thread = Thread(target=(myRow), args=(t, posY, row), daemon=True)
     thread.start()
 
 exitonclick()
