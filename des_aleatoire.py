@@ -51,56 +51,64 @@ for row in rows:
                     t.end_fill()
 
 exitonclick()
+
 #old rows = [racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)) + [racineTirage+((tirage-racineTirage**2)//racineTirage)]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))) + [tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))]
 # using def can be improved. 45 lignes
 """
 from math import floor
 from turtle import Turtle, exitonclick, setworldcoordinates
 from random import randint
+from threading import Thread
 
-size = 1
-cercleSize = size/8
+size = 1 #valeur sans importance doit être != 0
+cercleSize = size/10 #/6 est la taille max avant les problèmes /8 est pas mal /10 peut être meilleur
 tirage = int(input('tirage:\t'))
 racineTirage = floor(tirage**(1/2))
-setworldcoordinates(0, 0, (racineTirage+(not(tirage==racineTirage**2)))*(size+size/3), (racineTirage+(not(tirage==racineTirage**2)))*(size+size/3)) #ajustement de la taille de la carte
-t = Turtle()#création de la tortue
-t.speed(0)
-t.fillcolor('red')
-rows = [racineTirage]*racineTirage+[tirage-racineTirage**2]  #création du tableau/matris
-tour=0  #varible qui compte le nombre de tour
- 
-def myCercle():
-    t.begin_fill()
-    t.circle(cercleSize)
-    t.end_fill()
+rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [tirage//racineTirage]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
+setworldcoordinates(0, 0, max(rows[0], len(rows))*(size+size/3), max(rows[0], len(rows))*(size+size/3)) #ajustement de la taille de la carte
+tour=0  #varible qui compte le nombre de tour 
 
-for row in rows:
-    posY = (size+size/3)*tour   #position sur l'axe y
-    tour+=1
-    for nbcarre in range(row):    #création de la ligne et possitionnement de l'axe x
-        t.goto(nbcarre*(size+size/3), posY)
-        t.pendown()
+def myCerlce(turtle):
+    turtle.begin_fill()
+    turtle.circle(cercleSize)
+    turtle.end_fill()
+
+def myRow(turtle, posY):
+    turtle.penup()
+    for nbcarre in range(row):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
+        posX = nbcarre*(size+size/3)  #position sur l'axe x. peut être supprimer pour gagner 1 ligne
+        turtle.goto(posX, posY)
+        turtle.pendown()
         de = randint(1,6)   #numéro du dé
         for _ in range(4):  #création du carré
-            t.forward(size)
-            t.left(90)
-        t.penup()
-        if de in [1, 3, 5]: #dé de 1, 3, 5 cercles
-            t.goto(nbcarre*(size+size/3)+size/2,(size/2)-(cercleSize)+posY)
-            myCercle()
-        if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles
+            turtle.forward(size)
+            turtle.left(90)
+        turtle.penup()
+        if de in [1, 3, 5]: #dé de 1, 3, 5 cercles équivalent  équivalent: if de == 1 or de == 3 or de == 5:. 
+            turtle.goto(posX+size/2,(size/2)-(cercleSize)+posY)
+            myCerlce(turtle)
+        if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles équivalent : if de == 2 or de == 3 or de == 4 or de == 5 or de == 6:.
             if de != 2:
-                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles
-                    t.goto(nbcarre*(size+size/3)+size*i/4, i/4*size-cercleSize+posY)
-                    myCercle()
+                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 3):
+                    turtle.goto(posX+size*i/4, i/4*size-cercleSize+posY)
+                    myCerlce(turtle)
             if de !=3:  #dé de 2, 4, 5, 6 cercles
                 if de == 6: #dé de 6 cercles
-                    for i in [1, 3]:
-                        t.goto(nbcarre*(size+size/3)+size*i/4, size/2-cercleSize+posY)
-                        myCercle()
-                for i in [3,1]: #dé de 2, 4, 5, 6 cercles
-                    t.goto(nbcarre*(size+size/3)+size*i/4,size-(i/4*size)-cercleSize+posY)
-                    myCercle()
+                    for i in [1, 3]: #équivalent for i in range(1, 3):
+                        turtle.goto(posX+size*i/4, size/2-cercleSize+posY)
+                        myCerlce(turtle)
+                for i in [3,1]: #dé de 2, 4, 5, 6 cercles équivalent : for i in range(3, 0, -1):
+                    turtle.goto(posX+size*i/4,size-(i/4*size)-cercleSize+posY)
+                    myCerlce(turtle)
+
+for row in rows:
+    posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
+    tour+=1
+    t = Turtle()#création de la tortue
+    t.speed(0)
+    t.fillcolor('red')
+    thread = Thread(target=(myRow), args=(t, posY), daemon=True)
+    thread.start()
 
 exitonclick()
 """
