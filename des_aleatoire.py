@@ -53,7 +53,7 @@ for row in rows:
 exitonclick()
 
 #old rows = [racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)) + [racineTirage+((tirage-racineTirage**2)//racineTirage)]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))) + [tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))]
-# using def can be improved. 45 lignes
+# using def can be improved. 50 lignes threaded
 """
 from math import floor
 from turtle import Turtle, exitonclick, setworldcoordinates
