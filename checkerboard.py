@@ -1,8 +1,8 @@
-from turtle import setworldcoordinates, Turtle, exitonclick, title, tracer
+from turtle import setworldcoordinates, Turtle, exitonclick
 
 nbcarre = int(input('nb carré sur un côté :\t'))
 size = 1
-isBLUE=True
+isBlue=True
 setworldcoordinates(0,0,size*nbcarre,size*nbcarre)
 t = Turtle()
 t.speed(0)
@@ -11,7 +11,7 @@ t.penup()
 for i in range(nbcarre):
     t.goto(0,i*size)
     for _ in range(nbcarre):
-        if isBLUE:
+        if isBlue:
             t.fillcolor('blue')
         else:
             t.fillcolor('red')
@@ -20,8 +20,8 @@ for i in range(nbcarre):
             t.forward(size)
             t.left(90)
         t.end_fill()
-        isBLUE = not isBLUE
+        isBlue = not isBlue
         t.forward(size)
-    isBLUE = not isBLUE
+    isBlue = not isBlue
 
 exitonclick()
