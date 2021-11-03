@@ -100,6 +100,7 @@ def myRow(turtle, posY, row):
                 for i in [3,1]: #dé de 2, 4, 5, 6 cercles équivalent : for i in range(3, 0, -1):
                     turtle.goto(posX+size*i/4,size-(i/4*size)-cercleSize+posY)
                     myCircle(turtle)
+                    
 for row in rows:
     posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     tour+=1
