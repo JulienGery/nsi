@@ -66,9 +66,9 @@ tirage = int(input('tirage:\t'))
 racineTirage = floor(tirage**(1/2))
 rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [tirage//racineTirage]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
 setworldcoordinates(0, 0, max(rows[0], len(rows))*(size+size/3), max(rows[0], len(rows))*(size+size/3)) #ajustement de la taille de la carte
-tour=0  #varible qui compte le nombre de tour 
+tour=0  #varible qui compte le nombre de tour
 
-def myCerlce(turtle):
+def myCircle(turtle):
     turtle.begin_fill()
     turtle.circle(cercleSize)
     turtle.end_fill()
@@ -86,21 +86,20 @@ def myRow(turtle, posY, row):
         turtle.penup()
         if de in [1, 3, 5]: #dé de 1, 3, 5 cercles équivalent  équivalent: if de == 1 or de == 3 or de == 5:. 
             turtle.goto(posX+size/2,(size/2)-(cercleSize)+posY)
-            myCerlce(turtle)
+            myCircle(turtle)
         if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles équivalent : if de == 2 or de == 3 or de == 4 or de == 5 or de == 6:.
             if de != 2:
                 for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 3):
                     turtle.goto(posX+size*i/4, i/4*size-cercleSize+posY)
-                    myCerlce(turtle)
+                    myCircle(turtle)
             if de !=3:  #dé de 2, 4, 5, 6 cercles
                 if de == 6: #dé de 6 cercles
                     for i in [1, 3]: #équivalent for i in range(1, 3):
                         turtle.goto(posX+size*i/4, size/2-cercleSize+posY)
-                        myCerlce(turtle)
+                        myCircle(turtle)
                 for i in [3,1]: #dé de 2, 4, 5, 6 cercles équivalent : for i in range(3, 0, -1):
                     turtle.goto(posX+size*i/4,size-(i/4*size)-cercleSize+posY)
-                    myCerlce(turtle)
-
+                    myCircle(turtle)
 for row in rows:
     posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     tour+=1
