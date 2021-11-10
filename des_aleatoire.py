@@ -1,22 +1,20 @@
-from math import floor
 from turtle import Turtle, exitonclick, setworldcoordinates
 from random import randint
 
 size = 1 #valeur sans importance doit être != 0
 cercleSize = size/10 #/6 est la taille max avant les problèmes /8 est pas mal /10 peut être meilleur
 tirage = int(input('tirage:\t'))
-racineTirage = floor(tirage**(1/2))
+racineTirage = int(tirage**(1/2))
 rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [tirage//racineTirage]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
 setworldcoordinates(0, 0, max(rows[0], len(rows))*(size+size/3), max(rows[0], len(rows))*(size+size/3)) #ajustement de la taille de la carte
 t = Turtle()#création de la tortue
 t.speed(0)
 t.fillcolor('red')
-tour=0  #varible qui compte le nombre de tour 
 
-for row in rows:
-    posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
-    tour+=1
-    for nbcarre in range(row):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
+for row in range(len(rows)):
+    posY = (size+size/3)*row   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
+    for nbcarre in range(rows[row]):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
+
         posX = nbcarre*(size+size/3)  #position sur l'axe x. peut être supprimer pour gagner 1 ligne
         t.goto(posX, posY)
         t.pendown()
@@ -54,8 +52,8 @@ exitonclick()
 
 #old rows = [racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)) + [racineTirage+((tirage-racineTirage**2)//racineTirage)]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))) + [tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))]
 # using def can be improved. 50 lignes threaded
+
 """
-from math import floor
 from turtle import Turtle, exitonclick, setworldcoordinates
 from random import randint
 from threading import Thread
@@ -63,10 +61,10 @@ from threading import Thread
 size = 1 #valeur sans importance doit être != 0
 cercleSize = size/10 #/6 est la taille max avant les problèmes /8 est pas mal /10 peut être meilleur
 tirage = int(input('tirage:\t'))
-racineTirage = floor(tirage**(1/2))
+racineTirage = int(tirage**(1/2))
 rows = [racineTirage+2]*(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))+[racineTirage+1]*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)-(tirage-(racineTirage+1)*(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))-(racineTirage+((tirage-racineTirage**2)//racineTirage))*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage))))) + [tirage//racineTirage]*(racineTirage-(tirage-racineTirage**2-racineTirage*((tirage-racineTirage**2)//racineTirage)))  #création du tableau/"matrice"
 setworldcoordinates(0, 0, max(rows[0], len(rows))*(size+size/3), max(rows[0], len(rows))*(size+size/3)) #ajustement de la taille de la carte
-tour=0  #varible qui compte le nombre de tour
+
 
 def myCircle(turtle):
     turtle.begin_fill()
@@ -100,14 +98,13 @@ def myRow(turtle, posY, row):
                 for i in [3,1]: #dé de 2, 4, 5, 6 cercles équivalent : for i in range(3, 0, -1):
                     turtle.goto(posX+size*i/4,size-(i/4*size)-cercleSize+posY)
                     myCircle(turtle)
-                    
-for row in rows:
-    posY = (size+size/3)*tour   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
-    tour+=1
+
+for row in range(len(rows)):
+    posY = (size+size/3)*row   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     t = Turtle()#création de la tortue
     t.speed(0)
     t.fillcolor('red')
-    thread = Thread(target=(myRow), args=(t, posY, row), daemon=True)
+    thread = Thread(target=(myRow), args=(t, posY, rows[row]), daemon=True)
     thread.start()
 
 exitonclick()
