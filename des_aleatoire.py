@@ -14,7 +14,6 @@ t.fillcolor('red')
 for row in range(len(rows)):
     posY = (size+size/3)*row   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     for nbcarre in range(rows[row]):    #création de la ligne. nbcarre est le numéro du carré en cour sur la rangée
-
         posX = nbcarre*(size+size/3)  #position sur l'axe x. peut être supprimer pour gagner 1 ligne
         t.goto(posX, posY)
         t.pendown()
