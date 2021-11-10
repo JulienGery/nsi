@@ -116,7 +116,7 @@ from math import ceil
 
 size = 1 
 cercleSize = size/10 
-tirage = int(input('donner tirage:\t'))
+tirage = int(input('tirage:\t'))
 racineTirage = int(tirage**(1/2))
 rows = np.random.randint(1, 6, size=(racineTirage, ceil(tirage/racineTirage)))
 rows[np.shape(rows)[0]-(np.shape(rows)[0]*np.shape(rows)[1]-tirage):, -1] = 0
