@@ -29,14 +29,14 @@ for row in range(len(rows)):
             t.end_fill()
         if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles équivalent : if de == 2 or de == 3 or de == 4 or de == 5 or de == 6:.
             if de != 2:
-                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 3):
+                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 4, 2):
                     t.goto(posX+size*i/4, i/4*size-cercleSize+posY)
                     t.begin_fill()
                     t.circle(cercleSize)
                     t.end_fill()
             if de !=3:  #dé de 2, 4, 5, 6 cercles
                 if de == 6: #dé de 6 cercles
-                    for i in [1, 3]: #équivalent for i in range(1, 3):
+                    for i in [1, 3]: #équivalent for i in range(1, 4, 2):
                         t.goto(posX+size*i/4, size/2-cercleSize+posY)
                         t.begin_fill()
                         t.circle(cercleSize)
@@ -84,18 +84,17 @@ def myRow(turtle, posY, row):
             myCircle(turtle)
         if de in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles équivalent : if de == 2 or de == 3 or de == 4 or de == 5 or de == 6:.
             if de != 2:
-                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 3):
+                for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 4, 2):
                     turtle.goto(posX+size*i/4, i/4*size-cercleSize+posY)
                     myCircle(turtle)
             if de !=3:  #dé de 2, 4, 5, 6 cercles
                 if de == 6: #dé de 6 cercles
-                    for i in [1, 3]: #équivalent for i in range(1, 3):
+                    for i in [1, 3]: #équivalent for i in range(1, 4, 2):
                         turtle.goto(posX+size*i/4, size/2-cercleSize+posY)
                         myCircle(turtle)
                 for i in [3,1]: #dé de 2, 4, 5, 6 cercles équivalent : for i in range(3, 0, -1):
                     turtle.goto(posX+size*i/4,size-(i/4*size)-cercleSize+posY)
                     myCircle(turtle)
-
 for row in range(len(rows)):
     posY = (size+size/3)*row   #position sur l'axe y. peut être supprimer pour gagner 1 ligne
     t = Turtle()#création de la tortue
@@ -141,14 +140,14 @@ for row in range(len(rows)):
                 t.end_fill()
             if rows[row, nbcarre] in [2, 3, 4, 5, 6]: #dé de 2, 3, 4, 5, 6 cercles équivalent : if de == 2 or de == 3 or de == 4 or de == 5 or de == 6:.
                 if rows[row, nbcarre] != 2:
-                    for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 3):
+                    for i in [1, 3]:    #dé de 3, 4, 5, 6 cercles équivalent : for i in range(1, 4, 2):
                         t.goto(posX+size*i/4, i/4*size-cercleSize+posY)
                         t.begin_fill()
                         t.circle(cercleSize)
                         t.end_fill()
                 if rows[row, nbcarre] !=3:  #dé de 2, 4, 5, 6 cercles
                     if rows[row, nbcarre] == 6: #dé de 6 cercles
-                        for i in [1, 3]: #équivalent for i in range(1, 3):
+                        for i in [1, 3]: #équivalent for i in range(1, 4, 2):
                             t.goto(posX+size*i/4, size/2-cercleSize+posY)
                             t.begin_fill()
                             t.circle(cercleSize)
@@ -158,6 +157,5 @@ for row in range(len(rows)):
                         t.begin_fill()
                         t.circle(cercleSize)
                         t.end_fill()
-
 exitonclick()
 """
