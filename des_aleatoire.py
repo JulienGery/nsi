@@ -111,13 +111,13 @@ import numpy as np
 from turtle import Turtle, exitonclick, setworldcoordinates
 from math import ceil
  
-size = 1 
+size = 1 #valeur sans importance doit être != 0
 cercleSize = size/10 
 tirage = int(input('tirage:\t'))
 racineTirage = int(tirage**(1/2))
-rows = np.random.randint(1,7, size=(racineTirage, ceil(tirage/racineTirage)))
-rows[np.shape(rows)[0]-(np.shape(rows)[0]*np.shape(rows)[1]-tirage):, -1] = 0
-setworldcoordinates(0,0, np.shape(rows)[1]*(size+size/3), np.shape(rows)[1]*(size+size/3))
+rows = np.random.randint(1,7, size=(racineTirage, ceil(tirage/racineTirage))) #création du tableau/matrice
+rows[np.shape(rows)[0]-(np.shape(rows)[0]*np.shape(rows)[1]-tirage):, -1] = 0 #'suppréssion' des dés en trop
+setworldcoordinates(0,0, np.shape(rows)[1]*(size+size/3), np.shape(rows)[1]*(size+size/3)) #ajustement de la taille de la carte
 t = Turtle()
 t.fillcolor('red')
 t.speed(0)
@@ -147,7 +147,7 @@ for row in range(len(rows)):
                         t.end_fill()
                 if rows[row, nbcarre] !=3:  #dé de 2, 4, 5, 6 cercles
                     if rows[row, nbcarre] == 6: #dé de 6 cercles
-                        for i in [1, 3]: #équivalent for i in range(1, 4, 2):
+                        for i in [1, 3]: #équivalent : for i in range(1, 4, 2):
                             t.goto(posX+size*i/4, size/2-cercleSize+posY)
                             t.begin_fill()
                             t.circle(cercleSize)
