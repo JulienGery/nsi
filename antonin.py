@@ -30,7 +30,7 @@ def trouve(a : tuple, b):
     for i in range(len(a)):
         if a[i] == b:
             return i
-            
+    return -1
 #exercice en plus
 """
 def bissextile(annee : int):
