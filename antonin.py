@@ -24,9 +24,13 @@ def mini(a : tuple):
     return mini
 
 def extremum(a : tuple):
-
     return (mini(a), maxi(a))
-    
+
+def trouve(a : tuple, b):
+    for i in range(len(a)):
+        if a[i] == b:
+            return i
+            
 #exercice en plus
 """
 def bissextile(annee : int):
