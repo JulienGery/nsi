@@ -6,7 +6,7 @@ def anterieur(date1 : tuple, date2 : tuple):
         return True
     return False
 
-def age(a,b):
+def age(a : tuple,b : tuple):
     return abs(a[2]-b[2])
 
 def maxi(a : tuple):
