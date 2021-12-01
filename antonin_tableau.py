@@ -42,3 +42,75 @@ def nom_carte(carte : tuple):
 
 Tcarte = [[name, color] for name in range(2, 15) for color in colors]
 """
+#tester le hasard
+"""
+from random import random
+from matplotlib.pyplot import bar, show
+
+x, y = [], []
+for i in range(1000):
+    x.append(i)
+    y.append(random())
+
+bar(x, y)
+show()
+"""
+#loi normal 
+"""
+from random import randint
+from matplotlib.pyplot import bar, show
+
+y = [0 for i in range(13)]
+for i in range(10000):
+    y[randint(1,6) + randint(1,6)] += 1
+
+y.pop(0)
+bar(range(1, len(y)+1), y)
+show()
+"""
+
+#les impôts 
+"""
+from matplotlib.pyplot import plot, show
+
+def tranche(a):
+    if a<10000:
+        return 0
+    if a<25000:
+        return 1
+    if a<75000:
+        return 2
+    if a<150000:
+        return 3
+    return 4
+
+tranches = [0, 11, 30, 41, 45]
+revenu = int(input("tu gagnes combien ?\n"))
+print(f"ton montant d'impôt est de {tranches[tranche(revenu)]/100*revenu} €\ntu es dans la tranche {tranches[tranche(revenu)]}%")
+
+x, y = [], []
+for i in range(0,200000, 5000):
+    x.append(i)
+    y.append((tranches[tranche(i)]/100)*i)
+
+plot(x, y)
+show()
+"""
+
+#calcule distance 
+"""
+from math import sqrt
+def distance(a: tuple, b : tuple):
+    return sqrt((a[0]-b[0])**2 +(a[1]-b[1])**2)
+
+def dimension(tab : tuple):
+    return (len(tab), len(tab[0]))
+
+def longueur_dessin(tab : tuple):
+    return distance((0,0), dimension(tab))
+"""
+#inverse tableau*
+"""
+def inverse_tableau(tab : list):
+    return [tab[len(tab)-1-i] for i in range(len(tab))]
+"""
