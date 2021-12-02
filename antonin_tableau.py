@@ -47,11 +47,7 @@ Tcarte = [[name, color] for name in range(2, 15) for color in colors]
 from random import random
 from matplotlib.pyplot import bar, show
 
-x, y = [], []
-for i in range(1000):
-    x.append(i)
-    y.append(random())
-
+x, y = [x for x in range(1000)],[ y for _ in range(1000) for y in [random()]]
 bar(x, y)
 show()
 """
@@ -61,7 +57,7 @@ from random import randint
 from matplotlib.pyplot import bar, show
 
 y = [0 for i in range(13)]
-for i in range(10000):
+for _ in range(10000):
     y[randint(1,6) + randint(1,6)] += 1
 
 y.pop(0)
@@ -88,17 +84,13 @@ tranches = [0, 11, 30, 41, 45]
 revenu = int(input("tu gagnes combien ?\n"))
 print(f"ton montant d'impôt est de {tranches[tranche(revenu)]/100*revenu} €\ntu es dans la tranche {tranches[tranche(revenu)]}%")
 
-x, y = [], []
-for i in range(0,200000, 5000):
-    x.append(i)
-    y.append((tranches[tranche(i)]/100)*i)
+x, y = [i for i in range(0,200000, 5000)], [(tranches[tranche(i)]/100)*i for i in range(0,200000, 5000)]
 
 plot(x, y)
 show()
 """
-
 #calcule distance 
-"""
+
 from math import sqrt
 def distance(a: tuple, b : tuple):
     return sqrt((a[0]-b[0])**2 +(a[1]-b[1])**2)
@@ -108,9 +100,9 @@ def dimension(tab : tuple):
 
 def longueur_dessin(tab : tuple):
     return distance((0,0), dimension(tab))
-"""
+
 #inverse tableau*
-"""
+
 def inverse_tableau(tab : list):
-    return [tab[len(tab)-1-i] for i in range(len(tab))]
-"""
+    return [tab[-i] for i in range(1, len(tab)+1)]
+
