@@ -6,8 +6,8 @@ def anterieur(date1 : tuple, date2 : tuple):
         return True
     return False
 
-def age(a : tuple,b : tuple):
-    return abs(a[2]-b[2])
+def age(a : tuple, b : tuple):
+    return a[2]-b[2]-1+anterieur((a[0], a[1], b[2]), b)
 
 def maxi(a : tuple):
     maxi = a[0]
@@ -31,6 +31,8 @@ def trouve(a : tuple, b):
         if a[i] == b:
             return i
     return -1
+    
+ 
 #exercice en plus
 """
 def bissextile(annee : int):
