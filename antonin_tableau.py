@@ -1,15 +1,17 @@
+from random import randint, shuffle
+ 
 def moyenne(a : list):
     moyenne = 0
     for i in a:
         moyenne+=i
     return moyenne/len(a)
-
+ 
 def est_ordonne(a : list):
     for i in range(1, len(a)):
         if a[i-1]>a[i]:
             return False
     return True
-
+ 
 def maxi(a : list):
     maxi = a[0][0]
     for i in a:
@@ -17,14 +19,50 @@ def maxi(a : list):
             if maxi<j:
                 maxi = j
     return maxi
-
+ 
 tab = [
     [12, 13, 14],
     [6, 16, 18],
     [9, 14, 17]
     ]
+ 
+ 
+def exercice4_1():
+    return [0, 1, 2]
 
-
+def exercice4_2(n : int):
+    return [i for i in range(n)]
+ 
+def exercice4_3(n : int):
+    return [randint(1, 10) for _ in range(n)]
+ 
+def exercice4_3b(n : int):
+    tmp = [i for i in range(1, n)]
+    shuffle(tmp)
+    return tmp
+ 
+def exercice4_4():
+    return [n**2+2*n+3 for n in range(11)]
+ 
+def exercice5_1(n : int):
+    tmp = []
+    [tmp.extend([1,i]) for i in range(1, n+1)]
+    return tmp
+ 
+def exercice5_2(n : int):
+    return [j for i in range(1, n+1) for j in range(1, i+1)]
+ 
+def exercice6():
+    """
+    lance l'exercice 6 et renvoie la liste
+    """
+    epicerie = [["tomates", 20], ["pommes", 10], ["carottes", 5], ["poires", 3], ["bananes", 4], ["ananas", 1]]
+    tri = 2 == int(input("Tri alphanumérique (1) ou tri alphabétique (2)\n"))
+    inverse = "oui" in input("tableau inversé oui/non\n")
+    return sorted(epicerie, key=lambda x : x[1-tri], reverse=inverse)
+ 
+ 
+# exercice5_2 = lambda n : [j for i in range(1, n+1) for j in range(1, i+1)]
 #exercice en plus
 """
 colors = ["Pique", "Coeur", "Carreau", "Trèfle"]
