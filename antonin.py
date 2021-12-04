@@ -2,7 +2,7 @@ def milieuSegment(p1 : tuple, p2 : tuple):
     return((p1[0]+p2[0])/2, (p1[1]+p2[1])/2)
 
 def anterieur(date1 : tuple, date2 : tuple):
-    if date1[0]<date2[0] and date1[1]<=date2[1] and date1[2]<=date2[2] or date1[1]<date2[1] and date1[2]<=date2[2] or  date1[2]<date2[2]:
+    if date1[0]<date2[0] and date1[1]<=date2[1] and date1[2]<=date2[2] or date1[1]<date2[1] and date1[2]<=date2[2] or date1[2]<date2[2]:
         return True
     return False
 
