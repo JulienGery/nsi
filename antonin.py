@@ -7,7 +7,7 @@ def anterieur(date1 : tuple, date2 : tuple):
     return False
 
 def age(a : tuple, b : tuple):
-    return a[2]-b[2]-1+anterieur((a[0], a[1], b[2]), b)
+    return a[2]-b[2]-anterieur((a[0], a[1], b[2]), b)
 
 def maxi(a : tuple):
     maxi = a[0]
