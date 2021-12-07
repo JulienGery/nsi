@@ -26,7 +26,6 @@ tab = [
     [9, 14, 17]
     ]
  
- 
 def exercice4_1():
     return [0, 1, 2]
 
@@ -37,7 +36,7 @@ def exercice4_3(n : int):
     return [randint(1, 10) for _ in range(n)]
  
 def exercice4_3b(n : int):
-    tmp = [i for i in range(1, n)]
+    tmp = [i for i in range(1, n+1)]
     shuffle(tmp)
     return tmp
  
@@ -60,7 +59,7 @@ def exercice6():
     tri = 2 == int(input("Tri alphanumérique (1) ou tri alphabétique (2)\n"))
     inverse = "oui" in input("tableau inversé oui/non\n")
     return sorted(epicerie, key=lambda x : x[1-tri], reverse=inverse)
- 
+
  
 # exercice5_2 = lambda n : [j for i in range(1, n+1) for j in range(1, i+1)]
 #exercice en plus
