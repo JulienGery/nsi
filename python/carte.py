@@ -50,8 +50,12 @@ def convertion(a :str):
     return couleurs[int(a)-1] if a.isnumeric() else a[0].capitalize()+a[1:]
 
 def faireCarte():
-    c = input("enter une carte valeur, couleur(valeur de 1 à 4 ou le nom)\n").replace(" ", "").split(',')
-    return (int(c[0]), convertion(c[1]))
+    while True:
+        try:
+            c = input("enter une carte valeur, couleur(valeur de 1 à 4 ou le nom)\n").replace(" ", "").split(',')
+            return (int(c[0]), convertion(c[1]))
+        except (ValueError, IndexError):
+            print("variable invalide")
 
 print("les functions :\n1: carte valide \t 2: nom_carte \t \n3: jeu_52_carte \t 4: tirer \t\n5: mélanger \t\t 6: duel \n7: jouer")
 ch = int(input())
@@ -65,8 +69,14 @@ elif ch == 3:
 elif ch == 4:
     tirer()
 elif ch == 5:
-    c = input("carte sous la forme valeur, couleur | valeur, couleur ... sinon ne rien mettre pour utiliser la totalité des cartes:\n")
-    print(melanger([(int(i.split(',')[0]), convertion(i.split(',')[1])) for i in c.replace(" ", "").split("|")]) if c else melanger(jeu_52_carte()))
+    while True:
+        try:
+            c = input("carte sous la forme valeur, couleur | valeur, couleur ... sinon ne rien mettre pour utiliser la totalité des cartes (les invalide seront supprimées):\n")
+            print(melanger([(int(i.split(',')[0]), convertion(i.split(',')[1])) for i in c.replace(" ", "").split("|") if carte_valide((int(i.split(',')[0]), convertion(i.split(',')[1])))]) if c else melanger(jeu_52_carte()))
+            break
+        except (ValueError, IndexError):
+            print("saisie incorrect")
+            continue
 elif ch == 6:
     print(duel(faireCarte(), faireCarte()))
 else :
