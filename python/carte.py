@@ -49,21 +49,25 @@ def jouer():
 def convertion(a :str):
     return couleurs[int(a)-1] if a.isnumeric() else a[0].capitalize()+a[1:]
 
-def faireCarte():
+def faireCarte(a = 0):
     while True:
         try:
             c = input("enter une carte valeur, couleur(valeur de 1 à 4 ou le nom)\n").replace(" ", "").split(',')
             return (int(c[0]), convertion(c[1]))
         except (ValueError, IndexError):
-            print("variable invalide")
+            if a != 0 :
+                return (0, convertion('0'))
+            print("saisie invalide")
 
 print("les functions :\n1: carte valide \t 2: nom_carte \t \n3: jeu_52_carte \t 4: tirer \t\n5: mélanger \t\t 6: duel \n7: jouer")
 ch = int(input())
 system('cls')
 
 if ch == 1 or ch == 2:
-    c = faireCarte()
-    print((f"la carte {nom_carte(c)} est valide" if carte_valide(c) else "la carte n'est pas valide") if ch == 1 else nom_carte(c))
+    while True:
+        c = faireCarte(1 if ch == 1 else 0)
+        print((f"la carte {nom_carte(c)} est valide" if carte_valide(c) else "la carte n'est pas valide") if ch == 1 else nom_carte(c))
+        if carte_valide(c) or ch == 1: break
 elif ch == 3:
     print(jeu_52_carte())
 elif ch == 4:
@@ -71,11 +75,13 @@ elif ch == 4:
 elif ch == 5:
     while True:
         try:
-            c = input("carte sous la forme valeur, couleur | valeur, couleur ... sinon ne rien mettre pour utiliser la totalité des cartes (les invalide seront supprimées):\n")
-            print(melanger([(int(i.split(',')[0]), convertion(i.split(',')[1])) for i in c.replace(" ", "").split("|") if carte_valide((int(i.split(',')[0]), convertion(i.split(',')[1])))]) if c else melanger(jeu_52_carte()))
+            c = input("carte sous la forme valeur, couleur | valeur, couleur ... sinon ne rien mettre pour utiliser la totalité des cartes:\n").replace(" ", "").split("|")
+            c = [(int(k), convertion(j)) for i in c for k,j in [i.split(',')]] if c != [''] else None
+            [c[len(c)] for i in c if not carte_valide(i)] if c else None
+            print(melanger(c) if c else melanger(jeu_52_carte()))
             break
         except (ValueError, IndexError):
-            print("saisie incorrect")
+            print("saisie invalide")
             continue
 elif ch == 6:
     print(duel(faireCarte(), faireCarte()))
