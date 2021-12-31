@@ -79,7 +79,7 @@ if ch == 1 or ch == 2:
     while True:
         c = faireCarte(1 if ch == 1 else 0)
         print((f"La carte {nom_carte(c)} est valide" if carte_valide(c) else "La carte n'est pas valide") if ch == 1 else nom_carte(c))
-        if carte_valide(c) or ch == 1: break #Demande encore si la carte n'est pas valide ou que l'utilisateur veux afficher une carte ! condition inverse codé dans ce cas présent
+        if carte_valide(c) or ch == 1: break #Demande encore si la carte n'est pas valide ou que l'utilisateur veux afficher une carte ! condition inverse codé dans le cas présent
 elif ch == 3:
     print(jeu_52_carte())
 elif ch == 4:
