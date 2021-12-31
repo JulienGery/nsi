@@ -9,18 +9,20 @@ valeursP = ["Valet", "Dame", "Roi", "As"]
 
 def carte_valide(carte : tuple):
     return True if 2<=carte[0]<=14 and carte[1] in couleurs else False
-    # if 2<=carte[0]<=14 and carte[1] in couleurs:
-    #     return True
-    # return False
-
+    """
+    if 2<=carte[0]<=14 and carte[1] in couleurs:
+        return True
+    return False
+    """
 def nom_carte(carte : tuple):
     return f"{carte[0] if carte[0] <= 10 else valeursP[carte[0]-11] } de {carte[1]}" if carte_valide(carte) else "carte invalide"
-    # if carte_valide(carte):           #Vérification de la validité de la carte car sinon cela peut entrainer des problèmes 
-    #     if carte[0] <= 10:
-    #         return f"{carte[0]} de {carte[1]}"
-    #     return f"{valeursP[carte[0]-11]} de {carte[1]}"
-    # return "carte invalide"
-
+    """
+    if carte_valide(carte):           #Vérification de la validité de la carte car sinon cela peut entrainer des problèmes 
+        if carte[0] <= 10:
+            return f"{carte[0]} de {carte[1]}"
+        return f"{valeursP[carte[0]-11]} de {carte[1]}"
+    return "carte invalide"
+    """
 def jeu_52_carte():
     return [(i, j) for i in range(2, 15) for j in couleurs] #Construction du tableau par compréhension
 
@@ -40,12 +42,13 @@ def tirer():
 
 def duel(a, b):
     return 0 if a[0] == b[0] else 1 if a[0] > b[0] else 2
-    # if a[0] == b[0]:#Si égalité 
-    #     return 0
-    # if a[0] > b[0]: #Si a gagne
-    #     return 1
-    # return 2        #Si b gagne
-
+    """
+    if a[0] == b[0]:#Si égalité 
+        return 0
+    if a[0] > b[0]: #Si a gagne
+        return 1
+    return 2        #Si b gagne
+    """
 def jouer():
     nbDuel = 0                  #Variable contant le nombre de duel
     while True:
