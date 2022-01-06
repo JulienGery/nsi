@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" href="./main.css">
+    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+</head>
+
+<body>
+    <label>
+        dt <input type="number" id="dt" name="dt" required size="10" value="0.1">
+    </label>
+    <label>
+        T1<input type="number" id="T1" name="T1" required size="10" value="2">
+    </label>
+    <label>
+        T2<input type="number" id="T2" name="T2" required size="10" value="5">
+    </label>
+    <label>
+        formule<input type="text" id="expr" name="expr" required size="50" value="sin(t*pi/3) + cos(t*pi/2)">
+    </label>
+    <input type="button" value="submit" id="button">
+    <canvas id='mySignal'></canvas>
+    <canvas id='myChart'></canvas>
+    <script>
+
+        var btn = document.getElementById("button")
+        btn.addEventListener('click', myUpdate)
+
+        let myChart = document.getElementById('myChart').getContext('2d');
+            let mySignal = document.getElementById('mySignal').getContext('2d');
+            let signalChart = new Chart(mySignal, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'signal',
+                            data: [],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgb(75, 192, 192)',
+                            options: {},
+                        }
+                    ],
+                },
+            });
+            let massPopChart = new Chart(myChart, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'réel',
+                            data: [],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgb(75, 192, 192)',
+                        },
+                        {
+                            label: 'imaginaire',
+                            data: [],
+                            borderColor: '#0c8291',
+                            backgroundColor: '#0c8291',
+                        }
+                    ],
+                },
+                options: {},
+            });
+
+        function myUpdate () {
+            var url = new URL("https://europe-west1-phonic-operand-334510.cloudfunctions.net/function-1"),
+            params =  {dt: document.getElementById('dt').value, T1: document.getElementById('T1').value,T2: document.getElementById('T2').value, expr: document.getElementById('expr').value}
+            for (const i in params){
+                url.searchParams.append(i, params[i])
+            }
+            fetch(url).then((reponse) => {
+            reponse.json().then((user) => 
+        {
+            signalChart.data.labels = user.arange;
+            signalChart.data.datasets[0].data = user.signal;
+            massPopChart.data.labels = user.freq;
+            massPopChart.data.datasets[0].data = user.real;
+            massPopChart.data.datasets[1].data = user.img;
+            signalChart.update();
+            massPopChart.update();
+        })})}
+    </script>
+</body>
