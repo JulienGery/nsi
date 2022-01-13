@@ -15,7 +15,6 @@ def diagonal(size):
 def origami(size):
     print(row(size)+''.join('\nX '+'  '*(size-3-i)+'X '+'  '*i+'X' for i in range(floor(size/2)))+'\n'+''.join('X '+'  '*(i-2)+'X '+'  '*(size-i*2)+'X '+'  '*(i-2)+'X\n' for i in range(floor(size/2), 1, -1))+row(size) if size%2!=0 else 'La valeur doit être impaire')
 
-
 def triangle(size):
     print('  '*(size+1)+'X'+'\n'+''.join('  '*(i)+'X '+'  '*((size-i)*2+1)+'X\n' for i in range(size, 0, -1))+row(size*2+3))
     
