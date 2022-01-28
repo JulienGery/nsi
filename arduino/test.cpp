@@ -1,4 +1,4 @@
-const int Ports[] = {2, 3, 4, 5, 6, 7, 8};
+#define LEDVERTE 2
 
 const String morse[][2] = {
       {"a", ".-" },
@@ -47,21 +47,18 @@ const String morse[][2] = {
 
 void setup() {
   Serial.begin(115200);
-  for(auto &i : Ports){
-    pinMode(i, OUTPUT);
-  }
-
+  pinMode(LEDVERTE, OUTPUT);
 }
-
 void loop() {
   String message = "hello";
   for(auto &i: message){
     for(auto &j: morse){
       if(j[0] == String(i)){
         for(auto &h : j[1]){
-          digitalWrite(2, HIGH);
-          h == '-'? delay(1000): delay(100);
+          digitalWrite(LEDVERTE, HIGH);
+          h == '-'? delay(2000): delay(500);
           digitalWrite(2, LOW);
+          delay(200);
         }
       }
     }
