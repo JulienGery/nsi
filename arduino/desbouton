@@ -9,27 +9,25 @@ const int button[] = {GREENBUTTON, ORANGEBUTTON, REDBUTTON};
 const int led[] = {GREENLED, ORANGELED, REDLED};
 int values[50];
 int inputs[3];
+int previusPin = button[0]; //defaut value
+long Ttime;
 
-bool check(){
-  for(auto &i : inputs){
-    if(i != 0){
-      return false;
+void checkPrevius(int &pin){
+  Ttime = millis();
+  do{
+    if(digitalRead(pin) == HIGH){
+      Ttime = millis();
     }
-  }
-  return true;
+    delay(1);
+  }while(millis()<=Ttime+10);
 }
 
 int getData(){
-  do{
-    Serial.println("get data 1");
-    for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
-      inputs[i] = digitalRead(button[i]);
-    }
-  }while(not check());
-
+  checkPrevius(previusPin);
   while(true){
     for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
       if(digitalRead(button[i])){
+        previusPin = button[i];
         return i;
       }
     }
@@ -68,7 +66,7 @@ void loop() {
     int tmp = getData();
     Serial.println(tmp);
     if(values[j] != tmp){
-      // Serial.println(values[j]);
+      Serial.println("bites");
     }
   }
   delay(1000);
