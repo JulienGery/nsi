@@ -1,13 +1,18 @@
+#define GREENLED 2
+#define ORANGELED 3
+#define REDLED 4
 #define GREENBUTTON 6
 #define ORANGEBUTTON 7
 #define REDBUTTON 8
 
 const int button[] = {GREENBUTTON, ORANGEBUTTON, REDBUTTON};
+const int led[] = {GREENLED, ORANGELED, REDLED};
+int values[50];
 int inputs[3];
 
 bool check(){
   for(auto &i : inputs){
-    if(i == 1){
+    if(i != 0){
       return false;
     }
   }
@@ -16,6 +21,7 @@ bool check(){
 
 int getData(){
   do{
+    Serial.println("get data 1");
     for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
       inputs[i] = digitalRead(button[i]);
     }
@@ -32,12 +38,39 @@ int getData(){
 
 void setup() {
   Serial.begin(115200);
+  for(auto &i : led){
+    pinMode(i, OUTPUT);
+  }
   for(auto &i : button){
     pinMode(i, INPUT);
   }
 }
 
+void dis(int size){
+  for(int i = 0; i<=size; i++){
+    digitalWrite(led[values[i]], HIGH);
+    // Serial.print(values[i]);
+    delay(250);
+    digitalWrite(led[values[i]], LOW);
+    delay(250);
+  }
+  // Serial.println();
+}
+
+
+
 void loop() {
-  getData();
+  for(int i = 0; i<50; i++){
+  values[i] = random(0,3);
+  dis(i);
+  for(int j = 0; j<=i; j++){
+    // Serial.println(j);
+    int tmp = getData();
+    Serial.println(tmp);
+    if(values[j] != tmp){
+      // Serial.println(values[j]);
+    }
+  }
   delay(1000);
+  }
 }
