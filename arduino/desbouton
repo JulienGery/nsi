@@ -1,0 +1,43 @@
+#define GREENBUTTON 6
+#define ORANGEBUTTON 7
+#define REDBUTTON 8
+
+const int button[] = {GREENBUTTON, ORANGEBUTTON, REDBUTTON};
+int inputs[3];
+
+bool check(){
+  for(auto &i : inputs){
+    if(i == 1){
+      return false;
+    }
+  }
+  return true;
+}
+
+int getData(){
+  do{
+    for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
+      inputs[i] = digitalRead(button[i]);
+    }
+  }while(not check());
+
+  while(true){
+    for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
+      if(digitalRead(button[i])){
+        return i;
+      }
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  for(auto &i : button){
+    pinMode(i, INPUT);
+  }
+}
+
+void loop() {
+  getData();
+  delay(1000);
+}
