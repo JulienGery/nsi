@@ -7,22 +7,23 @@
 
 const int button[] = {GREENBUTTON, ORANGEBUTTON, REDBUTTON};
 const int led[] = {GREENLED, ORANGELED, REDLED};
-int values[50];
+const int game_length = 50
+int values[game_length];
 int inputs[3];
 byte previusPin = button[0]; //defaut value
 
 void checkPrevius(byte &pin){
-  int boucle = 0;
+  int loop = 0;
   while(boucle<10){
-    boucle++;
+    loop++;
     if(digitalRead(pin)){
-      boucle = 0;
+      loop = 0;
     }
     delay(1);
   }
 }
 
-int getData(){
+int getInput(){
   checkPrevius(previusPin);
   while(true){
     for(int i = 0; i<sizeof(button)/sizeof(*button); i++){
@@ -35,6 +36,7 @@ int getData(){
 }
 
 void setup() {
+  randomSeed(analogRead(A0));
   Serial.begin(115200);
   for(auto &i : led){
     pinMode(i, OUTPUT);
@@ -44,8 +46,7 @@ void setup() {
   }
 }
 
-void dis(int size){
-  randomSeed(analogRead(A0));
+void displaySquence(int size){
   for(int i = 0; i<=size; i++){
     digitalWrite(led[values[i]], HIGH);
     delay(250);
@@ -54,14 +55,12 @@ void dis(int size){
   }
 }
 
-
-
 void loop() {
-  for(int i = 0; i<50; i++){
+  for(int i = 0; i<game_length; i++){
   values[i] = random(0,3);
-  dis(i);
+  displaySquence(i);
   for(int j = 0; j<=i; j++){
-    if(values[j] != getData()){
+    if(values[j] != getInput()){
       Serial.println("perdu");
       for(auto &k : led){
         digitalWrite(k, HIGH);
