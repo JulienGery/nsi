@@ -91,15 +91,13 @@ if(True):#compute new coordonate. Require more computational power
     dif = [shape[i+1]-shape[i] for i in range(len(shape)-1)]
     lenT = 0
     for i in range(len(dif)):
-        print(i)
         radius = (dif[i].real**2+dif[i].imag**2)**(1/2)
         Difsin = dif[i].imag/radius
         Difcos = dif[i].real/radius
-        # print(angleDifsin,  angleDifcos)
         lesT = np.arange(shapeDt, radius, shapeDt)
         i += lenT
         for k in range(len(lesT)):
-            shape.insert(1+i+k, shape[i]+lesT[k]*(1j*Difsin+Difcos))
+            shape.insert(1+i+k, shape[i]+lesT[k]*(Difcos+1j*Difsin))
             lenT += 1
 
 
