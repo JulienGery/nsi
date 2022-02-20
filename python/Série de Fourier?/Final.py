@@ -81,11 +81,27 @@ def draw_circle(gp_frame, center: tuple, radius: float, segments: int):
     return gp_stroke
 
 
-nbCircle = 75 #number of circle 2nbCircle+1 computed
+nbCircle = 25 #number of circle 2nbCircle+1 computed
 shape = ['(110+25j)', '(112+50j)', '(113.5+75j)', '(115+100j)', '(116+125j)', '(117.5+150j)', '(125+150j)', '(150+150j)', '(175+150j)', '(200+150j)', '(225+150j)', '(225+175j)', '(225+200j)', '(225+220j)', '(200+220j)', '(175+220j)', '(150+220j)', '(125+220j)', '(100+220j)', '(75+220j)', '(50+220j)', '(25+220j)', '(0+219.5j)', '(-25+219j)', '(-50+217j)', '(-75+215j)', '(-100+212j)', '(-125+209j)', '(-150+203j)', '(-158+200j)', '(-175+190j)', '(-190+175j)', '(-203+150j)', '(-211+125j)', '(-220+100j)', '(-225+85j)', '(-209+85j)', '(-200+100j)', '(-182+125j)', '(-175+132j)', '(-150+145j)', '(-125+150j)', '(-100+150j)', '(-87+150j)', '(-87.5+125j)', '(-89+100j)', '(-92+75j)', '(-95+50j)', '(-100+25j)', '(-105+0j)', '(-113-25j)', '(-122-50j)', '(-136-75j)', '(-152-100j)', '(-170-125j)', '(-186-150j)', '(-189-175j)', '(-178-200j)', '(-175-205j)', '(-150-220j)', '(-125-220j)', '(-100-202j)', '(-85-175j)', '(-77-150j)', '(-73-125j)', '(-70-100j)', '(-67.5-75j)', '(-65-50j)', '(-62-25j)', '(-60+0j)', '(-57+25j)', '(-54.5+50j)', '(-51.5+75j)', '(-49+100j)', '(-47+125j)', '(-45+150j)', '(-25+150j)', '(0+150j)', '(25+150j)', '(50+150j)', '(58+150j)', '(55+125j)', '(53+100j)', '(51+75j)', '(49+50j)', '(47+25j)', '(44.5+0j)', '(42-25j)', '(40-50j)', '(38.5-75j)', '(37.5-100j)', '(37-125j)', '(37.5-150j)', '(43-175j)', '(49-185j)', '(66-200j)', '(75-205j)', '(100-215j)', '(125-218j)', '(150-214j)', '(175-203j)', '(179-200j)', '(201.5-175j)', '(213-150j)', '(221-125j)', '(226.5-100j)', '(227.5-88j)', '(210-88j)', '(209-100j)', '(200-123j)', '(197-125j)', '(175-141j)', '(150-144j)', '(125-134j)', '(117-125j)', '(109-100j)', '(106-75j)', '(106-50j)', '(110+25j)']
 
-
 shape = [complex(i) for i in shape]
+
+if(True):#compute new coordonate. Require more computational power
+    shapeDt = 1 #dt of new coordonate of the shape
+    dif = [shape[i+1]-shape[i] for i in range(len(shape)-1)]
+    lenT = 0
+    for i in range(len(dif)):
+        print(i)
+        radius = (dif[i].real**2+dif[i].imag**2)**(1/2)
+        Difsin = dif[i].imag/radius
+        Difcos = dif[i].real/radius
+        # print(angleDifsin,  angleDifcos)
+        lesT = np.arange(shapeDt, radius, shapeDt)
+        i += lenT
+        for k in range(len(lesT)):
+            shape.insert(1+i+k, shape[i]+lesT[k]*(1j*Difsin+Difcos))
+            lenT += 1
+
 
 TCn = np.linspace(0, 1, len(shape))
 Cn = [sum([shape[k]*np.exp(-n*2*np.pi*1j*TCn[k]) for k in range(len(TCn))])/len(TCn) for n in range(-nbCircle, nbCircle+1)]
@@ -94,11 +110,10 @@ dt = 0.005 #spacing between each values of Cn
 T = np.arange(0, 1+dt, dt)
 CnValues = [Cn[i]*np.exp((i-nbCircle)*T*2*np.pi*1j) for i in range(len(Cn))] #compute each Cn value
 
-print(Cn)
 
 gp_layer = init_grease_pencil()
 
-NUM_FRAMES = len(CnValues[0])-1
+NUM_FRAMES = len(CnValues[0])
 FRAMES_SPACING = 1  # distance between frames
 bpy.context.scene.frame_start = 0
 bpy.context.scene.frame_end = NUM_FRAMES*FRAMES_SPACING
@@ -107,15 +122,14 @@ allCnSum = [sum([CnValues[i][0] for i in range(len(CnValues))])] #cumpute the 1s
 
 for i in range(NUM_FRAMES):
     gp_frame = gp_layer.frames.new(i)
-    [draw_line(gp_frame, (shape[j].real, 0, shape[j].imag), (shape[j+1].real, 0, shape[j+1].imag)) for j in range(len(shape)-1)]
-    # break
+    #[draw_line(gp_frame, (shape[j].real, 0, shape[j].imag), (shape[j+1].real, 0, shape[j+1].imag)) for j in range(len(shape)-1)] #draw the shape
     CnSum = 0+0j
 
     for k in range(len(CnValues)):
-        draw_line(gp_frame, (CnSum.real, 0, CnSum.imag), (CnSum.real+CnValues[k][i].real, 0, CnSum.imag+CnValues[k][i].imag))
-        draw_circle(gp_frame, (CnSum.real, 0, CnSum.imag), ((Cn[k].real)**2+(Cn[k].imag)**2)**(1/2), 50)
+        draw_line(gp_frame, (CnSum.real, 0, CnSum.imag), (CnSum.real+CnValues[k][i].real, 0, CnSum.imag+CnValues[k][i].imag))#draw radius
+        draw_circle(gp_frame, (CnSum.real, 0, CnSum.imag), ((Cn[k].real)**2+(Cn[k].imag)**2)**(1/2), 50)#draw circles
         CnSum += CnValues[k][i]
 
     allCnSum.append(CnSum)
-    [draw_line(gp_frame, (allCnSum[j].real, 0, allCnSum[j].imag), (allCnSum[j+1].real, 0, allCnSum[j+1].imag)) for j in range(i)]
+    [draw_line(gp_frame, (allCnSum[j].real, 0, allCnSum[j].imag), (allCnSum[j+1].real, 0, allCnSum[j+1].imag)) for j in range(i+1)]#draw the output of the Fourier serie
         
