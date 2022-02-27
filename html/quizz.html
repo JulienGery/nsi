@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <title> quizz </title>
+    <link rel="stylesheet" href="./quizz.css">
 </head>
 <body>
     <h1>Parmi les propositions suivantes, lesquelles permettent d’obtenir le résultat d’une division Euclidienne par 2 ?</h1>
@@ -36,12 +37,14 @@
             <label for="q2r3">x**2</label>
         </span><br>
     </form>
-    <h1>Quelle méthode permet d’ajouter un ou plusieurs éléments d'un tableau à la fin d’un tableau ?</h1>
-    <form> 
-        <input type="text" class="question3" id="q3r1">
-    </form>
+   
+        <div class="form__group field">
+            <input type="text" class="form__field question3" placeholder="Name" name="name" id="q3r1" required/>
+            <label for="name" class="form__label">Quelle méthode permet d’ajouter un ou plusieurs éléments d'un tableau à la fin d’un tableau ?</label>
+        </div>
+    
     <h1>Parmi les propositions suivantes, lesquelles permettent d’insérer la valeur d’une variable dans une chaine de caractères ?</h1>
-    <form>
+    <form id="chaine">
         <span id="q4r1">
             <input type="checkbox" class="question4" value="q4r1">
             <label for="q3r1">f"chaine {variable}"</label>
@@ -54,13 +57,16 @@
             <input type="checkbox" class="question4" value="q4r3">
             <label for="q3r3">"chaine "+str(variable)</label>
         </span><br>
-
     </form>
-    <h1>Quel opérateur permet d’inverser la valeur d’un booléen ?</h1>
+    <div class="form__group field">
+        <input type="text" class="form__field question5" placeholder="Name" name="name" required id="q5r1"/>
+        <label for="name" class="form__label">Quel opérateur permet d’inverser la valeur d’un booléen ?</label>
+    </div>
+    <br>
     <form>
-        <input type="text" class="question5" id="q5r1">
+        <input type="button" onclick="rep()" value="soumettre" style="background-color: #57544C; color: #899E8B;">
     </form>
-        <input type="button" onclick="rep()" value="click">
+
     <script>
         const class_objs = [document.getElementsByClassName("question1"), document.getElementsByClassName("question2"), document.getElementsByClassName("question3"), document.getElementsByClassName("question4"), document.getElementsByClassName("question5")]
         const bonne_rep = [[1, 1, 0, 0], [0, 1, 0], ["append"], [1, 0, 1], ["not"]]//les réponse en dure pas terrible
@@ -76,28 +82,29 @@
         }
 
         const rep = () => {
+            let mauvaise_rep = 0;
             let rep_user = class_objs.map((obj) => {return obj.length>1 ? extract(obj): [obj[0].value];})
             for(let i in rep_user){
                 if(rep_user[i].length > 1){
                     for(let j in rep_user[i]){
                         if(rep_user[i][j] != bonne_rep[i][j] && rep_user[i].includes(true) && bonne_rep[i][j] || rep_user[i][j] != bonne_rep[i][j] && rep_user[i].includes(true)){
                             rep_area[i][j].style.backgroundColor = "red";
+                            mauvaise_rep++;
                         }
                         else if(bonne_rep[i][j] != 0 && rep_user[i][j]==bonne_rep[i][j]){
                             rep_area[i][j].style.backgroundColor = "green";
                         }
                         else{
-                            rep_area[i][j].style.backgroundColor = "white";
+                            rep_area[i][j].style.backgroundColor = "transparent";
                         }
                     }
                 }
                 else if(class_objs[i][0].value){
-                    rep_user[i][0].toLowerCase().includes(bonne_rep[i][0])? rep_area[i][0].style.backgroundColor = "green": rep_area[i][0].style.backgroundColor = "red";
-                }
-                else{
-                    rep_area[i][0].style.backgroundColor = "white";
+                    console.log(rep_user[i][0])
+                    rep_user[i][0].toLowerCase().includes(bonne_rep[i][0])? rep_area[i][0].style.color = "green": rep_area[i][0].style.color = "red"; mauvaise_rep++;
                 }
             }
+            return null;
         }
 
     </script>
