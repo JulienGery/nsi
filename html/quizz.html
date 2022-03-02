@@ -117,6 +117,7 @@
                     continue
                 }
                 else if (i == rep_user.length-1 && !reponse){
+                    rep_area.map(ids => ids.map(id => document.getElementById(id).style.backgroundColor = "transparent"))
                     return ""
                 }
             }
