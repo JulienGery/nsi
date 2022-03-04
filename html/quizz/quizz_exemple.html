@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<head>
+    <!-- Tu peux mettre ton script mais s’il interagie avec des éléments du body tu peux avoir des problèmes (car le body n’est pas encore chargé). -->
+</head>
+<body>
+    <input type="checkbox" id="myCheckbox" value="myValue">
+    <label for="myValue">la réponse n°1 ici</label><br>
+<!-- 
+    br c'est pour le retour à la ligne. 
+    Le label est lié à la checkbox grâce à la value. 
+    Donne une id qui a du sens. Sinon donne une classe mais après tu te retrouves avec des tableaux (en vrai c'est plus pratique)
+-->
+    <input type="checkbox" id="myCheckbox2" value="secondValue">
+    <label for="secondValue">la réponse n°2 ici</label><br><br>
+    <!-- Et tu continue comme ça encore et encore -->
+    <input type="button" onclick="repCheckbox()" value="Soumettre checkbox">
+    <script>
+        const myCheckboxIds = ["myCheckbox", "myCheckbox2"] //Tu déclares une variable qui contient les id de tes checkbox.
+        const bonneRep = [true, false] 
+        /* 
+        Tu déclares une variable qui contient les bonnes réponses 
+        (ce n’est pas super mais il y a pas d’autre moyen) 
+        sous forme d’un tableau car c’est plus pratique (si tu dois rajouter des éléments).
+        Attention à l’ordre des éléments ! 
+        Le premier élément doit être lier au première id de ton tableau et ainsi de suite.
+        Si la checkbox est coché sa valeur est true.
+        */
+        const repCheckbox = () => {
+            /*
+            C’est une écriture plus modère d’une fonction (c’est une arrow function ) 
+            il n’y a pas vraiment de différence entre une fonction normal et ça. 
+            (en réalité si mais bon )
+            */
+            let bonPoint = 0;
+            let mauvaisPoint = 0;
+            for(let i in myCheckboxIds){
+                //Tu boucle sur L’INDEX des éléments de ton tableau myCheckboxIds.
+                //La variable i va s’incrémenté de 1 à chaque tour de boucle.
+                if(document.getElementById(myCheckboxIds[i]).checked == bonneRep[i]){
+                    //Ici tu compares la valeur de la checkbox avec celle de ton tableau à l’index i.
+                    //Si la valeur est bonne c’est une bonne réponse, tu lui donne un point ou autre.
+                    //Un truc comme ça
+                    bonPoint++;
+                    //La variable bonPoint doit être préalablement déclaré (mais ça tu le sais).
+
+                } else {
+                    //Ici c'est dans le cas où la condition n'est pas vérifiée.
+                    //Tu peux aussi rajouter des conditions avec
+                    //else if(condition){ instruction }
+                    //Mais ça tu le sais aussi
+                    mauvaisPoint++;
+                }
+            }
+            alert("vous avez "+bonPoint+" bon point, "+mauvaisPoint+" mauvais point")
+            //Tu peux aussi regarder si l’utilisateur à répondue ou pas (il suffit de regarder si une des valeurs est vrai).
+        }
+    </script>
+    <br>
+    <br>
+    <br>
+    <!-- exemple pour les radio boutons -->
+    <input type="radio" value="myRadio1" name="question1" id="myRadio1">
+    <label for="myRadio1">réponse n°1 ici</label><br>
+    <input type="radio" value="myRadio2" name="question1" id="myRadio2">
+    <label for="myRadio2">réponse n°2 ici</label><br>
+    <input type="radio" value="myRadio3" name="question1" id="myRadio3">
+    <label for="myRadio3">réponse n°3 ici</label><br><br>
+<!--
+    Ici l’attribut « name » lie les radios buttons entre eux.
+    Si cette valeur diffère ils ne sont plus lier (mais ça tu le sais).
+-->
+    <input type="button" value="Soumettre radio buttons" onclick="repRadio()">
+    <script>
+        //Petit conseille. Ici tu peux te permettre de regarder qu’une seule valeur car il n’y a qu’une seule bonne réponse.
+        //Tu peux donc te permettre de ne pas donner d’id à tes éléments.
+        const repRadio = () => {
+            if(document.getElementById("myRadio2").checked){
+                //Ici la condition est sous entendue. En effet si la valeur du radio bouton est vrai (true) la condition sera remplie.
+                alert("bonne réponse");
+            } else {
+                alert("mauvaise réponse");
+            }
+        }
+    </script>
+    <br>
+    <br>
+    <br>
+    <!-- Exemple pour les entrée de caractères -->
+    <input type="text" id="myTextInput" placeholder="entré une chaine de caractères"><br><br>
+    <!-- L’attribut « placeholder » permet d’affiche une chaine de caractères dans la zone de texte qui disparait quand l’utilisateur entre quelque chose. -->
+    <input type="button" value="Soumettre text input" onclick="repTextInput3()">
+
+    <script>
+        const bonneRepChaine = "chaine de caractères";
+        /*
+        Alors ici il y a pleins de façons de faire. Je vais t’en montrer trois (dont une inutilisable mais tkt) :
+        -La comparaison strict. On va utiliser une méthode qui permet de changer tous les caractères en majuscule en petit caractères. 
+        La méthode est .toLowerCase(). Puis on compare cela a une autre chaine de caractères.
+        Ici le code correspondant. 
+        */
+        const repTextInput = () => {
+            if(document.getElementById("myTextInput").value.toLowerCase() == bonneRepChaine){
+                alert("bonne réponse la chaine de caractères est bien:\n"+bonneRepChaine)
+            } else {
+                alert("mausvaise réponse")
+            }
+        }
+        /*
+        Je ne te recommande pas cette approche (A part pour ton C (majuscule).).
+
+        -Deuxième méthode. 
+        On va utiliser une méthode qui permet de voir si la chaine de caractères de la bonne réponse est dans la chaine de caractères entrée par l’utilisateur. 
+        La méthode est .includes().
+
+        Ici le code correspondant.
+        */
+       const repTextInput2 = () => {
+        if(document.getElementById("myTextInput").value.toLowerCase().includes(bonneRepChaine)){
+                alert("bonne réponse la chaine de caractères est bien:\n"+bonneRepChaine)
+            } else {
+                alert("mausvaise réponse")
+            }
+       }
+       /*
+        Cette approche est déjà mieux.
+
+        Mais cependant il y a un problème : elle est trop flexible.
+        En effet si l’utilisateur entre « chaine de caractères kufjqsoifugdslf » la réponse sera quand même bonne.
+
+       Troisième méthode.
+        On va utiliser une expression régulière qui permet de faire des trucs bien trop complexe.
+        Si un jour tu as la folie de les utiliser il y a un site : https://regexr.com/.
+        Voilà l’expression régulier qui vérifie la chaine de caractères « append » qu’elle soit avec un point devant ou sans,
+        avec des parenthèses après ou sans, ou qu’elle est les deux (et un peu plus de truc). 
+        /(?=^(?!\s*$).+)(^\s*(\.?(append)(\(\))?\s*))*$/gi
+       */
+    const myRegex = /(?=^(?!\s*$).+)(^\s*(\.?(append)(\(\))?\s*))*$/gi
+    
+    const repTextInput3 = () => {
+        let userString = document.getElementById("myTextInput").value
+        if(userString.match(myRegex)){
+            alert("bonne réponse")
+        } else {
+            console.log("mauvaise réponse")
+        }
+    }
+    /*
+    Mais comme tu peux le voir c’est plutôt complexe. Mais tiens cette regex vérifie si la string n’est pas vide.
+    ^(?!\s*$).+
+    En réalité on peut faire bien plus de truc avec mais bon.
+    Je ne les ai pas utilisé dans le mien.
+    Donc si tu les maîtrise tu es plus fort que moi.
+
+    */
+    </script>
+    
+</body>
