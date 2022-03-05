@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>QUIZZ</title>
+</head>
+
+<body>
+
+
+    <h3>Sur un Arduino, les informations entrent et/ou sortent par des …</h3>
+
+    <input type="checkbox" name="Arduino1" id="Arduino1" >portes<br >
+    <input type="checkbox" name="Arduino2" id="Arduino2" >ports<br >
+    <input type="checkbox" name="Arduino3" id="Arduino3" >connecteurs<br >
+
+    <h3>Quelle(s) fonction(s) un Arduino remplit-il ?</h3>
+
+    <input type="checkbox" name="arduinofonction1" id="arduinofonction1" >stocker<br >
+    <input type="checkbox" name="arduinofonction2" id="arduinofonction2" >traiter<br >
+    <input type="checkbox" name="arduinofonction3" id="arduinofonction3" >transmettre<br >
+
+    <h3>Qu'est ce qu'un micro-controleur ?</h3>
+
+    <input type="checkbox" name="micro-controleur1" id="micro-controleur1" >un petit processeur
+    informatique<br />
+    <input type="checkbox" name="micro-controleur2" id="micro-controleur2" >un systeme d'exploitation<br >
+    <input type="checkbox" name="micro-controleur3" id="micro-controleur3" >un systeme de stockage
+    informatique<br />
+
+    <h3>Dans quel langage sont écrits les programmes qu'on écrit sur Arduino ?(une seule lettre est attendue dans la
+        réponse)</br>
+        <input type="text" placeholder="écrire ici" id="texte1" > <br >
+    </h3>
+
+
+    <h3>Une DEL est un dipole polarisé ?</h3>
+    <input type="radio" name="del2" id="oui" >OUI<br >
+    <input type="radio" name="del2" id="non" >NON<br >
+
+
+
+
+    <input type="button" value="Cliquez ici" onClick="resultat()" >
+
+
+
+    <script>
+        function resultat() {
+            let point = 0;
+            if (document.getElementById("Arduino1").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("Arduino2").checked) {
+                point = point + 1;
+            }
+            if (document.getElementById("Arduino3").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("arduinofonction1").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("arduinofonction2").checked) {
+                point = point + 1;
+            }
+            if (document.getElementById("arduinofonction3").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("micro-controleur1").checked) {
+                point = point + 1;
+            }
+            if (document.getElementById("micro-controleur2").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("micro-controleur3").checked) {
+                point = point + 0;
+            }
+            if (document.getElementById("texte1").value == "C") {
+                point = point + 1;
+            }
+            if (document.getElementById("oui").checked) {
+                point = point + 1;
+            }
+            if (document.getElementById("non").checked) {
+                point = point + 0;
+            }
+
+            alert("Votre résultat est de " + point + "/5)");
+	 }
+
+
+    </script>
+
+
+
+
+</body>
+
+
+</html>

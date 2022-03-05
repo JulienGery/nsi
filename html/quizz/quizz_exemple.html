@@ -132,9 +132,9 @@
         Si un jour tu as la folie de les utiliser il y a un site : https://regexr.com/.
         Voilà l’expression régulier qui vérifie la chaine de caractères « append » qu’elle soit avec un point devant ou sans,
         avec des parenthèses après ou sans, ou qu’elle est les deux (et un peu plus de truc). 
-        /(?=^(?!\s*$).+)(^\s*(\.?(append)(\(\))?\s*))*$/gi
+        /(^\s*(\.?(append)(\(\))?\s*))$/gi
        */
-    const myRegex = /(?=^(?!\s*$).+)(^\s*(\.?(append)(\(\))?\s*))*$/gi
+    const myRegex = /(^\s*(\.?(append)(\(\))?\s*))$/gi
     
     const repTextInput3 = () => {
         let userString = document.getElementById("myTextInput").value
