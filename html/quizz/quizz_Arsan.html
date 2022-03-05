@@ -51,12 +51,12 @@
 
     <script>
         const ids = ["Arduino1", "Arduino2", "Arduino3", "arduinofonction1", "arduinofonction2", "arduinofonction3", "micro-controleur1", "micro-controleur2", "micro-controleur3", "texte1", "oui"];
-        const bonneRep = [false, true, false, false, true, false, true, false, false, "C", true]
+        const bonneRep = [false, true, false, false, true, false, true, false, false, /(^\s*c((\+\+)|(pp))?\s*)$/gi, true]
 
         function resultat() {
             let point = 0;
             for(let i in ids){
-                if((i!=9? document.getElementById(ids[i]).checked == bonneRep[i] : document.getElementById(ids[i]).value == bonneRep[i]) && bonneRep[i]){
+                if((i!=9? document.getElementById(ids[i]).checked == bonneRep[i] : document.getElementById(ids[i]).value.match(bonneRep[i])) && bonneRep[i]){
                     point++;
                 }
             }

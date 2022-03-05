@@ -72,8 +72,9 @@
 
     <script>
         const class_name = ["question1", "question2", "question3", "question4", "question5"]
-        const bonne_rep = [[true, true, false, false], [false, true, false], ["append"], [true, false, true], ["not"]]//les réponse en dure pas terrible
-        const rep_area = [["q1r1", "q1r2", "q1r3", "q1r4"], ["q2r1", "q2r2", "q2r3"], ["q3r1"], ["q4r1", "q4r2", "q4r3"], ["q5r1"]]
+        // const bonne_rep = [[true, true, false, false], [false, true, false], "append", [true, false, true], "not"]//les réponse en dure pas terrible
+        const bonne_rep = [[true, true, false, false], [false, true, false], "append", [true, false, true], "not"] 
+        const rep_area = [["q1r1", "q1r2", "q1r3", "q1r4"], ["q2r1", "q2r2", "q2r3"], "q3r1", ["q4r1", "q4r2", "q4r3"], "q5r1"]
         //pas le plus opti de faire comme ca ^ 
         //regex append = /(^\s*(\.?(append)(\(\))?\s*))$/gi
         //regex not = /(^\s*((not)\s*))$/gi
@@ -107,24 +108,24 @@
             let reponse_valide = 0;
             let reponse = false;
             let form_valid = 0;
-            let rep_user = class_name.map((name) => {let obj = document.getElementsByClassName(name); return obj.length>1 ? extract(obj): [obj[0].value]})
+            let rep_user = class_name.map((name) => {let obj = document.getElementsByClassName(name); return obj.length>1 ? extract(obj): obj[0].value})
             for(let i in rep_user){
-                if(rep_user[i].includes(true) || rep_user[i][0]){
+                if(typeof(rep_user[i]) == "object"? rep_user[i].includes(true) : rep_user[i]){
                     reponse = true
-                    if(compare(rep_user[i], bonne_rep[i]) && rep_user[i].length>1){
+                    if(compare(rep_user[i], bonne_rep[i]) && typeof(rep_user[i]) == "object"){
                         form_valid++;
                         continue
                     }
                     continue
                 }
                 else if (i == rep_user.length-1 && !reponse){
-                    rep_area.map(ids => ids.map(id => document.getElementById(id).style.backgroundColor = "transparent"))
+                    rep_area.map(ids => typeof(ids) == "object"? ids.map(id => document.getElementById(id).style.backgroundColor = "transparent"): document.getElementById(ids).style.backgroundColor = "transparent")
                     return ""
                 }
             }
 
             for(let i in rep_user){
-                if(rep_user[i].length > 1){
+                if(typeof(rep_user[i]) == "object"){
                     for(let j in rep_user[i]){
                         if(rep_user[i][j] != bonne_rep[i][j] && rep_user[i].includes(true)){
                             document.getElementById(rep_area[i][j]).style.backgroundColor = "red";
@@ -139,8 +140,8 @@
                         }
                     }
                 }
-                else if(rep_user[i][0]){
-                    rep_user[i][0].toLowerCase().includes(bonne_rep[i][0])? (document.getElementById(rep_area[i][0]).style.color = "green", reponse_valide++, form_valid++): (document.getElementById(rep_area[i][0]).style.color = "red", mauvaise_rep++);
+                else if(rep_user[i]){
+                    rep_user[i].toLowerCase().includes(bonne_rep[i])? (document.getElementById(rep_area[i]).style.color = "green", reponse_valide++, form_valid++): (document.getElementById(rep_area[i]).style.color = "red", mauvaise_rep++);
                 }
             }
             return "<h2>vous avez "+reponse_valide+" bonne réponse, "+mauvaise_rep+" mauvaise réponse, "+form_valid+" formulaire correcte.</h2>";
