@@ -76,7 +76,7 @@
         const rep_area = [["q1r1", "q1r2", "q1r3", "q1r4"], ["q2r1", "q2r2", "q2r3"], ["q3r1"], ["q4r1", "q4r2", "q4r3"], ["q5r1"]]
         //pas le plus opti de faire comme ca ^ 
         //regex append = /(?=^(?!\s*$).+)(^\s*(\.?(append)(\(\))?\s*))*$/gi
-        //regex not = /(^\s*((not)\s*))*$/gi
+        //regex not = /(?=^(?!\s*$).+)(^\s*((not)\s*))*$/gi
 
         const compare = (list1, list2) => {
             if(list1.length != list2.length){
