@@ -73,11 +73,11 @@
     <script>
         const class_name = ["question1", "question2", "question3", "question4", "question5"]
         // const bonne_rep = [[true, true, false, false], [false, true, false], "append", [true, false, true], "not"]//les réponse en dure pas terrible
-        const bonne_rep = [[true, true, false, false], [false, true, false], "append", [true, false, true], "not"] 
+        const bonne_rep = [[true, true, false, false], [false, true, false], /(^\s*(\.?(append)(\(\))?\s*))$/g, [true, false, true], /(^\s*((not)\s*))$/g] 
         const rep_area = [["q1r1", "q1r2", "q1r3", "q1r4"], ["q2r1", "q2r2", "q2r3"], "q3r1", ["q4r1", "q4r2", "q4r3"], "q5r1"]
         //pas le plus opti de faire comme ca ^ 
-        //regex append = /(^\s*(\.?(append)(\(\))?\s*))$/gi
-        //regex not = /(^\s*((not)\s*))$/gi
+        //regex append = /(^\s*(\.?(append)(\(\))?\s*))$/g
+        //regex not = /(^\s*((not)\s*))$/g
 
         const compare = (list1, list2) => {
             if(list1.length != list2.length){
@@ -141,7 +141,8 @@
                     }
                 }
                 else if(rep_user[i]){
-                    rep_user[i].toLowerCase().includes(bonne_rep[i])? (document.getElementById(rep_area[i]).style.color = "green", reponse_valide++, form_valid++): (document.getElementById(rep_area[i]).style.color = "red", mauvaise_rep++);
+                    rep_user[i].match(bonne_rep[i])? (document.getElementById(rep_area[i]).style.color = "green", reponse_valide++, form_valid++): (document.getElementById(rep_area[i]).style.color = "red", mauvaise_rep++);
+                    //rep_user[i].toLowerCase().includes(bonne_rep[i])? (document.getElementById(rep_area[i]).style.color = "green", reponse_valide++, form_valid++): (document.getElementById(rep_area[i]).style.color = "red", mauvaise_rep++);
                 }
             }
             return "<h2>vous avez "+reponse_valide+" bonne réponse, "+mauvaise_rep+" mauvaise réponse, "+form_valid+" formulaire correcte.</h2>";

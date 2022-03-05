@@ -134,7 +134,7 @@
         avec des parenthèses après ou sans, ou qu’elle est les deux (et un peu plus de truc). 
         /(^\s*(\.?(append)(\(\))?\s*))$/gi
        */
-    const myRegex = /(^\s*(\.?(append)(\(\))?\s*))$/gi
+    const myRegex = /(^\s*(\.?(append)(\(\))?\s*))$/g
     
     const repTextInput3 = () => {
         let userString = document.getElementById("myTextInput").value
@@ -200,6 +200,8 @@
             let repUser = checkboxIds2.map(id => {return document.getElementById(id).checked})
             if(compareTableau(repUser, lesBonnesRep)){
                 alert("vous avez tout bon")
+            } else {
+                alert("mauvaise réponse")
             }
         }
     </script>
