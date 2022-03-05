@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="./quizz_Arsan.css">
     <title>QUIZZ</title>
 </head>
 
@@ -10,43 +11,51 @@
 
 
     <h3>Sur un Arduino, les informations entrent et/ou sortent par des …</h3>
-
-    <input type="checkbox" name="Arduino1" id="Arduino1" >portes<br>
-    <input type="checkbox" name="Arduino2" id="Arduino2" >ports<br>
-    <input type="checkbox" name="Arduino3" id="Arduino3" >connecteurs<br>
+    <form>
+        <input type="checkbox" name="Arduino1" id="Arduino1" >
+        <label for="Arduino1">portes</label><br>
+        <input type="checkbox" name="Arduino2" id="Arduino2" >
+        <label for="Arduino2">ports</label><br>
+        <input type="checkbox" name="Arduino3" id="Arduino3" >
+        <label for="Arduino3">connecteurs</label><br>
+    </form>
 
     <h3>Quelle(s) fonction(s) un Arduino remplit-il ?</h3>
-
-    <input type="checkbox" name="arduinofonction1" id="arduinofonction1" >
-    <label>stocker</label><br>
-    <input type="checkbox" name="arduinofonction2" id="arduinofonction2" >
-    <label>traiter </label><br>
-    <input type="checkbox" name="arduinofonction3" id="arduinofonction3" >
-    transmettre<br>
-
+    <form>
+        <input type="checkbox" name="arduinofonction1" id="arduinofonction1" >
+        <label for="arduinofonction1">stocker</label><br>
+        <input type="checkbox" name="arduinofonction2" id="arduinofonction2" >
+        <label for="arduinofonction2">traiter </label><br>
+        <input type="checkbox" name="arduinofonction3" id="arduinofonction3" >
+        <label for="arduinofonction3">transmettre</label><br>
+    </form>
     <h3>Qu'est ce qu'un micro-controleur ?</h3>
-
-    <input type="checkbox" name="micro-controleur1" id="micro-controleur1" >
-    <label for="micro-controleur1">un petit processeur informatique</label><br>
-    <input type="checkbox" name="micro-controleur2" id="micro-controleur2">
-    <label for="micro-controleur2">un systeme d'exploitation</label><br>
-    <input type="checkbox" name="micro-controleur3" id="micro-controleur3" >
-    <label for="micro-controleur3">un systeme de stockage informatique</label><br>
-
-    <h3>Dans quel langage sont écrits les programmes qu'on écrit sur Arduino ?(une seule lettre est attendue dans la réponse)</br>
-        <input type="text" placeholder="écrire ici" id="texte1" > <br>
-    </h3>
-
+    <form>
+        <input type="checkbox" name="micro-controleur1" id="micro-controleur1" >
+        <label for="micro-controleur1">un petit processeur informatique</label><br>
+        <input type="checkbox" name="micro-controleur2" id="micro-controleur2">
+        <label for="micro-controleur2">un systeme d'exploitation</label><br>
+        <input type="checkbox" name="micro-controleur3" id="micro-controleur3" >
+        <label for="micro-controleur3">un systeme de stockage informatique</label><br>
+    </form>
+    <h3>Dans quel langage sont écrits les programmes qu'on écrit sur Arduino ?(une seule lettre est attendue dans la réponse)</h3><br>
+    <form>
+        <input type="text" placeholder="écrire ici" id="texte1"><br>
+    </form>
 
     <h3>Une DEL est un dipole polarisé ?</h3>
-    <input type="radio" name="del2" id="oui" >OUI<br>
-    <input type="radio" name="del2" id="non" >NON<br>
+    <form>
+        <input type="radio" name="del2" id="oui" value="oui">
+        <label for="oui">OUI</label><br>
+        <input type="radio" name="del2" id="non" value="non">
+        <label for="non">NON</label><br>
+    </form>
+    <br>
+    <br>    
 
-
-
-
-    <input type="button" value="Cliquez ici" onClick="resultat()" >
-
+    <form>
+        <input type="button" value="Cliquez ici" onClick="resultat()" >
+    </form>
 
 
     <script>
