@@ -182,6 +182,26 @@
             }
             alert("vous avez "+bonPoint+" bon point, "+mauvaisPoint+" mauvais point")
         }
+        //Tu peux aussi faire une fonction qui vérifie que les deux tableaux sont bien les mêmes.
+        //Comme ça
+        const compareTableau = (tableau1, tableau2) => {
+            if(tableau1.length != tableau2.length){
+                return false;
+            }
+            for(let i in tableau1){
+                if(tableau1[i] != tableau2[i]){
+                    return false;
+                }
+            }
+            return true;
+        }
+        //Puis tu l’appelle comme ça.
+        const repCheckboxM2 = () => {
+            let repUser = checkboxIds2.map(id => {return document.getElementById(id).checked})
+            if(compareTableau(repUser, lesBonnesRep)){
+                alert("vous avez tout bon")
+            }
+        }
     </script>
     
 </body>
