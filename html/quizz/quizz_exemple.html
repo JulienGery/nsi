@@ -153,5 +153,35 @@
 
     */
     </script>
+    <br>
+    <br>
+    <br>
+    <!-- cas où il y a plusieurs réponses correct possible -->
+    <input type="checkbox" id="r1" value="r1">
+    <label for="r1">la réponse n°1 ici (bonne rep dans notre cas)</label><br>
+    <input type="checkbox" id="r2" value="r2">
+    <label for="r2">la réponse n°2 ici (mauvaise rep dans notre cas)</label><br>
+    <input type="checkbox" id="r3" value="r3">
+    <label for="r3">la réponse n°3 ici (bonne rep dans notre cas)</label><br><br>
+
+    <input type="button" onclick="repCheckboxM()" value="Soumettre checkbox multyple">
+    
+    <script>
+        const lesBonnesRep = [true, false, true];
+        const checkboxIds2 = ["r1", "r2", "r3"];
+
+        const repCheckboxM = () => {
+            let bonPoint = 0;
+            let mauvaisPoint = 0;
+            for(let i in checkboxIds2){
+                if(document.getElementById(checkboxIds2[i]).checked == lesBonnesRep[i]){
+                    bonPoint++;
+                }else{ 
+                    mauvaisPoint++;
+                }
+            }
+            alert("vous avez "+bonPoint+" bon point, "+mauvaisPoint+" mauvais point")
+        }
+    </script>
     
 </body>
