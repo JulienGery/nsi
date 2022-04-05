@@ -2,7 +2,7 @@ from random import randint
 from os import system #Utilisé pour l’affichage.
 
 couleurs = ["Pique", "Coeur", "Carreau", "Trèfle"]
-valeursP = ["Valet", "Dame", "Roi", "As"]
+aleursP = ["Valet", "Dame", "Roi", "As"]
 
 #Pour une meilleure lisibilité des conditions contractées une autre forme est disponible en dessous
 #Les f"strings {variable}" sont une autre écriture de "strings "+str(variable) 
