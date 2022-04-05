@@ -5,7 +5,6 @@ import * as dat from 'dat.gui'
 
 
 const loader = new THREE.TextureLoader();
-const texture = loader.load('https://avatars.githubusercontent.com/u/75223846?s=400&v=4')
 const texture2 = loader.load('/tmp.jpg')
 
 const _VS = `
@@ -98,30 +97,73 @@ const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color
 //     new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture}),
 // ]
 
-const geometry = new THREE.BoxBufferGeometry(1, 1, 0.005, 10, 10, 10);
-const geometry2 = new THREE.BoxBufferGeometry(1, 1, 0.005, 10, 10, 10);
-// Mesh
-const carte = new THREE.Mesh(geometry, [
-	new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-	new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture2}),
-    new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture}),
-])
+class card{
 
-const carte2 = new THREE.Mesh(geometry2, [
-	new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-    new THREE.MeshStandardMaterial({color: "black", side: THREE.DoubleSide}),
-	new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture2}),
-    new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture}),
-])
+    constructor(x, y, z, texture, px, py, pz, name){
+        this.x = x;
+        this.y = y;
+        this.z = z
+        this.texture = texture;
+        this.px = px
+        this.py = py
+        this.pz = pz
+        this.name = name
+        this.geometry = new THREE.BoxBufferGeometry(this.x, this.y, this.z, 10, 10, 10);
+        this.line = this.makeLine()
+        this.card = this.makeCard()
+        this.uuid = this.card.uuid
+        this.group = this.makeGroup()
+        this.place()
+    }
 
-scene.add(carte)
-scene.add(carte2)
-carte2.position.set(2, 0, 0)
+    makeCard (){
+
+        return new THREE.Mesh(this.geometry, [
+            new THREE.MeshStandardMaterial({color: "#000000", side: THREE.DoubleSide}),
+            new THREE.MeshStandardMaterial({color: "#000000", side: THREE.DoubleSide}),
+            new THREE.MeshStandardMaterial({color: "#000000", side: THREE.DoubleSide}),
+            new THREE.MeshStandardMaterial({color: "#000000", side: THREE.DoubleSide}),
+            new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: texture2}), //front
+            new THREE.MeshStandardMaterial({color: "#ffffff", side: THREE.DoubleSide, map: loader.load(this.texture)}), //back
+        ]) 
+    }
+
+    makeLine() {
+        return new THREE.LineSegments( new THREE.EdgesGeometry(this.geometry), new THREE.LineBasicMaterial( { color: 0x000000} ) );
+    }
+
+    makeGroup(){
+        const group = new THREE.Group();
+        group.add(this.card);
+        group.add(this.line);
+        return group
+    }
+
+    place(){
+        //pour les futures groups
+        // scene.add(this.group)
+        // this.group.position.set(this.px, this.py, this.pz)
+
+        this.card.name = this.name
+        this.setPlace(this.px, this.py, this.pz)
+        scene.add(this.card)
+    }
+
+    setPlace(x,y,z){
+        this.card.position.set(x, y, z)
+    }
+
+}
+
+//!compariason des nom des cartes 
+const allCard = []
+allCard.push(new card(1, 1, .001, "https://avatars.githubusercontent.com/u/75223846?s=400&v=4", 0, 0, 0, 'github').group)
+allCard.push(new card(1, 1, .001, "/snkellefaitpeur.png", 1.2, 0, 0, 'snk').group)
+allCard.push(new card(1, 1, .001, "https://avatars.githubusercontent.com/u/75223846?s=400&v=4", 1.2, 1.2, 0, 'github').group)
+allCard.push(new card(1, 1, .001, "/snkellefaitpeur.png", 0, 1.2, 0, 'snk').group)
+
+console.log(scene.children)
+
 
 const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
@@ -167,7 +209,6 @@ const compare = (intersect, array) => {
     if(array.length == 0){
         return true
     }
-    console.log(haveRotate[0].uuid)
     for(let i = 0; i<array.length; i++){
         if(array[i].uuid == intersect.object.uuid){
             return false
@@ -177,9 +218,13 @@ const compare = (intersect, array) => {
 }
 
 function onMouseClick(event) {
-
     if(haveRotate.length == 2){
-        for(let i = 0; i<haveRotate.length; i++){
+        if(haveRotate[0].name == haveRotate[1].name){
+            for(let i = 0; i<haveRotate.length; i++){
+                scene.remove(haveRotate[i])
+            }
+        }
+        else for(let i = 0; i<haveRotate.length; i++){
             rotate(haveRotate[i], -1, 0, Math.PI)
         }
         haveRotate = []
@@ -202,13 +247,15 @@ function onPointerMove( event ) {
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
 
-const pickCard = () => {
+const pickCard = () => {    
     raycaster.setFromCamera(mouse, camera);
     return raycaster.intersectObjects(scene.children);
+    // return raycaster.intersectObjects(scene.children, false, jsp)
 }
 
 const mouseHover = () => {
     const intersects = pickCard()
+
     if (intersects.length == 2){
         for(let i = 0; i<intersects.length; i++){
             intersects[i].object.material[4].color = new THREE.Color(0x000000)
@@ -217,9 +264,9 @@ const mouseHover = () => {
 }
 
 // carte.rotation.x = 181
-gui.add(carte.rotation, "x")
-gui.add(carte.rotation, "y")
-gui.add(carte.rotation, "z")
+// gui.add(carte.rotation, "x")
+// gui.add(carte.rotation, "y")
+// gui.add(carte.rotation, "z")
 
 // Lights
 
@@ -289,18 +336,12 @@ scene.updateMatrixWorld();
 const tick = () =>
 {
 
-    const elapsedTime = clock.getElapsedTime()
-
-    // Update objects
-    // carte.rotation.y = .5 * elapsedTime
-    
-    // line.rotation.y = .5 * elapsedTime
-
     // Update Orbital Controls
     // controls.update()
 
     // Render
-    resetMaterial()
+
+    // resetMaterial()
     // mouseHover()
     renderer.render(scene, camera)
 
@@ -308,6 +349,9 @@ const tick = () =>
 
     window.requestAnimationFrame(tick)
 }
+
 window.addEventListener('click', onMouseClick);
 window.addEventListener( 'pointermove', onPointerMove );
+
+
 tick()
