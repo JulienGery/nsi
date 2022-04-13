@@ -102,15 +102,11 @@ class Card {
 class Game {
 
     constructor(numberCard) {
-        console.log('starting')
         this.numberCard = numberCard
         this.allCard = []
         this.sqrtNumberCard = Math.floor(Math.sqrt(nb_card) * 2)
         this.Xpos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard)
         this.CreateCard()
-        // console.log(this.allCard)
-        // this.shuffleArray()
-        // this.placeCard()
     }
 
     CreateCard() {
@@ -148,9 +144,7 @@ class Game {
     }
 
     placeCard(){
-        console.log("bite")
         for (let i = 0; i < this.sqrtNumberCard; i++) {
-            console.log(this.allCard[i])
             for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
                 this.allCard[i * this.Xpos + j].setPlace(i * 1.2, j * 1.2, 0)
                 this.allCard[i * this.Xpos + j].show()
