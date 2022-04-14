@@ -105,20 +105,26 @@ class Card {
         this.card.position.set(x, y, z)
     }
 
-    rotate(start, end) {
+    rotate(start, end, coef) {
         const clock = new THREE.Clock()
 
         const actualRotate = () => {
 
             const elapsedTime = clock.getElapsedTime();
-            // this.card.rotation.y = 10 * elapsedTime * coef + start
-            this.card.setRotationFromQuaternion(start.slerp(end, elapsedTime))
+            this.card.rotation.y = 10 * elapsedTime * coef + start
 
-            if (elapsedTime < Math.PI / 10) {
+            // const q = start.slerp(end, elapsedTime*.01)
+            // this.card.setRotationFromQuaternion(q)
+
+            if (elapsedTime < 0.31415926535) {
                 window.requestAnimationFrame(actualRotate)
             }
             else {
-                this.card.setRotationFromQuaternion(end)
+
+                // console.log(elapsedTime)
+                // this.card.setRotationFromQuaternion(end)
+
+                this.card.rotation.y = end
             }
             renderer.render(scene, camera)
         }
@@ -223,8 +229,10 @@ function pickCard() {
 }
 
 function onMouseClick(event) {
+
     const qFront = new THREE.Quaternion(0, 0, 0, 1);
-    const qBack = new THREE.Quaternion(0, 1, 0, 6.123233995736766e-17);
+    const qBack = new THREE.Quaternion(0, 1, 0, 0);
+
     if (haveRotate.length == 2) {
         if (haveRotate[0] < haveRotate[1]) {
             haveRotate.reverse()
@@ -237,7 +245,7 @@ function onMouseClick(event) {
         }
         else {
             for (let i = 0; i < haveRotate.length; i++) {
-                game.allCard[haveRotate[i]].rotate(qBack, qFront)
+                game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1)
             }
         }
         haveRotate = []
@@ -249,7 +257,7 @@ function onMouseClick(event) {
         if (compare(intersects[0], haveRotate)) {
             for (let i = 0; i < game.allCard.length; i++) {
                 if (game.allCard[i].uuid == intersects[0].object.uuid) {
-                    game.allCard[i].rotate(qFront, qBack)
+                    game.allCard[i].rotate(0, Math.PI, 1)
                     haveRotate.push(i)
                     break
                 }

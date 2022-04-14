@@ -2,18 +2,26 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import Stats from 'stats.js'
 const axios = require('axios')
 
 
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
-const mouse = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
 const canvas = document.querySelector('canvas.webgl')
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 const dim = new THREE.Vector3(1, 1, .001)
 const nb_card = parseInt(prompt("nombre de pair"))
+const stats = new Stats();
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(0xffffff)
+
+const pointLight = new THREE.AmbientLight(0xffffff, 1)
+scene.add(pointLight)
+
+stats.showPanel(0)
+document.body.appendChild(stats.dom);
 
 const sizes = {
     width: window.innerWidth,
@@ -46,8 +54,10 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.x = 0
 camera.position.y = 0
 camera.position.z = 20
-// camera.lookAt(new THREE.Vector3(Zpos / 2, racineNb / 2, 0))
 scene.add(camera)
+
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
 
 
 
@@ -77,14 +87,13 @@ class Card {
             new THREE.MeshStandardMaterial({ color: "#000000", side: THREE.DoubleSide }),
             new THREE.MeshStandardMaterial({ color: "#000000", side: THREE.DoubleSide }),
             new THREE.MeshStandardMaterial({ color: "#000000", side: THREE.DoubleSide }),
-            new THREE.MeshStandardMaterial({ color: "#ffffff", side: THREE.DoubleSide, map: texture2 }), //front
-            new THREE.MeshStandardMaterial({ color: "#ffffff", side: THREE.DoubleSide, map: texture }), //back change that
+            new THREE.MeshStandardMaterial({ color: "#ffffff", map: texture2 }), //front
+            new THREE.MeshStandardMaterial({ color: "#ffffff", map: texture }), //back change that
         ])
 
     }
 
     show() {
-        console.log("placing")
         scene.add(this.card)
     }
 
@@ -94,6 +103,34 @@ class Card {
         this.py = y
         this.pz = z
         this.card.position.set(x, y, z)
+    }
+
+    rotate(start, end) {
+        const clock = new THREE.Clock()
+
+        const actualRotate = () => {
+
+            const elapsedTime = clock.getElapsedTime();
+            // this.card.rotation.y = 10 * elapsedTime * coef + start
+            const q = start.slerp(end, elapsedTime*.01)
+            this.card.setRotationFromQuaternion(q)
+
+            if (elapsedTime < 10) {
+                window.requestAnimationFrame(actualRotate)
+            }
+            else {
+                console.log(elapsedTime)
+                this.card.setRotationFromQuaternion(end)
+            }
+            renderer.render(scene, camera)
+        }
+
+        window.requestAnimationFrame(actualRotate)
+
+    }
+
+    remove() {
+        scene.remove(this.card)
     }
 
 }
@@ -112,18 +149,18 @@ class Game {
     CreateCard() {
         axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 10) + "&limit=" + nb_card).then((response) => {
             const data = response.data
-            for(let i = 0; i<data.length; i++){
+            for (let i = 0; i < data.length; i++) {
                 this.downloadTexture(data[i].download_url)
             }
         })
     }
 
-    async downloadTexture(URL){
+    async downloadTexture(URL) {
         loader.loadAsync(URL).then((rep) => {
-            for(let i = 0; i<2; i++){
-                this.allCard.push(new Card(dim, new THREE.Vector3(0, 0, 0), rep, i))
+            for (let i = 0; i < 2; i++) {
+                this.allCard.push(new Card(dim, new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i))
             }
-            if(this.allCard.length == this.numberCard*2){
+            if (this.allCard.length == this.numberCard * 2) {
                 this.shuffleArray(this.allCard)
                 this.placeCard()
             }
@@ -134,7 +171,7 @@ class Game {
     }
 
 
-    shuffleArray(){
+    shuffleArray() {
         for (let i = this.allCard.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             const temp = this.allCard[i];
@@ -143,7 +180,7 @@ class Game {
         }
     }
 
-    placeCard(){
+    placeCard() {
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
                 this.allCard[i * this.Xpos + j].setPlace(i * 1.2, j * 1.2, 0)
@@ -152,24 +189,87 @@ class Game {
         }
     }
 
+    //actual game
+
 }
+
+
 
 const game = new Game(nb_card)
 
-const pointLight = new THREE.AmbientLight(0xffffff, 1)
 
-scene.add(pointLight)
+let haveRotate = []
 
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
+function onPointerMove(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
 
+function compare(intersect, array) {
+    if (array.length == 0) {
+        return true
+    }
+    for (let i = 0; i < array.length; i++) {
+        if (game.allCard[array[i]].uuid == intersect.object.uuid) {
+            return false
+        }
+    }
+    return true
+}
 
-const tick = () => {
+function pickCard() {
 
-    renderer.render(scene, camera)
-
-    window.requestAnimationFrame(tick)
+    raycaster.setFromCamera(mouse, camera);
+    return raycaster.intersectObjects(scene.children);
 
 }
 
+function onMouseClick(event) {
+    const qFront = new THREE.Quaternion(0, 0, 0, 1);
+    const qBack = new THREE.Quaternion(0, 1, 0, 0);
+    if (haveRotate.length == 2) {
+        if (haveRotate[0] < haveRotate[1]) {
+            haveRotate.reverse()
+        }
+        if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
+            for (let i = 0; i < haveRotate.length; i++) {
+                const PopingCard = game.allCard.splice(haveRotate[i], 1)[0]
+                PopingCard.remove()
+            }
+        }
+        else {
+            for (let i = 0; i < haveRotate.length; i++) {
+                game.allCard[haveRotate[i]].rotate(qBack, qFront)
+            }
+        }
+        haveRotate = []
+        // return
+    }
+
+    const intersects = pickCard()
+
+    if (intersects.length == 1) {
+        if (compare(intersects[0], haveRotate)) {
+            for (let i = 0; i < game.allCard.length; i++) {
+                if (game.allCard[i].uuid == intersects[0].object.uuid) {
+                    game.allCard[i].rotate(qFront, qBack)
+                    haveRotate.push(i)
+                    break
+                }
+            }
+        }
+    }
+}
+
+function tick() {
+    stats.begin();
+    renderer.render(scene, camera)
+
+    stats.end();
+    window.requestAnimationFrame(tick)
+}
+
+
+window.addEventListener('click', onMouseClick);
+window.addEventListener('pointermove', onPointerMove);
 tick()
