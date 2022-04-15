@@ -68,12 +68,14 @@ controls.enableDamping = true
 class Card {
 
     constructor(pos, texture, name, gltf) {
+        this.pos = pos
         this.px = pos.x;
         this.py = pos.y;
         this.pz = pos.z;
         this.gltf = gltf.clone(true);
         this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture })
         this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
+        // this.gltf.children[0].children[2].material = new THREE.MeshBasicMaterial({ color: "#000000"}) //side
         this.name = name;
         for (let i = 0; i < this.gltf.children[0].children.length; i++) {
             this.gltf.children[0].children[i].name = name
@@ -90,6 +92,9 @@ class Card {
         this.px = x;
         this.py = y;
         this.pz = z;
+        this.pos.x = x
+        this.pos.y = y
+        this.pos.z = z
         this.gltf.position.set(x, y, z)
     }
 
@@ -122,18 +127,25 @@ class Card {
     }
 
     moveTo(from, to) {
+        if (from.equals(to)) {
+            return
+        }
         const clock = new THREE.Clock();
 
+        this.pos.x = to.x
+        this.pos.y = to.y
+        this.pos.z = to.z
         const actualMouveTo = () => {
             const elapsedTime = clock.getElapsedTime();
 
             const lerpPos = from.lerp(to, elapsedTime / 10)
             this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
 
-            if (elapsedTime < 1.1) {
+            if (elapsedTime < 1.01) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
-                this.gltf.position.set(to.x, to.y, to.z);
+                // this.gltf.position.set(to.x, to.y, to.z);
+                this.setPlace(to.x, to.y, to.z)
             }
             renderer.render(scene, camera);
         }
@@ -206,17 +218,16 @@ class Game {
     }
 
     placeCard() {
-        const place = new THREE.Vector2(this.sqrtNumberCard*2.3, this.Xpos)
+        const place = new THREE.Vector2(this.sqrtNumberCard * 2.3, this.Xpos)
 
-        for(let i = 0; i<this.allCard.length; i++){
+        for (let i = 0; i < this.allCard.length; i++) {
             this.allCard[i].setPlace(place.x, place.y, 0)
             this.allCard[i].show()
         }
 
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
-                this.allCard[i * this.Xpos + j].moveTo(new THREE.Vector3(place.x, place.y, 0),new THREE.Vector3(i * 2.3, j * 3.7, 0));
-                // this.allCard[i * this.Xpos + j].show();
+                this.allCard[i * this.Xpos + j].moveTo(new THREE.Vector3(place.x, place.y, 0), new THREE.Vector3(i * 2.3, j * 3.7, 0));
             }
         }
     }
@@ -292,36 +303,40 @@ function onMouseClick(event) {
     }
 }
 
+let haveMouve = []
 
-
-// gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf' , (gltf) => {
-//     scene.add(gltf.scene)
-//     const clock = new THREE.Clock();
-//     const start = new THREE.Vector3(0, 0, 0);
-//     const end = new THREE.Vector3(2, 2, 2);
-
-//     const mouveTo = () => {
-//         const elapsedTime = clock.getElapsedTime();
-//         const currentPos = start.lerp(end, elapsedTime/10)
-
-//         gltf.scene.position.set(currentPos.x, currentPos.y, currentPos.z)
-//         if(elapsedTime < 1){
-//             window.requestAnimationFrame(mouveTo);
-//         }else{
-//             console.log(elapsedTime)
-//             gltf.scene.position.set(end.x, end.y, end.z);
-//         }
-//         renderer.render(scene, camera);
-//     }
-//     mouveTo()
-// })
-
+const onMouseOver = () => {
+    const intersects = pickCard();
+    if (intersects.length == 1) {
+        for (let i = 0; i < game.allCard.length; i++) {
+            if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+                if (haveMouve.length != 1) {
+                    const pos = game.allCard[i].pos
+                    console.log("mouving")
+                    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 2))
+                    haveMouve.push(i)
+                } else if (haveMouve[0] != i) {
+                    console.log("jsp")
+                    const pos = game.allCard[haveMouve[0]].pos
+                    game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
+                    haveMouve = []
+                }
+            }
+        }
+    } else if (intersects.length == 0) {
+        if (haveMouve.length == 1) {
+            const pos = game.allCard[haveMouve[0]].pos
+            game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
+        }
+        haveMouve = []
+    }
+}
 
 function tick() {
     stats.begin();
 
+    onMouseOver()
     renderer.render(scene, camera);
-
     stats.end();
 
     window.requestAnimationFrame(tick);
