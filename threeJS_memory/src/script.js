@@ -132,9 +132,6 @@ class Card {
         }
         const clock = new THREE.Clock();
 
-        this.pos.x = to.x
-        this.pos.y = to.y
-        this.pos.z = to.z
         const actualMouveTo = () => {
             const elapsedTime = clock.getElapsedTime();
 
@@ -151,6 +148,9 @@ class Card {
         }
         window.requestAnimationFrame(actualMouveTo)
 
+        this.pos.x = to.x
+        this.pos.y = to.y
+        this.pos.z = to.z
     }
 
 
@@ -311,13 +311,13 @@ const onMouseOver = () => {
         for (let i = 0; i < game.allCard.length; i++) {
             if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
                 if (haveMouve.length != 1) {
-                    const pos = game.allCard[i].pos
+                    const pos = game.allCard[i].pos.clone()
                     console.log("mouving")
                     game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 2))
                     haveMouve.push(i)
                 } else if (haveMouve[0] != i) {
                     console.log("jsp")
-                    const pos = game.allCard[haveMouve[0]].pos
+                    const pos = game.allCard[haveMouve[0]].pos.clone()
                     game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
                     haveMouve = []
                 }
@@ -325,7 +325,7 @@ const onMouseOver = () => {
         }
     } else if (intersects.length == 0) {
         if (haveMouve.length == 1) {
-            const pos = game.allCard[haveMouve[0]].pos
+            const pos = game.allCard[haveMouve[0]].pos.clone()
             game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
         }
         haveMouve = []
