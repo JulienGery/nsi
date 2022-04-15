@@ -121,6 +121,27 @@ class Card {
 
     }
 
+    moveTo(from, to) {
+        const clock = new THREE.Clock();
+
+        const actualMouveTo = () => {
+            const elapsedTime = clock.getElapsedTime();
+
+            const lerpPos = from.lerp(to, elapsedTime / 10)
+            this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
+
+            if (elapsedTime < 1.1) {
+                window.requestAnimationFrame(actualMouveTo);
+            } else {
+                this.gltf.position.set(to.x, to.y, to.z);
+            }
+            renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(actualMouveTo)
+
+    }
+
+
     remove() {
         scene.remove(this.gltf);
     }
@@ -139,13 +160,17 @@ class Game {
     }
 
     CreateCard() {
-        gltfLoader.load('carte.gltf', (gltf) => {
+        gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
             this.getImage(gltf)
+        }, (progess) => {
+
+        }, (error) => {
+            this.CreateCard()
         })
     }
 
     getImage(gltf) {
-        axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 10) + "&limit=" + nb_card).then((response) => {
+        axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
             const data = response.data;
             for (let i = 0; i < data.length; i++) {
                 this.downloadTexture(data[i].download_url, gltf.scene)
@@ -166,7 +191,7 @@ class Game {
             }
         }).catch((err) => {
             console.log(err);
-            this.downloadTexture(URL);
+            this.downloadTexture(URL, gltf);
         })
     }
 
@@ -181,10 +206,17 @@ class Game {
     }
 
     placeCard() {
+        const place = new THREE.Vector2(this.sqrtNumberCard*2.3, this.Xpos)
+
+        for(let i = 0; i<this.allCard.length; i++){
+            this.allCard[i].setPlace(place.x, place.y, 0)
+            this.allCard[i].show()
+        }
+
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
-                this.allCard[i * this.Xpos + j].setPlace(i * 2.3, j * 3.7, 0);
-                this.allCard[i * this.Xpos + j].show();
+                this.allCard[i * this.Xpos + j].moveTo(new THREE.Vector3(place.x, place.y, 0),new THREE.Vector3(i * 2.3, j * 3.7, 0));
+                // this.allCard[i * this.Xpos + j].show();
             }
         }
     }
@@ -262,7 +294,27 @@ function onMouseClick(event) {
 
 
 
+// gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf' , (gltf) => {
+//     scene.add(gltf.scene)
+//     const clock = new THREE.Clock();
+//     const start = new THREE.Vector3(0, 0, 0);
+//     const end = new THREE.Vector3(2, 2, 2);
 
+//     const mouveTo = () => {
+//         const elapsedTime = clock.getElapsedTime();
+//         const currentPos = start.lerp(end, elapsedTime/10)
+
+//         gltf.scene.position.set(currentPos.x, currentPos.y, currentPos.z)
+//         if(elapsedTime < 1){
+//             window.requestAnimationFrame(mouveTo);
+//         }else{
+//             console.log(elapsedTime)
+//             gltf.scene.position.set(end.x, end.y, end.z);
+//         }
+//         renderer.render(scene, camera);
+//     }
+//     mouveTo()
+// })
 
 
 function tick() {
