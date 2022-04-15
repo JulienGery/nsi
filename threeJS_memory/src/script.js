@@ -136,7 +136,8 @@ class Card {
             const elapsedTime = clock.getElapsedTime();
 
             const lerpPos = from.lerp(to, elapsedTime / 10)
-            this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
+            // this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
+            this.setPlace(lerpPos.x, lerpPos.y, lerpPos.z)
 
             if (elapsedTime < 1.01) {
                 window.requestAnimationFrame(actualMouveTo);
@@ -148,9 +149,9 @@ class Card {
         }
         window.requestAnimationFrame(actualMouveTo)
 
-        this.pos.x = to.x
-        this.pos.y = to.y
-        this.pos.z = to.z
+        // this.pos.x = to.x
+        // this.pos.y = to.y
+        // this.pos.z = to.z
     }
 
 
