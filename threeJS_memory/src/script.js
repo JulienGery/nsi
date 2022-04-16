@@ -126,20 +126,22 @@ class Card {
 
     }
 
-    moveTo(from, to) {
-        if (from.equals(to)) {
-            return
-        }
+    moveTo(from, to, time = 1) {
+
+        // if (from.equals(to)) {
+        //     return
+        // }
+
         const clock = new THREE.Clock();
 
         const actualMouveTo = () => {
             const elapsedTime = clock.getElapsedTime();
 
-            const lerpPos = from.lerp(to, elapsedTime / 10)
+            const lerpPos = from.lerp(to, elapsedTime / (10 * time))
             // this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
             this.setPlace(lerpPos.x, lerpPos.y, lerpPos.z)
 
-            if (elapsedTime < 1.01) {
+            if (elapsedTime < time + .1) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
                 // this.gltf.position.set(to.x, to.y, to.z);
@@ -246,18 +248,6 @@ function onPointerMove(event) {
     onMouseOver()
 }
 
-function compare(intersect, array) {
-    if (array.length == 0) {
-        return true
-    }
-    for (let i = 0; i < array.length; i++) {
-        if (game.allCard[array[i]].uuid == intersect.object.uuid) {
-            return false
-        }
-    }
-    return true
-}
-
 function pickCard() {
 
     raycaster.setFromCamera(mouse, camera);
@@ -277,6 +267,9 @@ function onMouseClick(event) {
         if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
             for (let i = 0; i < haveRotate.length; i++) {
                 const PopingCard = game.allCard.splice(haveRotate[i], 1)[0];
+                if (haveMove.includes(haveRotate[i])) {
+                    haveMove = []
+                }
                 PopingCard.remove();
             }
         }
@@ -291,11 +284,12 @@ function onMouseClick(event) {
     const intersects = pickCard()
 
     if (intersects.length == 1) {
-        if (compare(intersects[0], haveRotate)) {
-            for (let i = 0; i < game.allCard.length; i++) {
-                if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+        for (let i = 0; i < game.allCard.length; i++) {
+            if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+                if (!haveRotate.includes(i, 0)) {
                     game.allCard[i].rotate(0, Math.PI, 1);
                     haveRotate.push(i);
+                    moveDown()
                     break
                 }
             }
@@ -303,32 +297,36 @@ function onMouseClick(event) {
     }
 }
 
-let haveMouve = []
+let haveMove = []
 
-const onMouseOver = () => {
+const moveUp = (i) => {
+    const pos = game.allCard[i].pos.clone()
+    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1.5), .5)
+}
+
+const moveDown = (i = 0) => {
+    const pos = game.allCard[haveMove[i]].pos.clone()
+    game.allCard[haveMove[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .5)
+}
+
+const onMouseOver = async () => {
     const intersects = pickCard();
-    console.log(haveMouve)
     if (intersects.length == 1) {
         for (let i = 0; i < game.allCard.length; i++) {
             if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-                if (haveMouve.length != 1) {
-                    const pos = game.allCard[i].pos.clone()
-                    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 2))
-                    haveMouve.push(i)
-                } else if (haveMouve[0] != i) {
-                    const pos = game.allCard[haveMouve[0]].pos.clone()
-                    game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
-                    haveMouve = []
-                    haveMouve.push(i)
+                if (!haveMove.includes(i, 0)) {
+                    if (haveMove.length > 0) {
+                        moveDown()
+                        haveMove = []
+                    }
+                    haveMove.push(i)
+                    moveUp(i)
                 }
             }
         }
-    } else if (intersects.length == 0) {
-        if (haveMouve.length == 1) {
-            const pos = game.allCard[haveMouve[0]].pos.clone()
-            game.allCard[haveMouve[0]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0))
-        }
-        haveMouve = []
+    } else if (haveMove.length > 0) {
+        moveDown()
+        haveMove = []
     }
 }
 
