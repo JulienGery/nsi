@@ -13,7 +13,7 @@ const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const dim = new THREE.Vector3(1, 1, .001);
-const nb_card = parseInt(prompt("nombre de pair"));
+const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -68,28 +68,25 @@ controls.enableDamping = true
 class Card {
 
     constructor(pos, texture, name, gltf) {
-        this.pos = pos
+        this.pos = pos //vector 3
         this.px = pos.x;
         this.py = pos.y;
         this.pz = pos.z;
-        this.gltf = gltf.clone(true);
-        this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture })
-        this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
+        this.gltf = gltf.clone(true); //clone the gltf which is the card
+        this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture }) //setting back texture 
+        this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })//setting front texture 
         // this.gltf.children[0].children[2].material = new THREE.MeshBasicMaterial({ color: "#000000"}) //side
-        this.name = name;
-        for (let i = 0; i < this.gltf.children[0].children.length; i++) {
-            this.gltf.children[0].children[i].name = name
-        }
-        this.uuid = this.gltf.uuid
+        this.name = name; //name which define pairs
+        this.uuid = this.gltf.uuid //get the uuid of the shape for convenience
     }
 
     show() {
-        scene.add(this.gltf)
+        scene.add(this.gltf)//add gltf to the scene
     }
 
 
     setPlace(x, y, z) {
-        this.px = x;
+        this.px = x;//TODO function to set px from the vector
         this.py = y;
         this.pz = z;
         this.pos.x = x
@@ -102,7 +99,7 @@ class Card {
         const clock = new THREE.Clock();
 
         const actualRotate = () => {
-
+            //TODO use quaternion (and see why does it break)
             const elapsedTime = clock.getElapsedTime();
             this.gltf.rotation.y = 10 * elapsedTime * coef + start;
 
@@ -127,11 +124,6 @@ class Card {
     }
 
     moveTo(from, to, time = 1) {
-
-        // if (from.equals(to)) {
-        //     return
-        // }
-
         const clock = new THREE.Clock();
 
         const actualMouveTo = () => {
@@ -144,7 +136,6 @@ class Card {
             if (elapsedTime < time + .1) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
-                // this.gltf.position.set(to.x, to.y, to.z);
                 this.setPlace(to.x, to.y, to.z)
             }
             renderer.render(scene, camera);
@@ -173,19 +164,19 @@ class Game {
 
     CreateCard() {
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
-            this.getImage(gltf)
+            this.getImage(gltf)//doawnload gltf of the card and passing it to constructor. it's kinda ugly but...
         }, (progess) => {
 
         }, (error) => {
-            this.CreateCard()
+            this.CreateCard()//recall on error
         })
     }
 
     getImage(gltf) {
         axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
-            const data = response.data;
+            const data = response.data;//getting image urls
             for (let i = 0; i < data.length; i++) {
-                this.downloadTexture(data[i].download_url, gltf.scene)
+                this.downloadTexture(data[i].download_url, gltf.scene)//TODO allow user to enter url(s)
             }
         }).catch((err) => {
             this.getImage(gltf)
@@ -195,15 +186,15 @@ class Game {
     async downloadTexture(URL, gltf) {
         loader.loadAsync(URL).then((rep) => {
             for (let i = 0; i < 2; i++) {
-                this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf))
+                this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf))//creating card
             }
             if (this.allCard.length == this.numberCard * 2) {
-                this.shuffleArray(this.allCard);
+                this.shuffleArray(this.allCard);//kinda ugly again but it work so...
                 this.placeCard();
             }
         }).catch((err) => {
             console.log(err);
-            this.downloadTexture(URL, gltf);
+            this.downloadTexture(URL, gltf);//recall on error
         })
     }
 
@@ -233,7 +224,7 @@ class Game {
     }
 
     //actual game
-
+    //still nothing
 }
 
 
@@ -309,10 +300,11 @@ const moveDown = (i = 0) => {
     game.allCard[haveMove[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .5)
 }
 
-const onMouseOver = async () => {
+const onMouseOver = () => {
     const intersects = pickCard();
     if (intersects.length == 1) {
         for (let i = 0; i < game.allCard.length; i++) {
+            //getting index of the card under the mouse in allCard and moving it up and moving the older card down
             if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
                 if (!haveMove.includes(i, 0)) {
                     if (haveMove.length > 0) {
@@ -325,6 +317,7 @@ const onMouseOver = async () => {
             }
         }
     } else if (haveMove.length > 0) {
+        //moving the older card down
         moveDown()
         haveMove = []
     }
