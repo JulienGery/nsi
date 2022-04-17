@@ -13,7 +13,8 @@ const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const dim = new THREE.Vector3(1, 1, .001);
-const nb_card = parseInt(prompt("nombre de pair"));
+const gui = new dat.GUI();
+const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -52,13 +53,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 20
-scene.add(camera)
 
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
+scene.add(camera)
 
 
 
@@ -68,30 +64,21 @@ controls.enableDamping = true
 class Card {
 
     constructor(pos, texture, name, gltf) {
-        this.pos = pos
-        this.px = pos.x;
-        this.py = pos.y;
-        this.pz = pos.z;
-        this.gltf = gltf.clone(true);
-        this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture })
-        this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
+        this.pos = pos //vector 3
+        this.gltf = gltf.clone(true); //clone the gltf which is the card
+        this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture }) //setting back texture 
+        this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })//setting front texture 
         // this.gltf.children[0].children[2].material = new THREE.MeshBasicMaterial({ color: "#000000"}) //side
-        this.name = name;
-        for (let i = 0; i < this.gltf.children[0].children.length; i++) {
-            this.gltf.children[0].children[i].name = name
-        }
-        this.uuid = this.gltf.uuid
+        this.name = name; //name which define pairs
+        this.uuid = this.gltf.uuid //get the uuid of the shape for convenience
     }
 
     show() {
-        scene.add(this.gltf)
+        scene.add(this.gltf)//add gltf to the scene
     }
 
 
     setPlace(x, y, z) {
-        this.px = x;
-        this.py = y;
-        this.pz = z;
         this.pos.x = x
         this.pos.y = y
         this.pos.z = z
@@ -102,7 +89,7 @@ class Card {
         const clock = new THREE.Clock();
 
         const actualRotate = () => {
-
+            //TODO use quaternion (and see why does it break)
             const elapsedTime = clock.getElapsedTime();
             this.gltf.rotation.y = 10 * elapsedTime * coef + start;
 
@@ -127,11 +114,6 @@ class Card {
     }
 
     moveTo(from, to, time = 1) {
-
-        // if (from.equals(to)) {
-        //     return
-        // }
-
         const clock = new THREE.Clock();
 
         const actualMouveTo = () => {
@@ -144,7 +126,6 @@ class Card {
             if (elapsedTime < time + .1) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
-                // this.gltf.position.set(to.x, to.y, to.z);
                 this.setPlace(to.x, to.y, to.z)
             }
             renderer.render(scene, camera);
@@ -167,43 +148,46 @@ class Game {
         this.numberCard = numberCard;
         this.allCard = [];
         this.sqrtNumberCard = Math.floor(Math.sqrt(nb_card) * 2);
-        this.Xpos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
+        this.Ypos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
+        this.place = new THREE.Vector2((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2)
         this.CreateCard();
     }
 
     CreateCard() {
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
-            this.getImage(gltf)
+            this.getImage(gltf)//doawnload gltf of the card and passing it to constructor. it's kinda ugly but...
         }, (progess) => {
 
         }, (error) => {
-            this.CreateCard()
+            this.CreateCard()//recall on error
         })
     }
 
-    getImage(gltf) {
-        axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
-            const data = response.data;
+    async getImage(gltf) {
+        await axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
+            const data = response.data;//getting image urls
             for (let i = 0; i < data.length; i++) {
-                this.downloadTexture(data[i].download_url, gltf.scene)
+                this.downloadTexture(data[i].download_url, gltf.scene)//TODO allow user to enter url(s)
             }
         }).catch((err) => {
             this.getImage(gltf)
         })
+        
+
     }
 
     async downloadTexture(URL, gltf) {
         loader.loadAsync(URL).then((rep) => {
             for (let i = 0; i < 2; i++) {
-                this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf))
+                this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf))//creating card
             }
             if (this.allCard.length == this.numberCard * 2) {
-                this.shuffleArray(this.allCard);
+                this.shuffleArray(this.allCard);//kinda ugly again but it work so...
                 this.placeCard();
             }
         }).catch((err) => {
             console.log(err);
-            this.downloadTexture(URL, gltf);
+            this.downloadTexture(URL, gltf);//recall on error
         })
     }
 
@@ -218,33 +202,44 @@ class Game {
     }
 
     placeCard() {
-        const place = new THREE.Vector2(this.sqrtNumberCard * 2.3, this.Xpos)
 
         for (let i = 0; i < this.allCard.length; i++) {
-            this.allCard[i].setPlace(place.x, place.y, 0)
+            this.allCard[i].setPlace(this.place.x, this.place.y, 0)
             this.allCard[i].show()
         }
+    }
+
+    spread() {
+
 
         for (let i = 0; i < this.sqrtNumberCard; i++) {
-            for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
-                this.allCard[i * this.Xpos + j].moveTo(new THREE.Vector3(place.x, place.y, 0), new THREE.Vector3(i * 2.3, j * 3.7, 0));
+            for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard * 2; j++) {
+                this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0));
             }
         }
     }
 
     //actual game
+    //still nothing
 
 }
 
 
 const game = new Game(nb_card)
 
+camera.position.x = game.place.x
+camera.position.y = game.place.y
+camera.position.z = 20
+camera.lookAt(new THREE.Vector3(game.place.x, game.place.y, 0))
 let haveRotate = []
 
 function onPointerMove(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
 
+const ponterMoveAspread = (event) => {
+    onPointerMove(event)
     onMouseOver()
 }
 
@@ -309,10 +304,11 @@ const moveDown = (i = 0) => {
     game.allCard[haveMove[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .5)
 }
 
-const onMouseOver = async () => {
+const onMouseOver = () => {
     const intersects = pickCard();
     if (intersects.length == 1) {
         for (let i = 0; i < game.allCard.length; i++) {
+            //getting index of the card under the mouse in allCard and moving it up and moving the older card down
             if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
                 if (!haveMove.includes(i, 0)) {
                     if (haveMove.length > 0) {
@@ -325,10 +321,29 @@ const onMouseOver = async () => {
             }
         }
     } else if (haveMove.length > 0) {
+        //moving the older card down
         moveDown()
         haveMove = []
     }
 }
+
+
+const beforeSpread = (event) => {
+    game.spread()
+    window.removeEventListener('click', beforeSpread)
+    window.removeEventListener('pointermove', onPointerMove)
+
+    const addListner = () => {
+        const controls = new OrbitControls(camera, canvas)
+        // controls.enableDamping = true    
+        window.addEventListener('click', onMouseClick)
+        window.addEventListener('pointermove', ponterMoveAspread)
+    }
+    setTimeout(addListner, 1200);
+}
+
+window.addEventListener('click', beforeSpread);
+window.addEventListener('pointermove', onPointerMove);
 
 function tick() {
     stats.begin();
@@ -338,10 +353,5 @@ function tick() {
 
     window.requestAnimationFrame(tick);
 }
-
-
-window.addEventListener('click', onMouseClick);
-window.addEventListener('pointermove', onPointerMove);
-// window.addEventListener('click', test);
 
 tick()
