@@ -13,6 +13,7 @@ const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const dim = new THREE.Vector3(1, 1, .001);
+const gui = new dat.GUI();
 const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
@@ -52,26 +53,14 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 20
+
 scene.add(camera)
-
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
-
-
-
-
 
 
 class Card {
 
     constructor(pos, texture, name, gltf) {
         this.pos = pos //vector 3
-        this.px = pos.x;
-        this.py = pos.y;
-        this.pz = pos.z;
         this.gltf = gltf.clone(true); //clone the gltf which is the card
         this.gltf.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture }) //setting back texture 
         this.gltf.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })//setting front texture 
@@ -85,14 +74,9 @@ class Card {
     }
 
 
-    setPlace(x, y, z) {
-        this.px = x;//TODO function to set px from the vector
-        this.py = y;
-        this.pz = z;
-        this.pos.x = x
-        this.pos.y = y
-        this.pos.z = z
-        this.gltf.position.set(x, y, z)
+    setPlace(vector) {
+        this.pos = vector
+        this.gltf.position.set(vector.x, vector.y, vector.z)
     }
 
     rotate(start, end, coef) {
@@ -110,35 +94,30 @@ class Card {
                 window.requestAnimationFrame(actualRotate)
             }
             else {
-
-                // console.log(elapsedTime)
                 // this.card.setRotationFromQuaternion(end)
-
                 this.gltf.rotation.y = end;
             }
-            renderer.render(scene, camera);
         }
 
         window.requestAnimationFrame(actualRotate);
 
     }
 
-    moveTo(from, to, time = 1) {
+    async moveTo(from, to, time = 1) {
+
         const clock = new THREE.Clock();
 
-        const actualMouveTo = () => {
+        const actualMouveTo = async () => {
             const elapsedTime = clock.getElapsedTime();
 
             const lerpPos = from.lerp(to, elapsedTime / (10 * time))
             // this.gltf.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
-            this.setPlace(lerpPos.x, lerpPos.y, lerpPos.z)
-
-            if (elapsedTime < time + .1) {
+            this.setPlace(lerpPos)
+            if (elapsedTime <= time+.02) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
-                this.setPlace(to.x, to.y, to.z)
+                this.setPlace(to)
             }
-            renderer.render(scene, camera);
         }
         window.requestAnimationFrame(actualMouveTo)
 
@@ -158,7 +137,8 @@ class Game {
         this.numberCard = numberCard;
         this.allCard = [];
         this.sqrtNumberCard = Math.floor(Math.sqrt(nb_card) * 2);
-        this.Xpos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
+        this.Ypos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
+        this.offSet = new THREE.Vector3((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2, 0)
         this.CreateCard();
     }
 
@@ -172,8 +152,8 @@ class Game {
         })
     }
 
-    getImage(gltf) {
-        axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
+    async getImage(gltf) {
+        await axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
             const data = response.data;//getting image urls
             for (let i = 0; i < data.length; i++) {
                 this.downloadTexture(data[i].download_url, gltf.scene)//TODO allow user to enter url(s)
@@ -181,6 +161,8 @@ class Game {
         }).catch((err) => {
             this.getImage(gltf)
         })
+
+
     }
 
     async downloadTexture(URL, gltf) {
@@ -189,12 +171,12 @@ class Game {
                 this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf))//creating card
             }
             if (this.allCard.length == this.numberCard * 2) {
-                this.shuffleArray(this.allCard);//kinda ugly again but it work so...
+                this.shuffleArray(this.allCard); //kinda ugly again but it work so...
                 this.placeCard();
             }
         }).catch((err) => {
             console.log(err);
-            this.downloadTexture(URL, gltf);//recall on error
+            this.downloadTexture(URL, gltf); //recall on error
         })
     }
 
@@ -209,33 +191,40 @@ class Game {
     }
 
     placeCard() {
-        const place = new THREE.Vector2(this.sqrtNumberCard * 2.3, this.Xpos)
-
         for (let i = 0; i < this.allCard.length; i++) {
-            this.allCard[i].setPlace(place.x, place.y, 0)
             this.allCard[i].show()
         }
+    }
 
+    spread() {
         for (let i = 0; i < this.sqrtNumberCard; i++) {
-            for (let j = 0; j < this.Xpos && i * this.Xpos + j < this.numberCard * 2; j++) {
-                this.allCard[i * this.Xpos + j].moveTo(new THREE.Vector3(place.x, place.y, 0), new THREE.Vector3(i * 2.3, j * 3.7, 0));
+            for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard * 2; j++) {
+                this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet));
             }
         }
     }
 
     //actual game
     //still nothing
+
 }
 
 
 const game = new Game(nb_card)
+
+camera.position.x = 0
+camera.position.y = 0
+camera.position.z = 20
 
 let haveRotate = []
 
 function onPointerMove(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
 
+const ponterMoveAspread = (event) => {
+    onPointerMove(event)
     onMouseOver()
 }
 
@@ -258,8 +247,8 @@ function onMouseClick(event) {
         if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
             for (let i = 0; i < haveRotate.length; i++) {
                 const PopingCard = game.allCard.splice(haveRotate[i], 1)[0];
-                if (haveMove.includes(haveRotate[i])) {
-                    haveMove = []
+                if (cardUnder.includes(haveRotate[i])) {
+                    cardUnder = []
                 }
                 PopingCard.remove();
             }
@@ -272,32 +261,45 @@ function onMouseClick(event) {
         haveRotate = [];
     }
 
-    const intersects = pickCard()
-
-    if (intersects.length == 1) {
-        for (let i = 0; i < game.allCard.length; i++) {
-            if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-                if (!haveRotate.includes(i, 0)) {
-                    game.allCard[i].rotate(0, Math.PI, 1);
-                    haveRotate.push(i);
-                    moveDown()
-                    break
-                }
-            }
+    if (cardUnder.length >= 1) {
+        const cardIndex = cardUnder[0]
+        if (!haveRotate.includes(cardIndex, 0)) {
+            game.allCard[cardIndex].rotate(0, Math.PI, 1);
+            haveRotate.push(cardIndex);
+            moveDown()
         }
     }
+
+
+    
+    // const intersects = pickCard()
+
+    // if (intersects.length == 1) {
+    //     for (let i = 0; i < game.allCard.length; i++) {
+    //         if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+    //             if (!haveRotate.includes(i, 0)) {
+    //                 game.allCard[i].rotate(0, Math.PI, 1);
+    //                 haveRotate.push(i);
+    //                 moveDown()
+    //                 break
+    //             }
+    //         }
+    //     }
+    // }
+
+
 }
 
-let haveMove = []
+let cardUnder = []
 
 const moveUp = (i) => {
     const pos = game.allCard[i].pos.clone()
-    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1.5), .5)
+    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
 }
 
 const moveDown = (i = 0) => {
-    const pos = game.allCard[haveMove[i]].pos.clone()
-    game.allCard[haveMove[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .5)
+    const pos = game.allCard[cardUnder[i]].pos.clone()
+    game.allCard[cardUnder[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
 }
 
 const onMouseOver = () => {
@@ -306,22 +308,40 @@ const onMouseOver = () => {
         for (let i = 0; i < game.allCard.length; i++) {
             //getting index of the card under the mouse in allCard and moving it up and moving the older card down
             if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-                if (!haveMove.includes(i, 0)) {
-                    if (haveMove.length > 0) {
+                if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
+                    if (cardUnder.length > 0) {
                         moveDown()
-                        haveMove = []
+                        cardUnder = []
                     }
-                    haveMove.push(i)
+                    cardUnder.push(i)
                     moveUp(i)
                 }
             }
         }
-    } else if (haveMove.length > 0) {
+    } else if (cardUnder.length > 0) {
         //moving the older card down
         moveDown()
-        haveMove = []
+        cardUnder = []
     }
 }
+
+
+const beforeSpread = (event) => {
+    game.spread()
+    window.removeEventListener('click', beforeSpread)
+    window.removeEventListener('pointermove', onPointerMove)
+
+    const addListner = () => {
+        const controls = new OrbitControls(camera, canvas)
+        // controls.enableDamping = true    
+        window.addEventListener('click', onMouseClick)
+        window.addEventListener('pointermove', ponterMoveAspread)
+    }
+    setTimeout(addListner, 1200);
+}
+
+window.addEventListener('click', beforeSpread);
+window.addEventListener('pointermove', onPointerMove);
 
 function tick() {
     stats.begin();
@@ -331,10 +351,5 @@ function tick() {
 
     window.requestAnimationFrame(tick);
 }
-
-
-window.addEventListener('click', onMouseClick);
-window.addEventListener('pointermove', onPointerMove);
-// window.addEventListener('click', test);
 
 tick()
