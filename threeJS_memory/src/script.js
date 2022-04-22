@@ -53,40 +53,48 @@ function randomUnitVector() {
     return vec;
 }
 
+const color = new THREE.Color();
+
 class explosion {
     constructor(x, y) {
+        this.clock = new THREE.Clock()
         this.x = x
-        this.y = y 
+        this.y = y
         this.speeds = []
         this.createGeometry()
-        this.points = new THREE.Points(this.geometry, new THREE.PointsMaterial({ color: 'red', size: .15 }))
+        this.points = new THREE.Points(this.geometry, new THREE.PointsMaterial({ vertexColors: true, size: .15 }))
         scene.add(this.points)
         this.position = this.geometry.attributes.position
     }
 
     createGeometry() {
         this.geometry = new THREE.BufferGeometry();
-        let vertices = []
+        const vertices = []
+        const colors = []
         for (let i = 0; i < nbObject; i++) {
+            color.setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            colors.push(color.r, color.g, color.b);
             const vec = randomUnitVector()
             vec.multiplyScalar(.1)
             vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
             this.speeds.push(Math.random())
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
+        this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
     }
 
     update() {
+        const elapsedTime = this.clock.getElapsedTime()
         for (let i = 0; i < nbObject; i++) {
             const speed = this.speeds[i]
-            const x = this.position.getX(i) 
-            const y = this.position.getY(i) 
+            const x = this.position.getX(i)
+            const y = this.position.getY(i)
             const z = this.position.getZ(i)
-            this.position.setXYZ(i, (x-this.x) * speed + x , (y-this.y) * speed + y , z * speed + z)
+            this.position.setXYZ(i, (x - this.x) * speed * elapsedTime + x, (y - this.y) * speed * elapsedTime + y, z * speed * elapsedTime + z)
         }
         this.position.needsUpdate = true;
     }
-    remove(){
+    remove() {
         scene.remove(this.points)
     }
 }
