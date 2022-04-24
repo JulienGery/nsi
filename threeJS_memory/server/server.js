@@ -22,7 +22,7 @@ io.on('connect', socket => {
         socket.join(room)
         if (!rooms[room]) {
             rooms[room] = {
-                "playerTurn": 0,
+                "playerTurn": 1,
                 "players": []
             }
         }
@@ -35,7 +35,6 @@ io.on('connect', socket => {
         })
 
         socket.to(room).emit('update-room', rooms[room])
-        // console.log(socket.rooms)
         // console.log(io.sockets.adapter.rooms.get(room))
         cb(rooms[room])
     })
@@ -47,19 +46,27 @@ io.on('connect', socket => {
                 console.log('turn card\t' + cardIndex)
                 socket.to(room).emit('turn-card', cardIndex);
                 break;
+
             case 'move-up':
                 console.log('moving-up\t' + cardIndex)
                 socket.to(room).emit('move-up', cardIndex);
                 break;
+
             case 'move-down':
                 console.log('moving down')
-                console.log(action)
                 socket.to(room).emit('move-down');
                 break;
+
             case 'pair-found':
                 //TODO add point
+                console.log('pair found\t'+cardIndex)
                 socket.to(room).emit('pair-found', cardIndex);
                 break;
+            case 'turnback-card':
+                console.log('turnback card\t'+cardIndex)
+                socket.to(room).emit('turnback-card', cardIndex)
+                break;
+
         }
     })
 
@@ -74,12 +81,10 @@ io.on('connect', socket => {
         rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
         const playerTurn = rooms[room].playerTurn
 
-        // console.log(rooms[room])
-        // console.log(rooms[room].players[playerTurn].socketID)
-
+        // console.log(rooms[room].players[playerTurn].name)
+        // console.log(playerTurn)
         socket.to(rooms[room].players[playerTurn].socketID).emit('next-player')
-        // console.log(io.socket.adapter.rooms.get(room))
-        // socket.to(io.socket.adapter.rooms.get(room))
+
     })
 
     socket.on('ready', (room, cb) => {
