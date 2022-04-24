@@ -7,8 +7,8 @@ import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const nombreParticules = 2000;
-const name = 'julien'
-const room = "xavier"
+const name = prompt('name')
+const room = prompt('room')
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
@@ -278,14 +278,17 @@ function onMouseClick(event) {
 
     if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
       for (let i = 0; i < haveRotate.length; i++) {
-        socket.emit('action', 'pair-found', i, room)
-        explosionAndCard(i)
+        socket.emit('action', 'pair-found', haveRotate[i], room)
+        explosionAndCard(haveRotate[i])
       }
     } else {
       for (let i = 0; i < haveRotate.length; i++) {
+        socket.emit('action', 'turnback-card', haveRotate[i], room)
         game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
       }
+
       removeListener()
+
       if (cardUnder.length > 0) {
         socket.emit('action', 'move-down', null, room)
         onMoveDown()
@@ -307,9 +310,9 @@ function onMouseClick(event) {
 }
 
 const explosionAndCard = (cardIndex) => {
-  const PopingCard = game.allCard.splice(haveRotate[cardIndex], 1)[0];
+  const PopingCard = game.allCard.splice(cardIndex, 1)[0];
   explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
-  if (cardUnder.includes(haveRotate[cardIndex])) {
+  if (cardUnder.includes(cardIndex)) {
     cardUnder = []
   }
   PopingCard.remove();
@@ -415,7 +418,10 @@ function tick() {
 
   window.requestAnimationFrame(tick);
 }
+
+
 socket.on('turnback-card', (cardIndex) => {
+  console.log(cardIndex)
   game.allCard[cardIndex].rotate(Math.PI, 0, -1)
   haveRotate = []
 })

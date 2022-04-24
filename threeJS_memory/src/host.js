@@ -1,29 +1,4 @@
-const name = prompt('name')
-const room = prompt("room")
-
-
 import { io } from 'socket.io-client'
-
-const socket = io("http://localhost:3000")
-
-socket.on('connect', () => {
-  console.log('success')
-  socket.emit('join-room', name, room, cb => {
-    console.log(cb)
-  })
-})
-
-socket.on('update-room', dict => {
-  console.log(dict)
-})
-
-
-
-// window.addEventListener("click", jsp)
-
-
-
-
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -32,6 +7,9 @@ import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 const axios = require('axios')
 
+const name = prompt('name')
+const room = prompt("room")
+const socket = io("http://localhost:3000")
 const nombreParticules = 2000;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
@@ -47,6 +25,17 @@ scene.background = new THREE.Color(0xffffff);
 
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
+
+socket.on('connect', () => {
+  console.log('success')
+  socket.emit('join-room', name, room, cb => {
+    console.log(cb)
+  })
+})
+
+socket.on('update-room', dict => {
+  console.log(dict)
+})
 
 stats.showPanel(0);
 document.body.appendChild(stats.dom);

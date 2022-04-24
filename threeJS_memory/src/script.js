@@ -7,8 +7,8 @@ import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const nombreParticules = 2000;
-const name = 'julien'
-const room = "xavier"
+const name = prompt('name')
+const room = prompt('room')
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
