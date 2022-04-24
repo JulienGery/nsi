@@ -165,8 +165,6 @@ class Game {
     this.allCard = [];
     this.sqrtNumberCard = Math.floor(Math.sqrt(this.numberCard) * 2);
     this.Ypos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
-    console.log('sqrtcards\t' + this.sqrtNumberCard)
-    console.log('Ypos\t' + this.Ypos)
     this.offSet = new THREE.Vector3((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2, 0)
     this.CreateCard();
   }
@@ -312,14 +310,16 @@ camera.position.y = 0
 camera.position.z = 20
 
 let haveRotate = []
+let cardUnder = []
+let explosion = []
 
-function onPointerMove(event) {
+function updateMouse(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 }
 
-const ponterMoveAspread = (event) => {
-  onPointerMove(event)
+const onMove = (event) => {
+  updateMouse(event)
   onMouseOver()
 }
 
@@ -339,20 +339,26 @@ function onMouseClick(event) {
     if (haveRotate[0] < haveRotate[1]) {
       haveRotate.reverse();
     }
+
     if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
       for (let i = 0; i < haveRotate.length; i++) {
-        const PopingCard = game.allCard.splice(haveRotate[i], 1)[0];
-        explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
-        if (cardUnder.includes(haveRotate[i])) {
-          cardUnder = []
-        }
-        PopingCard.remove();
+        socket.emit('action', 'pair-found', haveRotate[i], room)
+        explosionAndCard(haveRotate[i])
       }
-    }
-    else {
+    } else {
       for (let i = 0; i < haveRotate.length; i++) {
+        socket.emit('action', 'turnback-card', haveRotate[i], room)
         game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
       }
+
+      removeListener()
+
+      if (cardUnder.length > 0) {
+        socket.emit('action', 'move-down', null, room)
+        onMoveDown()
+      }
+      socket.emit('next-player', room)
+      return
     }
     haveRotate = [];
   }
@@ -360,34 +366,27 @@ function onMouseClick(event) {
   if (cardUnder.length >= 1) {
     const cardIndex = cardUnder[0]
     if (!haveRotate.includes(cardIndex, 0)) {
-      game.allCard[cardIndex].rotate(0, Math.PI, 1);
-      haveRotate.push(cardIndex);
-      moveDown()
+      socket.emit('action', 'turn-card', cardIndex, room)
+      turnCard(cardIndex)
     }
   }
 
-
-
-  // const intersects = pickCard()
-
-  // if (intersects.length == 1) {
-  //     for (let i = 0; i < game.allCard.length; i++) {
-  //         if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-  //             if (!haveRotate.includes(i, 0)) {
-  //                 game.allCard[i].rotate(0, Math.PI, 1);
-  //                 haveRotate.push(i);
-  //                 moveDown()
-  //                 break
-  //             }
-  //         }
-  //     }
-  // }
-
-
 }
 
-let cardUnder = []
-let explosion = []
+const explosionAndCard = (cardIndex) => {
+  const PopingCard = game.allCard.splice(cardIndex, 1)[0];
+  explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
+  if (cardUnder.includes(cardIndex)) {
+    cardUnder = []
+  }
+  PopingCard.remove();
+}
+
+const turnCard = (cardIndex) => {
+  game.allCard[cardIndex].rotate(0, Math.PI, 1);
+  haveRotate.push(cardIndex);
+  moveDown()
+}
 
 const moveUp = (i) => {
   const pos = game.allCard[i].pos.clone()
@@ -407,54 +406,80 @@ const onMouseOver = () => {
       if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
         if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
           if (cardUnder.length > 0) {
-            moveDown()
-            cardUnder = []
+            socket.emit('action', 'move-down', null, room)
+            onMoveDown()
           }
-          socket.emit('move-up', i, room)
-          cardUnder.push(i)
-          moveUp(i)
+          socket.emit('action', 'move-up', i, room)
+          onMoveUp(i)
         }
+
+        break
       }
     }
   } else if (cardUnder.length > 0) {
+    socket.emit('action', 'move-down', null, room)
     //moving the older card down
-    moveDown()
-    cardUnder = []
+    onMoveDown()
   }
+}
+
+const onMoveDown = () => {
+  moveDown()
+  cardUnder = []
+}
+
+const onMoveUp = (cardIndex) => {
+  moveUp(cardIndex)
+  cardUnder.push(cardIndex)
 }
 
 
 const beforeSpread = (event) => {
   socket.emit('ready', room, cb => {
-    if(cb){
+    if (cb) {
       gameStart()
     }
   })
 }
 
-const gameStart = () => {
-  console.log('game start')
-  game.spread()
-  window.removeEventListener('click', beforeSpread)
-  window.removeEventListener('pointermove', onPointerMove)
 
-  const addListner = () => {
-    const controls = new OrbitControls(camera, canvas)
-    // controls.enableDamping = true    
-    window.addEventListener('click', onMouseClick)
-    window.addEventListener('pointermove', ponterMoveAspread)
-  }
-  setTimeout(addListner, 1200);
+const addListener = () => {
+  console.log('my turn')
+  window.addEventListener('click', onMouseClick)
+  window.addEventListener('pointermove', onMove)
+
 }
 
-socket.on('start-game', () => {
-  gameStart()
-})
+const removeListener = () => {
+  window.removeEventListener('click', onMouseClick)
+  window.removeEventListener('pointermove', onMove)
+}
+
+const gameStart = () => {
+
+  game.spread()
+
+  window.removeEventListener('click', beforeSpread)
+  window.removeEventListener('pointermove', updateMouse)
+
+  setTimeout(() => {
+    addListener();
+    startControls();
+  }, 1200);
+
+}
+
+const startControls = () => {
+  const controls = new OrbitControls(camera, canvas)
+  // controls.enableDamping = true
+}
+
 
 window.addEventListener('click', beforeSpread);
-window.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointermove', updateMouse);
 
 function tick() {
+
   stats.begin();
 
   for (let i = 0; i < explosion.length; i++) {
@@ -466,5 +491,17 @@ function tick() {
 
   window.requestAnimationFrame(tick);
 }
+
+socket.on('move-down', () => onMoveDown())
+socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
+socket.on('pair-found', cardIndex => explosionAndCard(cardIndex))
+socket.on('move-up', (cardIndex) => onMoveUp(cardIndex))
+socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
+socket.on('next-player', () => addListener())
+socket.on('start-game', () => gameStart())
+socket.on('turnback-card', (cardIndex) => {
+  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
+  haveRotate = []
+})
 
 tick()

@@ -1,10 +1,4 @@
-const name = 'julien'
-const room = "xavier"
 import { io } from 'socket.io-client'
-
-const socket = io("http://localhost:3000")
-
-
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -13,6 +7,8 @@ import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const nombreParticules = 2000;
+const name = 'julien'
+const room = "xavier"
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
@@ -23,6 +19,7 @@ const gui = new dat.GUI();
 const stats = new Stats();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
+const socket = io("http://localhost:3000")
 
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
@@ -140,8 +137,55 @@ class Card {
 
 }
 
+function randomUnitVector() {
+  const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+  return vec;
+}
 
+class Explosion {
+  constructor(x, y) {
+    this.clock = new THREE.Clock()
+    this.x = x
+    this.y = y
+    this.speeds = []
+    this.createGeometry()
+    this.points = new THREE.Points(this.geometry, new THREE.PointsMaterial({ vertexColors: true, size: .15 }))
+    scene.add(this.points)
+    this.position = this.geometry.attributes.position
+  }
 
+  createGeometry() {
+    this.geometry = new THREE.BufferGeometry();
+    const vertices = []
+    const color = new THREE.Color()
+    const colors = []
+    for (let i = 0; i < nombreParticules; i++) {
+      color.setHSL(1, Math.random(), Math.random() * 2);
+      colors.push(color.r, color.g, color.b);
+      const vec = randomUnitVector()
+      vec.multiplyScalar(.1)
+      vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
+      this.speeds.push(Math.random())
+    }
+    this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
+    this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+  }
+
+  async update() {
+    const elapsedTime = this.clock.getElapsedTime()
+    for (let i = 0; i < nombreParticules; i++) {
+      const speed = this.speeds[i]
+      const x = this.position.getX(i)
+      const y = this.position.getY(i)
+      const z = this.position.getZ(i)
+      this.position.setXYZ(i, (x - this.x) * speed * elapsedTime + x, (y - this.y) * speed * elapsedTime + y, z * speed * elapsedTime + z)
+    }
+    this.position.needsUpdate = true;
+  }
+  remove() {
+    scene.remove(this.points)
+  }
+}
 
 class Game {
 
@@ -163,23 +207,20 @@ class Game {
       }
     }, (progess) => {
     }, (error) => {
-      this.CreateCard()//recall on error
+      this.CreateCard(cards)//recall on error
     })
   }
 
   async downloadTexture(URL, name, index, gltf) {
     loader.loadAsync(URL).then((rep) => {
-
       this.allCard[index] = new Card(new THREE.Vector3(0, 0, 0), rep, name, gltf, URL)//creating card
-
-      if (this.allCard.length == this.numberCard && !this.allCard.includes(0, 0)) {
-        console.log(this.allCard)
+      if (!this.allCard.includes(undefined)) {
         //kinda ugly again but it work so...
         this.placeCard();
       }
     }).catch((err) => {
       console.log(err);
-      this.downloadTexture(URL, gltf); //recall on error
+      //this.downloadTexture(URL, gltf); //recall on error
     })
   }
 
@@ -199,164 +240,208 @@ class Game {
 
 }
 
-socket.on('connect', () => {
-  console.log('success')
-  socket.emit('join-room', name, room, cb => {
-    console.log(cb)
+camera.position.x = 0
+camera.position.y = 0
+camera.position.z = 20
+
+let haveRotate = []
+let cardUnder = []
+let explosion = []
+let game = 0
+
+function updateMouse(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
+
+const onMove = (event) => {
+  updateMouse(event)
+  onMouseOver()
+}
+
+function pickCard() {
+
+  raycaster.setFromCamera(mouse, camera);
+  return raycaster.intersectObjects(scene.children, true);
+
+}
+
+function onMouseClick(event) {
+
+  // const qFront = new THREE.Quaternion(0, 0, 0, 1);
+  // const qBack = new THREE.Quaternion(0, 1, 0, 0);
+
+  if (haveRotate.length == 2) {
+    if (haveRotate[0] < haveRotate[1]) {
+      haveRotate.reverse();
+    }
+
+    if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
+      for (let i = 0; i < haveRotate.length; i++) {
+        socket.emit('action', 'pair-found', i, room)
+        explosionAndCard(i)
+      }
+    } else {
+      for (let i = 0; i < haveRotate.length; i++) {
+        game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
+      }
+      removeListener()
+      if (cardUnder.length > 0) {
+        socket.emit('action', 'move-down', null, room)
+        onMoveDown()
+      }
+      socket.emit('next-player', room)
+      return
+    }
+    haveRotate = [];
+  }
+
+  if (cardUnder.length >= 1) {
+    const cardIndex = cardUnder[0]
+    if (!haveRotate.includes(cardIndex, 0)) {
+      socket.emit('action', 'turn-card', cardIndex, room)
+      turnCard(cardIndex)
+    }
+  }
+
+}
+
+const explosionAndCard = (cardIndex) => {
+  const PopingCard = game.allCard.splice(haveRotate[cardIndex], 1)[0];
+  explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
+  if (cardUnder.includes(haveRotate[cardIndex])) {
+    cardUnder = []
+  }
+  PopingCard.remove();
+}
+
+const turnCard = (cardIndex) => {
+  game.allCard[cardIndex].rotate(0, Math.PI, 1);
+  haveRotate.push(cardIndex);
+  moveDown()
+}
+
+const moveUp = (i) => {
+  const pos = game.allCard[i].pos.clone()
+  game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
+}
+
+const moveDown = (i = 0) => {
+  const pos = game.allCard[cardUnder[i]].pos.clone()
+  game.allCard[cardUnder[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
+}
+
+const onMouseOver = () => {
+  const intersects = pickCard();
+  if (intersects.length == 1) {
+    for (let i = 0; i < game.allCard.length; i++) {
+      //getting index of the card under the mouse in allCard and moving it up and moving the older card down
+      if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+        if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
+          if (cardUnder.length > 0) {
+            socket.emit('action', 'move-down', null, room)
+            onMoveDown()
+          }
+          socket.emit('action', 'move-up', i, room)
+          onMoveUp(i)
+        }
+
+        break
+      }
+    }
+  } else if (cardUnder.length > 0) {
+    socket.emit('action', 'move-down', null, room)
+    //moving the older card down
+    onMoveDown()
+  }
+}
+
+const onMoveDown = () => {
+  moveDown()
+  cardUnder = []
+}
+
+const beforeSpread = (event) => {
+  socket.emit('ready', room, cb => {
+    if (cb) {
+      gameStart()
+    }
   })
-})
+}
 
-socket.on('update-room', dict => {
-  console.log(dict)
-})
 
+const addListener = () => {
+  window.addEventListener('click', onMouseClick)
+  window.addEventListener('pointermove', onMove)
+
+}
+
+const removeListener = () => {
+  window.removeEventListener('click', onMouseClick)
+  window.removeEventListener('pointermove', onMove)
+}
+
+
+
+const gameStart = () => {
+
+  game.spread()
+
+  window.removeEventListener('click', beforeSpread)
+  window.removeEventListener('pointermove', updateMouse)
+
+  setTimeout(() => {
+    // addListener();
+    startControls();
+  }, 1200);
+
+}
+
+const startControls = () => {
+  const controls = new OrbitControls(camera, canvas)
+  // controls.enableDamping = true
+}
 
 function tick() {
+
   stats.begin();
 
-  // for (let i = 0; i < explosion.length; i++) {
-  //   explosion[i].update()
-  // }
+  for (let i = 0; i < explosion.length; i++) {
+    explosion[i].update()
+  }
 
   renderer.render(scene, camera);
   stats.end();
 
   window.requestAnimationFrame(tick);
 }
+socket.on('turnback-card', (cardIndex) => {
+  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
+  haveRotate = []
+})
+socket.on('next-player', () => addListener())
+socket.on('start-game', () => gameStart())
+socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
+socket.on('pair-found', cardIndex => explosionAndCard(cardIndex))
+socket.on('receive-cards', (cards) => {
+  game = new Game(cards);
+  window.addEventListener('click', beforeSpread);
+  window.addEventListener('pointermove', updateMouse);
+})
+socket.on('connect', () => {
+  console.log('success')
+  socket.emit('join-room', name, room, cb => {
+    console.log(cb)
+  })
+})
+socket.on('update-room', dict => {
+  console.log(dict)
+})
+socket.on('move-down', () => onMoveDown())
+const onMoveUp = (cardIndex) => {
+  moveUp(cardIndex)
+  cardUnder.push(cardIndex)
+}
+socket.on('move-up', (cardIndex) => onMoveUp(cardIndex))
 
 tick()
-
-socket.on('receive-cards', cards => {
-
-  //   console.log(cards)
-  const game = new Game(cards)
-
-
-  function onPointerMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-  }
-
-  const ponterMoveAspread = (event) => {
-    onPointerMove(event)
-    onMouseOver()
-  }
-
-  function pickCard() {
-
-    raycaster.setFromCamera(mouse, camera);
-    return raycaster.intersectObjects(scene.children, true);
-
-  }
-
-  function onMouseClick(event) {
-
-    // const qFront = new THREE.Quaternion(0, 0, 0, 1);
-    // const qBack = new THREE.Quaternion(0, 1, 0, 0);
-
-    if (haveRotate.length == 2) {
-      if (haveRotate[0] < haveRotate[1]) {
-        haveRotate.reverse();
-      }
-      if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
-        for (let i = 0; i < haveRotate.length; i++) {
-          const PopingCard = game.allCard.splice(haveRotate[i], 1)[0];
-          explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
-          if (cardUnder.includes(haveRotate[i])) {
-            cardUnder = []
-          }
-          PopingCard.remove();
-        }
-      }
-      else {
-        for (let i = 0; i < haveRotate.length; i++) {
-          game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
-        }
-      }
-      haveRotate = [];
-    }
-
-    if (cardUnder.length >= 1) {
-      const cardIndex = cardUnder[0]
-      if (!haveRotate.includes(cardIndex, 0)) {
-        game.allCard[cardIndex].rotate(0, Math.PI, 1);
-        haveRotate.push(cardIndex);
-        moveDown()
-      }
-    }
-
-
-
-    // const intersects = pickCard()
-
-    // if (intersects.length == 1) {
-    //     for (let i = 0; i < game.allCard.length; i++) {
-    //         if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-    //             if (!haveRotate.includes(i, 0)) {
-    //                 game.allCard[i].rotate(0, Math.PI, 1);
-    //                 haveRotate.push(i);
-    //                 moveDown()
-    //                 break
-    //             }
-    //         }
-    //     }
-    // }
-
-
-  }
-
-  let cardUnder = []
-  let explosion = []
-
-  const moveUp = (i) => {
-    const pos = game.allCard[i].pos.clone()
-    game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
-  }
-
-  const moveDown = (i = 0) => {
-    const pos = game.allCard[cardUnder[i]].pos.clone()
-    game.allCard[cardUnder[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
-  }
-
-  const onMouseOver = () => {
-    const intersects = pickCard();
-    if (intersects.length == 1) {
-      for (let i = 0; i < game.allCard.length; i++) {
-        //getting index of the card under the mouse in allCard and moving it up and moving the older card down
-        if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-          if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
-            if (cardUnder.length > 0) {
-              moveDown()
-              cardUnder = []
-            }
-            socket.emit('move-up', i, room)
-            cardUnder.push(i)
-            moveUp(i)
-          }
-        }
-      }
-    } else if (cardUnder.length > 0) {
-      //moving the older card down
-      moveDown()
-      cardUnder = []
-    }
-  }
-
-
-  const beforeSpread = (event) => {
-    game.spread()
-    window.removeEventListener('click', beforeSpread)
-    window.removeEventListener('pointermove', onPointerMove)
-
-    const addListner = () => {
-      const controls = new OrbitControls(camera, canvas)
-      // controls.enableDamping = true    
-      window.addEventListener('click', onMouseClick)
-      window.addEventListener('pointermove', ponterMoveAspread)
-    }
-    setTimeout(addListner, 1200);
-  }
-
-  window.addEventListener('click', beforeSpread);
-  window.addEventListener('pointermove', onPointerMove);
-})
