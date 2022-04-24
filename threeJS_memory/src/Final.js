@@ -6,6 +6,7 @@ import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 const axios = require('axios')
 
+const nombreParticules = 2000;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
@@ -209,7 +210,14 @@ class Game {
 
 }
 
-class explosion {
+
+function randomUnitVector() {
+    const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+    return vec;
+}
+
+
+class Explosion {
     constructor(x, y) {
         this.clock = new THREE.Clock()
         this.x = x
@@ -224,8 +232,9 @@ class explosion {
     createGeometry() {
         this.geometry = new THREE.BufferGeometry();
         const vertices = []
+        const color = new THREE.Color()
         const colors = []
-        for (let i = 0; i < nbObject; i++) {
+        for (let i = 0; i < nombreParticules; i++) {
             color.setHSL(1, Math.random(), Math.random()*2);
             colors.push(color.r, color.g, color.b);
             const vec = randomUnitVector()
@@ -237,9 +246,9 @@ class explosion {
         this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
     }
 
-    update() {
+    async update() {
         const elapsedTime = this.clock.getElapsedTime()
-        for (let i = 0; i < nbObject; i++) {
+        for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
             const x = this.position.getX(i)
             const y = this.position.getY(i)
@@ -291,6 +300,7 @@ function onMouseClick(event) {
         if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
             for (let i = 0; i < haveRotate.length; i++) {
                 const PopingCard = game.allCard.splice(haveRotate[i], 1)[0];
+                explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
                 if (cardUnder.includes(haveRotate[i])) {
                     cardUnder = []
                 }
@@ -335,6 +345,7 @@ function onMouseClick(event) {
 }
 
 let cardUnder = []
+let explosion = []
 
 const moveUp = (i) => {
     const pos = game.allCard[i].pos.clone()
@@ -389,6 +400,10 @@ window.addEventListener('pointermove', onPointerMove);
 
 function tick() {
     stats.begin();
+
+    for(let i = 0; i<explosion.length; i++){
+        explosion[i].update()
+    }
 
     renderer.render(scene, camera);
     stats.end();
