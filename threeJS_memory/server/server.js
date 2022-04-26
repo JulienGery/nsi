@@ -6,7 +6,6 @@ const io = require("socket.io")(3000, {
     }
 })
 
-
 const arePlayerReady = (room) => {
     const players = rooms[room].players
     for (let i = 0; i < players.length; i++) {
@@ -54,7 +53,7 @@ io.on('connect', socket => {
 
             case 'move-down':
                 console.log('moving down')
-                socket.to(room).emit('move-down');
+                socket.to(room).emit('move-down', cardIndex);
                 break;
 
             case 'pair-found':
