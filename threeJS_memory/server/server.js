@@ -88,6 +88,7 @@ io.on('connect', socket => {
     })
 
     socket.on('ready', (room, cb) => {
+        console.log('ready')
         const players = rooms[room].players
         for (let i = 0; i < players.length; i++) {
             if (players[i].socketID == socket.id) {

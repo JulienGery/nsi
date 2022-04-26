@@ -5,10 +5,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+const axios = require('axios')
 
-const nombreParticules = 2000;
 const name = prompt('name')
-const room = prompt('room')
+const room = prompt("room")
+const socket = io("http://localhost:3000")
+const nombreParticules = 2000;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
@@ -16,10 +18,10 @@ const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const gui = new dat.GUI();
+const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
-const socket = io("http://localhost:3000")
 
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
@@ -56,11 +58,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 
-camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 20
-
 scene.add(camera)
+
 
 class Card {
 
@@ -132,7 +131,6 @@ class Card {
 
   remove() {
     scene.remove(this.card);
-
   }
 
 }
@@ -141,6 +139,7 @@ function randomUnitVector() {
   const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
   return vec;
 }
+
 
 class Explosion {
   constructor(x, y) {
@@ -187,41 +186,78 @@ class Explosion {
   }
 }
 
+
 class Game {
 
-  constructor(cards) {
-
-    this.numberCard = cards.length;
-    this.allCard = [].fill(0, 0, this.numberCard);
-    this.sqrtNumberCard = Math.floor(Math.sqrt(this.numberCard / 2) * 2);
-    this.Ypos = Math.ceil(this.numberCard / this.sqrtNumberCard);
+  constructor(numberCard) {
+    this.numberCard = numberCard;
+    this.allCard = [];
+    this.sqrtNumberCard = Math.floor(Math.sqrt(this.numberCard) * 2);
+    this.Ypos = Math.ceil(this.numberCard * 2 / this.sqrtNumberCard);
     this.offSet = new THREE.Vector3((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2, 0)
-    this.CreateCard(cards);
-
+    this.CreateCard();
   }
 
-  CreateCard(cards) {
+  CreateCard() {
     gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
-      for (let i = 0; i < cards.length; i++) {
-        this.downloadTexture(cards[i].textureURL, cards[i].name, i, gltf.scene)//doawnload gltf of the card and passing it to constructor. it's kinda ugly but...
-      }
+      this.getImage(gltf)//doawnload gltf of the card and passing it to constructor. it's kinda ugly but...
     }, (progess) => {
+
     }, (error) => {
-      this.CreateCard(cards)//recall on error
+      this.CreateCard()//recall on error
     })
   }
 
-  async downloadTexture(URL, name, index, gltf) {
+  async getImage(gltf) {
+    await axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / this.numberCard) + "&limit=" + nb_card).then((response) => {
+      const data = response.data;//getting image urls
+      // socket.emit('send-cards', data)
+      for (let i = 0; i < data.length; i++) {
+        this.downloadTexture(data[i].download_url, gltf.scene)//TODO allow user to enter url(s)
+      }
+    }).catch((err) => {
+      this.getImage(gltf)
+    })
+
+
+  }
+
+  async downloadTexture(URL, gltf) {
     loader.loadAsync(URL).then((rep) => {
-      this.allCard[index] = new Card(new THREE.Vector3(0, 0, 0), rep, name, gltf, URL)//creating card
-      if (!this.allCard.includes(undefined)) {
-        //kinda ugly again but it work so...
+      for (let i = 0; i < 2; i++) {
+        this.allCard.push(new Card(new THREE.Vector3(0, 0, 0), rep, this.allCard.length - i, gltf, URL))//creating card
+      }
+      if (this.allCard.length == this.numberCard * 2) {
+        this.shuffleArray(this.allCard); //kinda ugly again but it work so...
+        this.sendCards();
         this.placeCard();
       }
     }).catch((err) => {
       console.log(err);
-      //this.downloadTexture(URL, gltf); //recall on error
+      this.downloadTexture(URL, gltf); //recall on error
     })
+  }
+
+
+  shuffleArray() {
+    for (let i = this.allCard.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = this.allCard[i];
+      this.allCard[i] = this.allCard[j];
+      this.allCard[j] = temp;
+    }
+  }
+
+  async sendCards() {
+    let cards = []
+    for (let i = 0; i < this.allCard.length; i++) {
+      cards.push({
+        "name": this.allCard[i].name,
+        "textureURL": this.allCard[i].textureURL,
+      })
+    }
+    socket.emit('send-cards', cards, room)
+    cards = []
   }
 
   placeCard() {
@@ -232,13 +268,18 @@ class Game {
 
   spread() {
     for (let i = 0; i < this.sqrtNumberCard; i++) {
-      for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard; j++) {
+      for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard * 2; j++) {
         this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet));
       }
     }
   }
 
+  //actual game
+  //still nothing
+
 }
+
+const game = new Game(nb_card)
 
 camera.position.x = 0
 camera.position.y = 0
@@ -247,7 +288,6 @@ camera.position.z = 20
 let haveRotate = []
 let cardUnder = []
 let explosion = []
-let game = 0
 
 function updateMouse(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -262,7 +302,7 @@ const onMove = (event) => {
 function pickCard() {
 
   raycaster.setFromCamera(mouse, camera);
-  return raycaster.intersectObjects(scene.children, true);
+  return raycaster.intersectObjects([...Array(game.allCard.length).keys()].map(i => scene.children[i+2]), true);
 
 }
 
@@ -279,7 +319,10 @@ function onMouseClick(event) {
     if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
       for (let i = 0; i < haveRotate.length; i++) {
         socket.emit('action', 'pair-found', haveRotate[i], room)
-        explosionAndCard(haveRotate[i])
+        pairFound(haveRotate[i])
+        if(haveRotate[i] < cardUnder[0]){
+          cardUnder[0]--;
+        }
       }
     } else {
       for (let i = 0; i < haveRotate.length; i++) {
@@ -294,22 +337,26 @@ function onMouseClick(event) {
         onMoveDown()
       }
       socket.emit('next-player', room)
+      haveRotate = [];
       return
     }
+    // onMouseOver();
     haveRotate = [];
+    // return
   }
 
   if (cardUnder.length >= 1) {
     const cardIndex = cardUnder[0]
     if (!haveRotate.includes(cardIndex, 0)) {
       socket.emit('action', 'turn-card', cardIndex, room)
+      console.log('turning card'+cardIndex)
       turnCard(cardIndex)
     }
   }
 
 }
 
-const explosionAndCard = (cardIndex) => {
+const pairFound = (cardIndex) => {
   const PopingCard = game.allCard.splice(cardIndex, 1)[0];
   explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
   if (cardUnder.includes(cardIndex)) {
@@ -321,7 +368,7 @@ const explosionAndCard = (cardIndex) => {
 const turnCard = (cardIndex) => {
   game.allCard[cardIndex].rotate(0, Math.PI, 1);
   haveRotate.push(cardIndex);
-  moveDown()
+  moveDown(cardIndex)
 }
 
 const moveUp = (i) => {
@@ -329,9 +376,9 @@ const moveUp = (i) => {
   game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
 }
 
-const moveDown = (i = 0) => {
-  const pos = game.allCard[cardUnder[i]].pos.clone()
-  game.allCard[cardUnder[i]].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
+const moveDown = (cardIndex) => {
+  const pos = game.allCard[cardIndex].pos.clone()
+  game.allCard[cardIndex].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
 }
 
 const onMouseOver = () => {
@@ -360,9 +407,15 @@ const onMouseOver = () => {
 }
 
 const onMoveDown = () => {
-  moveDown()
-  cardUnder = []
+  const cardIndex = cardUnder.pop()
+  moveDown(cardIndex)
 }
+
+const onMoveUp = (cardIndex) => {
+  moveUp(cardIndex)
+  cardUnder.push(cardIndex)
+}
+
 
 const beforeSpread = (event) => {
   socket.emit('ready', room, cb => {
@@ -374,6 +427,7 @@ const beforeSpread = (event) => {
 
 
 const addListener = () => {
+  console.log('my turn')
   window.addEventListener('click', onMouseClick)
   window.addEventListener('pointermove', onMove)
 
@@ -384,8 +438,6 @@ const removeListener = () => {
   window.removeEventListener('pointermove', onMove)
 }
 
-
-
 const gameStart = () => {
 
   game.spread()
@@ -394,7 +446,7 @@ const gameStart = () => {
   window.removeEventListener('pointermove', updateMouse)
 
   setTimeout(() => {
-    // addListener();
+    addListener();
     startControls();
   }, 1200);
 
@@ -404,6 +456,10 @@ const startControls = () => {
   const controls = new OrbitControls(camera, canvas)
   // controls.enableDamping = true
 }
+
+
+window.addEventListener('click', beforeSpread);
+window.addEventListener('pointermove', updateMouse);
 
 function tick() {
 
@@ -419,35 +475,27 @@ function tick() {
   window.requestAnimationFrame(tick);
 }
 
-
-socket.on('turnback-card', (cardIndex) => {
-  console.log(cardIndex)
-  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
-  haveRotate = []
-})
-socket.on('next-player', () => addListener())
-socket.on('start-game', () => gameStart())
-socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
-socket.on('pair-found', cardIndex => explosionAndCard(cardIndex))
-socket.on('receive-cards', (cards) => {
-  game = new Game(cards);
-  window.addEventListener('click', beforeSpread);
-  window.addEventListener('pointermove', updateMouse);
-})
 socket.on('connect', () => {
   console.log('success')
   socket.emit('join-room', name, room, cb => {
     console.log(cb)
   })
 })
+
 socket.on('update-room', dict => {
   console.log(dict)
 })
+
 socket.on('move-down', () => onMoveDown())
-const onMoveUp = (cardIndex) => {
-  moveUp(cardIndex)
-  cardUnder.push(cardIndex)
-}
+socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
+socket.on('pair-found', cardIndex => pairFound(cardIndex))
 socket.on('move-up', (cardIndex) => onMoveUp(cardIndex))
+socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
+socket.on('next-player', () => addListener())
+socket.on('start-game', () => gameStart())
+socket.on('turnback-card', (cardIndex) => {
+  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
+  haveRotate = []
+})
 
 tick()

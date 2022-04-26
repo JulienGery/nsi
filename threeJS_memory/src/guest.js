@@ -56,10 +56,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 
-camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 20
-
 scene.add(camera)
 
 class Card {
@@ -244,10 +240,10 @@ camera.position.x = 0
 camera.position.y = 0
 camera.position.z = 20
 
+let game = 0
 let haveRotate = []
 let cardUnder = []
 let explosion = []
-let game = 0
 
 function updateMouse(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -279,7 +275,7 @@ function onMouseClick(event) {
     if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
       for (let i = 0; i < haveRotate.length; i++) {
         socket.emit('action', 'pair-found', haveRotate[i], room)
-        explosionAndCard(haveRotate[i])
+        pairFound(haveRotate[i])
       }
     } else {
       for (let i = 0; i < haveRotate.length; i++) {
@@ -309,7 +305,7 @@ function onMouseClick(event) {
 
 }
 
-const explosionAndCard = (cardIndex) => {
+const pairFound = (cardIndex) => {
   const PopingCard = game.allCard.splice(cardIndex, 1)[0];
   explosion.push(new Explosion(PopingCard.pos.x, PopingCard.pos.y))
   if (cardUnder.includes(cardIndex)) {
@@ -364,6 +360,12 @@ const onMoveDown = () => {
   cardUnder = []
 }
 
+const onMoveUp = (cardIndex) => {
+  moveUp(cardIndex)
+  cardUnder.push(cardIndex)
+}
+
+
 const beforeSpread = (event) => {
   socket.emit('ready', room, cb => {
     if (cb) {
@@ -374,6 +376,7 @@ const beforeSpread = (event) => {
 
 
 const addListener = () => {
+  console.log('my turn')
   window.addEventListener('click', onMouseClick)
   window.addEventListener('pointermove', onMove)
 
@@ -383,8 +386,6 @@ const removeListener = () => {
   window.removeEventListener('click', onMouseClick)
   window.removeEventListener('pointermove', onMove)
 }
-
-
 
 const gameStart = () => {
 
@@ -405,6 +406,10 @@ const startControls = () => {
   // controls.enableDamping = true
 }
 
+
+window.addEventListener('click', beforeSpread);
+window.addEventListener('pointermove', updateMouse);
+
 function tick() {
 
   stats.begin();
@@ -420,15 +425,6 @@ function tick() {
 }
 
 
-socket.on('turnback-card', (cardIndex) => {
-  console.log(cardIndex)
-  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
-  haveRotate = []
-})
-socket.on('next-player', () => addListener())
-socket.on('start-game', () => gameStart())
-socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
-socket.on('pair-found', cardIndex => explosionAndCard(cardIndex))
 socket.on('receive-cards', (cards) => {
   game = new Game(cards);
   window.addEventListener('click', beforeSpread);
@@ -440,14 +436,21 @@ socket.on('connect', () => {
     console.log(cb)
   })
 })
+
 socket.on('update-room', dict => {
   console.log(dict)
 })
+
 socket.on('move-down', () => onMoveDown())
-const onMoveUp = (cardIndex) => {
-  moveUp(cardIndex)
-  cardUnder.push(cardIndex)
-}
-socket.on('move-up', (cardIndex) => onMoveUp(cardIndex))
+socket.on('turn-card', cardIndex => turnCard(cardIndex))
+socket.on('pair-found', cardIndex => pairFound(cardIndex))
+socket.on('move-up', cardIndex => onMoveUp(cardIndex))
+socket.on('turn-card', cardIndex => turnCard(cardIndex))
+socket.on('next-player', () => addListener())
+socket.on('start-game', () => gameStart())
+socket.on('turnback-card', (cardIndex) => {
+  game.allCard[cardIndex].rotate(Math.PI, 0, -1)
+  haveRotate = []
+})
 
 tick()

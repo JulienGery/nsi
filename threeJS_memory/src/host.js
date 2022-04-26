@@ -26,17 +26,6 @@ scene.background = new THREE.Color(0xffffff);
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
 
-socket.on('connect', () => {
-  console.log('success')
-  socket.emit('join-room', name, room, cb => {
-    console.log(cb)
-  })
-})
-
-socket.on('update-room', dict => {
-  console.log(dict)
-})
-
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
@@ -146,6 +135,57 @@ class Card {
 
 }
 
+function randomUnitVector() {
+  const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
+  return vec;
+}
+
+
+class Explosion {
+  constructor(x, y) {
+    this.clock = new THREE.Clock()
+    this.x = x
+    this.y = y
+    this.speeds = []
+    this.createGeometry()
+    this.points = new THREE.Points(this.geometry, new THREE.PointsMaterial({ vertexColors: true, size: .15 }))
+    scene.add(this.points)
+    this.position = this.geometry.attributes.position
+  }
+
+  createGeometry() {
+    this.geometry = new THREE.BufferGeometry();
+    const vertices = []
+    const color = new THREE.Color()
+    const colors = []
+    for (let i = 0; i < nombreParticules; i++) {
+      color.setHSL(1, Math.random(), Math.random() * 2);
+      colors.push(color.r, color.g, color.b);
+      const vec = randomUnitVector()
+      vec.multiplyScalar(.1)
+      vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
+      this.speeds.push(Math.random())
+    }
+    this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
+    this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+  }
+
+  async update() {
+    const elapsedTime = this.clock.getElapsedTime()
+    for (let i = 0; i < nombreParticules; i++) {
+      const speed = this.speeds[i]
+      const x = this.position.getX(i)
+      const y = this.position.getY(i)
+      const z = this.position.getZ(i)
+      this.position.setXYZ(i, (x - this.x) * speed * elapsedTime + x, (y - this.y) * speed * elapsedTime + y, z * speed * elapsedTime + z)
+    }
+    this.position.needsUpdate = true;
+  }
+  remove() {
+    scene.remove(this.points)
+  }
+}
+
 
 class Game {
 
@@ -238,59 +278,6 @@ class Game {
   //still nothing
 
 }
-
-
-function randomUnitVector() {
-  const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
-  return vec;
-}
-
-
-class Explosion {
-  constructor(x, y) {
-    this.clock = new THREE.Clock()
-    this.x = x
-    this.y = y
-    this.speeds = []
-    this.createGeometry()
-    this.points = new THREE.Points(this.geometry, new THREE.PointsMaterial({ vertexColors: true, size: .15 }))
-    scene.add(this.points)
-    this.position = this.geometry.attributes.position
-  }
-
-  createGeometry() {
-    this.geometry = new THREE.BufferGeometry();
-    const vertices = []
-    const color = new THREE.Color()
-    const colors = []
-    for (let i = 0; i < nombreParticules; i++) {
-      color.setHSL(1, Math.random(), Math.random() * 2);
-      colors.push(color.r, color.g, color.b);
-      const vec = randomUnitVector()
-      vec.multiplyScalar(.1)
-      vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
-      this.speeds.push(Math.random())
-    }
-    this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
-    this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
-  }
-
-  async update() {
-    const elapsedTime = this.clock.getElapsedTime()
-    for (let i = 0; i < nombreParticules; i++) {
-      const speed = this.speeds[i]
-      const x = this.position.getX(i)
-      const y = this.position.getY(i)
-      const z = this.position.getZ(i)
-      this.position.setXYZ(i, (x - this.x) * speed * elapsedTime + x, (y - this.y) * speed * elapsedTime + y, z * speed * elapsedTime + z)
-    }
-    this.position.needsUpdate = true;
-  }
-  remove() {
-    scene.remove(this.points)
-  }
-}
-
 
 const game = new Game(nb_card)
 
@@ -480,6 +467,17 @@ function tick() {
 
   window.requestAnimationFrame(tick);
 }
+
+socket.on('connect', () => {
+  console.log('success')
+  socket.emit('join-room', name, room, cb => {
+    console.log(cb)
+  })
+})
+
+socket.on('update-room', dict => {
+  console.log(dict)
+})
 
 socket.on('move-down', () => onMoveDown())
 socket.on('turn-card', (cardIndex) => turnCard(cardIndex))
