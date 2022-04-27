@@ -15,6 +15,7 @@ export class Explosion {
         this.x = x
         this.y = y
         this.speeds = []
+        this.vectors = []
         this.createGeometry()
         this.PointsMaterial = new THREE.PointsMaterial({ vertexColors: true, size: particuleSize })
         this.points = new THREE.Points(this.geometry, this.PointsMaterial)
@@ -32,8 +33,9 @@ export class Explosion {
             colors.push(color.r, color.g, color.b);
             const vec = randomUnitVector()
             vec.multiplyScalar(.1)
+            this.vectors.push(vec)
             vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
-            this.speeds.push(Math.random())
+            this.speeds.push(Math.random() * 2)
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
         this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
@@ -43,10 +45,16 @@ export class Explosion {
         const elapsedTime = this.clock.getElapsedTime()
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
+
+            // const expretion = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
+            const expretion = Math.exp(-elapsedTime*.2+2)*Math.cos(elapsedTime+5)
+            const jsp = this.vectors[i]
+            const vec = this.vectors[i].clone().multiplyScalar(expretion)
+            // console.log(vec)
             const x = this.position.getX(i)
             const y = this.position.getY(i)
             const z = this.position.getZ(i)
-            this.position.setXYZ(i, (x - this.x) * speed * elapsedTime + x, (y - this.y) * speed * elapsedTime + y, z * speed * elapsedTime + z)
+            this.position.setXYZ(i, vec.x * speed + jsp.x + x, vec.y * speed + jsp.y + y, vec.z * speed + jsp.z + z)
         }
         this.position.needsUpdate = true;
     }
