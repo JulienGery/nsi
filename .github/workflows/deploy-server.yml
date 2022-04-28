@@ -22,7 +22,6 @@ jobs:
           password: ${{ secrets.CR_PAT }}
       - uses: docker/build-push-action@v2
         with:
-          context: .
           file: ./threeJS_memory/server/Dockerfile
           push: true
           tags: ghcr.io/juliengery/socket-game-server:latest
