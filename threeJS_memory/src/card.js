@@ -57,10 +57,12 @@ export class Card {
         const actualMouveTo = async () => {
             const elapsedTime = clock.getElapsedTime();
 
-            const lerpPos = from.lerp(to, elapsedTime / (10 * time))
-            // this.card.position.set(lerpPos.x, lerpPos.y, lerpPos.z)
+            const lerpPos = from.clone()
+
+            lerpPos.lerp(to, elapsedTime/time)
             this.setPlace(lerpPos)
-            if (elapsedTime <= time + .02) {
+
+            if (elapsedTime < time) {
                 window.requestAnimationFrame(actualMouveTo);
             } else {
                 this.setPlace(to)
