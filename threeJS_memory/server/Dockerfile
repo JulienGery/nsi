@@ -2,7 +2,7 @@ FROM node:16.15-alpine
 
 # Create app directory
 WORKDIR /app
-COPY package.json /app/
+COPY threeJS_memory/server/package.json /app/
 
 RUN npm install
 
