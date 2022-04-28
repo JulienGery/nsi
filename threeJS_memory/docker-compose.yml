@@ -1,0 +1,22 @@
+version: "2"
+services:
+  socket-game-server:
+    image: ghcr.io/juliengery/socket-game-server:latest
+    container_name: socket-game-server
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.socker-game-server-http.entrypoints=http"
+      - "traefik.http.routers.socker-game-server-http.rule=Host(`julien-game-server.gery.me`)"
+      - "traefik.http.routers.socker-game-server-http.middlewares=socker-game-server-https@docker"
+      - "traefik.http.middlewares.socker-game-server-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.socker-game-server.rule=Host(`julien-game-server.gery.me`)"
+      - "traefik.http.routers.socker-game-server.entrypoints=https"
+      - "traefik.http.routers.socker-game-server.tls.certresolver=gery"
+      - "traefik.http.services.socker-game-server.loadbalancer.server.port=3000"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
