@@ -25,4 +25,4 @@ jobs:
           context: .
           file: ./threeJS_memory/server/Dockerfile
           push: true
-          tags: ghcr.io/juliengery/socket-game-server:latest
+          tags: socket-server:latest
