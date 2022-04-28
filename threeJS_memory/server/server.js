@@ -1,3 +1,6 @@
+// import axios from 'axios';
+
+const users = {}
 const rooms = {}
 
 const io = require("socket.io")(3000, {
@@ -6,10 +9,37 @@ const io = require("socket.io")(3000, {
     }
 })
 
+const initCards = (room) => {
+    const Rcards = rooms[room].cards
+    const cards = []
+    for (let i = 0; i < Rcards.length; i++) {
+        for (let j = 0; j < 2; j++) {
+            cards.push({
+                "name": cards.length - i,
+                "textureURL": Rcards.cards[i]
+            })
+        }
+    }
+    return cards
+}
+
+
+const getRoomStatus = (room) => {
+    const players = []
+    for (let i = 0; i < rooms[room].players.length; i++) {
+        const player = users[rooms[room].players[i]]
+        players.push({
+            "name": player.name,
+            "points": player.points,
+            "ready": player.ready
+        })
+    }
+    return players
+}
 const arePlayerReady = (room) => {
     const players = rooms[room].players
     for (let i = 0; i < players.length; i++) {
-        if (!players[i].ready) {
+        if (!users[players[i]].ready) {
             return false
         }
     }
@@ -17,25 +47,31 @@ const arePlayerReady = (room) => {
 }
 
 io.on('connect', socket => {
-    socket.on('join-room', (name, room, cb) => {
+    socket.on('join-room', (name, room, /*cardsURL,*/ cb) => {
         socket.join(room)
-        if (!rooms[room]) {
-            rooms[room] = {
-                "playerTurn": 1,
-                "players": []
-            }
-        }
 
-        rooms[room].players.push({
+        users[socket.id] = {
             "name": name,
             "points": 0,
             "ready": false,
-            "socketID": socket.id
-        })
+            "room": room
+        }
 
-        socket.to(room).emit('update-room', rooms[room])
+        users[socket.id]
+        if (!rooms[room]) {
+            rooms[room] = {
+                "playerTurn": 0,
+                "players": [],
+                "cards": []
+            }
+        }
+
+        rooms[room].players.push(socket.id)
+        cardsURL.map((url) => rooms[room].cards.push(url))
+        const roomStatus = getRoomStatus(room)
+        socket.to(room).emit('update-room', roomStatus)
         // console.log(io.sockets.adapter.rooms.get(room))
-        cb(rooms[room])
+        cb(roomStatus)
     })
 
 
@@ -58,11 +94,11 @@ io.on('connect', socket => {
 
             case 'pair-found':
                 //TODO add point
-                console.log('pair found\t'+cardIndex)
+                console.log('pair found\t' + cardIndex)
                 socket.to(room).emit('pair-found', cardIndex);
                 break;
             case 'turnback-card':
-                console.log('turnback card\t'+cardIndex)
+                console.log('turnback card\t' + cardIndex)
                 socket.to(room).emit('turnback-card', cardIndex)
                 break;
 
@@ -86,16 +122,13 @@ io.on('connect', socket => {
 
     })
 
-    socket.on('ready', (room, cb) => {
+    socket.on('ready', (cb) => {
+
         console.log('ready')
-        const players = rooms[room].players
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].socketID == socket.id) {
-                players[i].ready = true
-                socket.to(room).emit('update-room', rooms[room])
-                break
-            }
-        }
+        users[socket.id].ready = true
+        const room = users[socket.id].room
+        socket.to(room).emit('update-room', getRoomStatus(room))
+
         if (arePlayerReady(room)) {
             socket.to(room).emit('start-game')
             cb(true)
