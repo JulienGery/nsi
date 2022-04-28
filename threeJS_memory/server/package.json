@@ -1,0 +1,10 @@
+{
+  "repository": "#",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.5.0"
+  }
+}
