@@ -46,10 +46,10 @@ export class Explosion {
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
 
-            // const expretion = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
-            const expretion = Math.exp(-elapsedTime*.2+2)*Math.cos(elapsedTime+5)
+            // const V = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
+            const V = Math.exp(-elapsedTime*.2+2)*Math.cos(elapsedTime+5)
             const jsp = this.vectors[i]
-            const vec = this.vectors[i].clone().multiplyScalar(expretion)
+            const vec = this.vectors[i].clone().multiplyScalar(V)
             // console.log(vec)
             const x = this.position.getX(i)
             const y = this.position.getY(i)

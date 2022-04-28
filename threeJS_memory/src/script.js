@@ -1,25 +1,17 @@
-import { io } from 'socket.io-client'
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import * as dat from 'dat.gui'
 import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Explosion } from './explosion.js'
 import { Card } from './card.js'
 const axios = require('axios')
 
-const name = prompt('name')
-const room = prompt("room")
-const socket = io("http://localhost:3000")
-const nombreParticules = 2000;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
-const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
 const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const gui = new dat.GUI();
 const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
@@ -35,6 +27,11 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
 }
+
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+
+const controls = new OrbitControls(camera, canvas)
+controls.enabled = false;
 
 window.addEventListener('resize', () => {
   // Update sizes
@@ -56,9 +53,6 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 
 scene.add(camera)
 
@@ -105,7 +99,6 @@ class Game {
         for (let i = 0; i < 22; i++) {
           this.shuffleArray(this.allCard);
         }
-        this.sendCards();
         this.placeCard(); //kinda ugly again but it work so...
       }
     }).catch((err) => {
@@ -122,18 +115,6 @@ class Game {
       this.allCard[i] = this.allCard[j];
       this.allCard[j] = temp;
     }
-  }
-
-  async sendCards() {
-    let cards = []
-    for (let i = 0; i < this.allCard.length; i++) {
-      cards.push({
-        "name": this.allCard[i].name,
-        "textureURL": this.allCard[i].textureURL,
-      })
-    }
-    socket.emit('send-cards', cards, room)
-    cards = []
   }
 
   placeCard() {
@@ -194,7 +175,6 @@ function onMouseClick(event) {
 
     if (game.allCard[haveRotate[0]].name == game.allCard[haveRotate[1]].name) {
       for (let i = 0; i < haveRotate.length; i++) {
-        socket.emit('action', 'pair-found', haveRotate[i], room)
         pairFound(haveRotate[i])
         if (haveRotate[i] < cardUnder[0]) {
           cardUnder[0]--;
@@ -202,19 +182,8 @@ function onMouseClick(event) {
       }
     } else {
       for (let i = 0; i < haveRotate.length; i++) {
-        socket.emit('action', 'turnback-card', haveRotate[i], room)
         game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
       }
-
-      removeListener()
-
-      if (cardUnder.length > 0) {
-        socket.emit('action', 'move-down', cardUnder[0], room)
-        onMoveDown()
-      }
-      socket.emit('next-player', room)
-      haveRotate = [];
-      return
     }
     haveRotate = [];
   }
@@ -222,7 +191,6 @@ function onMouseClick(event) {
   if (cardUnder.length >= 1) {
     const cardIndex = cardUnder[0]
     if (!haveRotate.includes(cardIndex, 0)) {
-      socket.emit('action', 'turn-card', cardIndex, room)
       turnCard(cardIndex)
     }
   }
@@ -262,10 +230,8 @@ const onMouseOver = () => {
       if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
         if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
           if (cardUnder.length > 0) {
-            socket.emit('action', 'move-down', cardUnder[0], room)
             onMoveDown()
           }
-          socket.emit('action', 'move-up', i, room)
           onMoveUp(i)
         }
 
@@ -273,7 +239,6 @@ const onMouseOver = () => {
       }
     }
   } else if (cardUnder.length > 0) {
-    socket.emit('action', 'move-down', cardUnder[0], room)
     onMoveDown()
   }
 }
@@ -288,49 +253,27 @@ const onMoveUp = (cardIndex) => {
   cardUnder.push(cardIndex)
 }
 
-
-const beforeSpread = (event) => {
-  socket.emit('ready', room, cb => {
-    if (cb) {
-      gameStart()
-    }
-  })
-}
-
-
 const addListener = () => {
   console.log('my turn')
   window.addEventListener('click', onMouseClick)
   window.addEventListener('pointermove', onMove)
-
-}
-
-const removeListener = () => {
-  window.removeEventListener('click', onMouseClick)
-  window.removeEventListener('pointermove', onMove)
 }
 
 const gameStart = () => {
 
   game.spread()
 
-  window.removeEventListener('click', beforeSpread)
+  window.removeEventListener('click', gameStart)
   window.removeEventListener('pointermove', updateMouse)
 
   setTimeout(() => {
     addListener();
-    startControls();
+    controls.enabled  = true;
   }, 1200);
 
 }
 
-const startControls = () => {
-  const controls = new OrbitControls(camera, canvas)
-  // controls.enableDamping = true
-}
-
-
-window.addEventListener('click', beforeSpread);
+window.addEventListener('click', gameStart);
 window.addEventListener('pointermove', updateMouse);
 
 function tick() {
@@ -357,22 +300,7 @@ function tick() {
 }
 
 
-socket.on('connect', () => {
-  console.log('success')
-  socket.emit('join-room', name, room, cb => {
-    console.log(cb)
-  })
-})
-socket.on('update-room', dict => {
-  console.log(dict)
-})
-
-socket.on('move-down', (cardIndex) => moveDown(cardIndex))
-socket.on('turn-card', (cardIndex) => game.allCard[cardIndex].rotate(0, Math.PI, -1))
-socket.on('pair-found', cardIndex => pairFound(cardIndex))
-socket.on('move-up', (cardIndex) => moveUp(cardIndex))
-socket.on('next-player', () => addListener())
-socket.on('start-game', () => gameStart())
-socket.on('turnback-card', (cardIndex) => { game.allCard[cardIndex].rotate(Math.PI, 0, -1) })
+window.addEventListener('click', gameStart);
+window.addEventListener('pointermove', updateMouse);
 
 tick()

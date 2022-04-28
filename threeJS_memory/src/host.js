@@ -2,7 +2,6 @@ import { io } from 'socket.io-client'
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import * as dat from 'dat.gui'
 import Stats from 'stats.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Explosion } from './explosion.js'
@@ -12,14 +11,11 @@ const axios = require('axios')
 const name = prompt('name')
 const room = prompt("room")
 const socket = io("http://localhost:3000")
-const nombreParticules = 2000;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
-const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
 const canvas = document.querySelector('canvas.webgl')
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const gui = new dat.GUI();
 const nb_card = parseInt(prompt("nombre de paires"));
 const stats = new Stats();
 const scene = new THREE.Scene();
