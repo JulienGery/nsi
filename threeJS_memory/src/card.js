@@ -1,15 +1,15 @@
 import * as THREE from 'three'
+import { scene } from './script.js';
 
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/tmp.jpg') //front
 
 export class Card {
 
-    constructor(pos, texture, name, card, textureURL, scene) {
+    constructor(pos, texture, name, card, textureURL) {
         this.pos = pos //vector 3
-        this.scene = scene
         this.textureURL = textureURL //textureURL
-        this.card = card.clone(true); //clone the card which is the card
+        this.card = card.clone(true); //clone the gltf which is the card
         this.card.children[0].children[0].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture }) //setting back texture 
         this.card.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })//setting front texture 
         // this.card.children[0].children[2].material = new THREE.MeshBasicMaterial({ color: "#000000"}) //side
@@ -18,7 +18,7 @@ export class Card {
     }
 
     show() {
-        this.scene.add(this.card)//add card to the scene
+        scene.add(this.card)//add card to the scene
     }
 
     setPlace(vector) {
@@ -73,7 +73,7 @@ export class Card {
     }
 
     remove() {
-        this.scene.remove(this.card);
+        scene.remove(this.card);
     }
 
 }

@@ -83,10 +83,16 @@ io.on('connect', socket => {
                 "started": false,
                 "playerTurn": 0,
                 "players": [],
-                "cards": ["https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/snkellefaitpeur.png"]
+                "cards": [
+                    "https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/snkellefaitpeur.png",
+                    "https://img-19.commentcamarche.net/WNCe54PoGxObY8PCXUxMGQ0Gwss=/480x270/smart/d8c10e7fd21a485c909a5b4c5d99e611/ccmcms-commentcamarche/20456790.jpg"
+                ]
             }
+        }else if(rooms[room].started){
+            cb("room started")
         }
 
+        console.log(`${name} joined ${room}`)
         rooms[room].players.push(socket.id)
         // cardsURL.map((url) => rooms[room].cards.push(url))
         const roomStatus = getRoomStatus(room)
@@ -127,31 +133,24 @@ io.on('connect', socket => {
         }
     })
 
-    socket.on('submit-cards', cards => {
+    socket.on('submit-card', (card, cb) => {
         const room = users[socket.id].room
-        rooms[room].cards.push(cards)
+        rooms[room].cards.push(card)
         socket.to(room).emit('update-cards', rooms[room].cards)
         cb(rooms[room].cards)
     })
 
-    // socket.on('send-cards', () => {
-    //     const room = users[socket.id].room
-    //     const cards = initCards(users[socket.id].room)
-    //     socket.to(room).emit('receive-cards', cards)
-    // })
-
     socket.on('next-player', () => {
 
         const room = users[socket.id].room
-        console.log('next-player')
 
         rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
         const playerTurn = rooms[room].playerTurn
 
         // console.log(rooms[room].players[playerTurn].name)
         // console.log(playerTurn)
-        socket.to(rooms[room].players[playerTurn]).emit('next-player')
-
+        console.log(`next-player is ${users[rooms[room].players[playerTurn]].name}`)
+        io.to(rooms[room].players[playerTurn]).emit('next-player')
     })
 
     socket.on('ready', () => {
@@ -163,13 +162,15 @@ io.on('connect', socket => {
 
         if (arePlayerReady(room)) {
             if (rooms[room].started) {
-                console.log('start game')
+                console.log(`start game in room ${room}`)
                 io.to(room).emit('start-game')
                 setTimeout(() => {
-                    io.to(rooms[room].players[Math.floor(rooms[room].players.length * Math.random())]).emit('next-player')
-                }, 1200);
+                    const players = rooms[room].players
+                    rooms[room].playerTurn = Math.floor(players.length * Math.random())
+                    io.to(players[rooms[room].playerTurn]).emit('next-player')
+                }, 150);
             } else {
-                console.log('send cards')
+                console.log(`send cards to room ${room}`)
 
                 rooms[room].started = true
                 setPlayersNotReady(room)
@@ -179,7 +180,7 @@ io.on('connect', socket => {
                 io.to(room).emit('receive-cards', cards)
             }
         }
-        
+
     })
 
     socket.on('disconnect', () => {
@@ -190,6 +191,10 @@ io.on('connect', socket => {
         socket.to(room).emit('update-room', getRoomStatus(room))
         socket.leave(room)
         delete users[user]
+        if(rooms[room].players.length == 0){
+            console.log(`delete room ${room}`)
+            delete rooms[room]
+        }
     })
 })
 

@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { scene } from './script.js';
 
 const nombreParticules = 2000;
 const particuleSize = .15
@@ -9,9 +10,8 @@ function randomUnitVector() {
 }
 
 export class Explosion {
-    constructor(x, y, scene) {
+    constructor(x, y) {
         this.clock = new THREE.Clock()
-        this.scene = scene
         this.x = x
         this.y = y
         this.speeds = []
@@ -19,7 +19,7 @@ export class Explosion {
         this.createGeometry()
         this.PointsMaterial = new THREE.PointsMaterial({ vertexColors: true, size: particuleSize })
         this.points = new THREE.Points(this.geometry, this.PointsMaterial)
-        this.scene.add(this.points)
+        scene.add(this.points)
         this.position = this.geometry.attributes.position
     }
 
@@ -51,15 +51,15 @@ export class Explosion {
             const jsp = this.vectors[i]
             const vec = this.vectors[i].clone().multiplyScalar(V)
             // console.log(vec)
-            const x = this.position.getX(i)
-            const y = this.position.getY(i)
-            const z = this.position.getZ(i)
-            this.position.setXYZ(i, vec.x * speed + jsp.x + x, vec.y * speed + jsp.y + y, vec.z * speed + jsp.z + z)
+            const X = this.position.getX(i)
+            const Y = this.position.getY(i)
+            const Z = this.position.getZ(i)
+            this.position.setXYZ(i, vec.x * speed + jsp.x + X, vec.y * speed + jsp.y + Y, vec.z * speed + jsp.z + Z)
         }
         this.position.needsUpdate = true;
     }
     remove() {
-        this.scene.remove(this.points)
+        scene.remove(this.points)
     }
 
     scaleDown() {
