@@ -8,9 +8,12 @@ import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
 
-const name = prompt('name')
-const room = prompt('room')
+// const name = prompt('name')
+// const room = prompt('room')
+const name = 'juju'
+const room = 'xavier'
 const canvas = document.querySelector('canvas.webgl')
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const gui = new dat.GUI();
@@ -207,7 +210,6 @@ const removeListener = () => {
 }
 
 const gameStart = () => {
-
   game.spread()
 
   window.removeEventListener('click', beforeSpread)
@@ -287,20 +289,65 @@ socket.on('action', (action, cardIndex) => {
 socket.on('next-player', () => addListener())
 socket.on('start-game', () => gameStart())
 
+tick()
 
+let ready = false
+const regex = /(https?:\/\/.*\.(?:png|jpg))/g
 
-
-
-function submitCard(url) {
-  socket.emit('submit-card', url, cb => {
-    console.log(cb)
-  })
+const submitCard = async () => {
+  const url = textInput.value.match(regex)
+  if (!url) {
+    textInput.style.backgroundColor = "red"
+  } else {
+    fetch(url).then((rep) => {
+      socket.emit('submit-card', url[0], cb => {
+        console.log(cb)
+        if (cb) {
+          textInput.style.backgroundColor = "green"
+        } else { textInput.style.backgroundColor = "red" }
+      })
+      //TODO add url to serv
+    }).catch((err) => {
+      textInput.style.backgroundColor = "red"
+    })
+  }
 }
 
-// const btn = document.createElement("button")
-// btn.innerHTML = "click me"
-// document.body.appendChild(btn)
+const onEnterPress = async (event) => {
+  if (event.key == "Enter") {
+    submitCard()
+  }
+}
+
+const textInput = document.createElement("input")
+textInput.type = "text"
+textInput.placeholder = "enter url here"
+textInput.id = "url"
+textInput.style.position = "absolute"
+// textInput.style.backgroundColor = "red"
+textInput.addEventListener('keypress', onEnterPress)
+
+const btn = document.createElement("button")
+btn.innerHTML = "submit"
+btn.style.position = "absolute"
+btn.onclick = submitCard
 
 
+const br = document.createElement('br')
 
-tick()
+const abtn = document.createElement('button')
+abtn.innerHTML = "set ready"
+abtn.style.position = "absolute"
+abtn.onclick = function (){
+  ready = true
+  socket.emit('ready')
+  document.body.removeChild(btn)
+  document.body.removeChild(textInput)
+  document.body.removeChild(br)
+  document.body.removeChild(abtn)
+}
+
+document.body.appendChild(textInput)
+document.body.appendChild(btn)
+document.body.appendChild(br)
+document.body.appendChild(abtn)

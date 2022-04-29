@@ -88,7 +88,7 @@ io.on('connect', socket => {
                     "https://img-19.commentcamarche.net/WNCe54PoGxObY8PCXUxMGQ0Gwss=/480x270/smart/d8c10e7fd21a485c909a5b4c5d99e611/ccmcms-commentcamarche/20456790.jpg"
                 ]
             }
-        }else if(rooms[room].started){
+        } else if (rooms[room].started) {
             cb("room started")
         }
 
@@ -133,11 +133,14 @@ io.on('connect', socket => {
         }
     })
 
-    socket.on('submit-card', (card, cb) => {
+    socket.on('submit-card', (url, cb) => {
         const room = users[socket.id].room
-        rooms[room].cards.push(card)
-        socket.to(room).emit('update-cards', rooms[room].cards)
-        cb(rooms[room].cards)
+        if (!rooms[room].cards.includes(url)) {
+            rooms[room].cards.push(url)
+            socket.to(room).emit('update-cards', rooms[room].cards)
+            cb(rooms[room].cards)
+        }
+        cb(false)
     })
 
     socket.on('next-player', () => {
@@ -191,7 +194,7 @@ io.on('connect', socket => {
         socket.to(room).emit('update-room', getRoomStatus(room))
         socket.leave(room)
         delete users[user]
-        if(rooms[room].players.length == 0){
+        if (rooms[room].players.length == 0) {
             console.log(`delete room ${room}`)
             delete rooms[room]
         }
