@@ -84,8 +84,8 @@ io.on('connect', socket => {
                 "playerTurn": 0,
                 "players": [],
                 "cards": [
-                    "https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/snkellefaitpeur.png",
-                    "https://img-19.commentcamarche.net/WNCe54PoGxObY8PCXUxMGQ0Gwss=/480x270/smart/d8c10e7fd21a485c909a5b4c5d99e611/ccmcms-commentcamarche/20456790.jpg"
+                    // "https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/snkellefaitpeur.png",
+                    // "https://img-19.commentcamarche.net/WNCe54PoGxObY8PCXUxMGQ0Gwss=/480x270/smart/d8c10e7fd21a485c909a5b4c5d99e611/ccmcms-commentcamarche/20456790.jpg"
                 ]
             }
         } else if (rooms[room].started) {

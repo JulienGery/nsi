@@ -215,12 +215,9 @@ const gameStart = () => {
   window.removeEventListener('click', beforeSpread)
   window.removeEventListener('pointermove', updateMouse)
 
-  setTimeout(() => {controls.enabled = true},150);
+  setTimeout(() => { controls.enabled = true }, 150);
 
 }
-
-window.addEventListener('click', beforeSpread);
-window.addEventListener('pointermove', updateMouse);
 
 function tick() {
 
@@ -249,11 +246,9 @@ function tick() {
 socket.on('receive-cards', (cards) => {
   console.log(cards)
   game = new Game(cards);
+  window.addEventListener('click', beforeSpread);
+  window.addEventListener('pointermove', updateMouse);
 })
-
-window.addEventListener('click', beforeSpread);
-window.addEventListener('pointermove', updateMouse);
-
 
 socket.on('connect', () => {
   console.log('success')
@@ -264,6 +259,10 @@ socket.on('connect', () => {
 
 socket.on('update-room', dict => {
   console.log(dict)
+})
+
+socket.on('update-cards', cards => {
+  console.log(cards)
 })
 
 
@@ -295,59 +294,60 @@ let ready = false
 const regex = /(https?:\/\/.*\.(?:png|jpg))/g
 
 const submitCard = async () => {
-  const url = textInput.value.match(regex)
+  const url = textInput.value
+
   if (!url) {
     textInput.style.backgroundColor = "red"
   } else {
     fetch(url).then((rep) => {
-      socket.emit('submit-card', url[0], cb => {
+      socket.emit('submit-card', url, cb => {
         console.log(cb)
         if (cb) {
           textInput.style.backgroundColor = "green"
+          textInput.value = ""
         } else { textInput.style.backgroundColor = "red" }
       })
-      //TODO add url to serv
     }).catch((err) => {
+      console.log(err)
       textInput.style.backgroundColor = "red"
     })
   }
 }
 
-const onEnterPress = async (event) => {
-  if (event.key == "Enter") {
-    submitCard()
-  }
-}
+
+
+const form = document.createElement('form')
+form.style.position = "absolute"
 
 const textInput = document.createElement("input")
 textInput.type = "text"
 textInput.placeholder = "enter url here"
 textInput.id = "url"
-textInput.style.position = "absolute"
-// textInput.style.backgroundColor = "red"
-textInput.addEventListener('keypress', onEnterPress)
 
 const btn = document.createElement("button")
 btn.innerHTML = "submit"
-btn.style.position = "absolute"
+
 btn.onclick = submitCard
 
 
 const br = document.createElement('br')
 
 const abtn = document.createElement('button')
+
 abtn.innerHTML = "set ready"
-abtn.style.position = "absolute"
-abtn.onclick = function (){
+
+abtn.onclick = function () {
   ready = true
   socket.emit('ready')
-  document.body.removeChild(btn)
-  document.body.removeChild(textInput)
-  document.body.removeChild(br)
-  document.body.removeChild(abtn)
+  document.body.removeChild(form)
 }
 
-document.body.appendChild(textInput)
-document.body.appendChild(btn)
-document.body.appendChild(br)
-document.body.appendChild(abtn)
+form.appendChild(textInput)
+form.appendChild(btn)
+form.appendChild(abtn)
+
+
+form.addEventListener("submit", e => {
+  e.preventDefault()
+})
+document.body.appendChild(form)
