@@ -7,6 +7,7 @@ import * as dat from 'dat.gui'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
+const axios = require('axios')
 
 // const name = prompt('name')
 // const room = prompt('room')
@@ -288,25 +289,49 @@ socket.on('action', (action, cardIndex) => {
 socket.on('next-player', () => addListener())
 socket.on('start-game', () => gameStart())
 
-tick()
-
 let ready = false
-const regex = /(https?:\/\/.*\.(?:png|jpg))/g
+// const regex = /(https?:\/\/.*\.(?:png|jpg))/g
+const regex = /(?<=axios:\s*)\d+/g
+
+
+const sendCards = (url) => {
+  socket.emit('submit-card', url, cb => {
+    console.log(cb)
+    if (cb) {
+      textInput.style.backgroundColor = "green"
+      textInput.value = ""
+    } else { textInput.style.backgroundColor = "red" }
+  })
+}
 
 const submitCard = async () => {
+
   const url = textInput.value
+  const number = url.match(regex)
+
+  if (number) {
+    console.log(`geting ${number} cards`)
+
+    axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
+
+      const data = response.data;
+
+      for (let i = 0; i < data.length; i++) {
+        sendCards(data[i].download_url)
+      }
+
+    }).catch((err) => {
+      console.log(err)
+    })
+    return
+  }
 
   if (!url) {
     textInput.style.backgroundColor = "red"
   } else {
     fetch(url).then((rep) => {
-      socket.emit('submit-card', url, cb => {
-        console.log(cb)
-        if (cb) {
-          textInput.style.backgroundColor = "green"
-          textInput.value = ""
-        } else { textInput.style.backgroundColor = "red" }
-      })
+      sendCards(url)
+      
     }).catch((err) => {
       console.log(err)
       textInput.style.backgroundColor = "red"
@@ -351,3 +376,5 @@ form.addEventListener("submit", e => {
   e.preventDefault()
 })
 document.body.appendChild(form)
+
+tick()

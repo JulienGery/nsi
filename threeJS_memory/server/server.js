@@ -68,16 +68,6 @@ const arePlayerReady = (room) => {
 
 io.on('connect', socket => {
     socket.on('join-room', (name, room, /*cardsURL,*/ cb) => {
-        socket.join(room)
-
-        users[socket.id] = {
-            "name": name,
-            "points": 0,
-            "ready": false,
-            "room": room
-        }
-
-        users[socket.id]
         if (!rooms[room]) {
             rooms[room] = {
                 "started": false,
@@ -90,8 +80,17 @@ io.on('connect', socket => {
             }
         } else if (rooms[room].started) {
             cb("room started")
+            return
         }
 
+        users[socket.id] = {
+            "name": name,
+            "points": 0,
+            "ready": false,
+            "room": room
+        }
+
+        socket.join(room)
         console.log(`${name} joined ${room}`)
         rooms[room].players.push(socket.id)
         // cardsURL.map((url) => rooms[room].cards.push(url))
@@ -134,6 +133,7 @@ io.on('connect', socket => {
     })
 
     socket.on('submit-card', (url, cb) => {
+        console.log(url)
         const room = users[socket.id].room
         if (!rooms[room].cards.includes(url)) {
             rooms[room].cards.push(url)
@@ -187,16 +187,18 @@ io.on('connect', socket => {
     })
 
     socket.on('disconnect', () => {
-        const user = users[socket.id]
-        const room = user.room
-        console.log(`${user.name} has left`)
-        rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
-        socket.to(room).emit('update-room', getRoomStatus(room))
-        socket.leave(room)
-        delete users[user]
-        if (rooms[room].players.length == 0) {
-            console.log(`delete room ${room}`)
-            delete rooms[room]
+        if (users[socket.id]) {
+            const user = users[socket.id]
+            const room = user.room
+            console.log(`${user.name} has left`)
+            rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
+            socket.to(room).emit('update-room', getRoomStatus(room))
+            socket.leave(room)
+            delete users[user]
+            if (rooms[room].players.length == 0) {
+                console.log(`delete room ${room}`)
+                delete rooms[room]
+            }
         }
     })
 })
