@@ -62,7 +62,7 @@ export class Explosion {
         scene.remove(this.points)
     }
 
-    scaleDown() {
+    async scaleDown() {
         const time = this.clock.getElapsedTime()
         const size = Math.cos((time - .5) * 0.62831853071)
         this.PointsMaterial.size = size * particuleSize

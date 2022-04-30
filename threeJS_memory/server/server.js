@@ -24,7 +24,7 @@ const initCards = (room) => {
     for (let i = 0; i < roomCards.length; i++) {
         for (let j = 0; j < 2; j++) {
             cards.push({
-                "name": cards.length - j,
+                "name": cards.length - j -i,
                 "textureURL": roomCards[i]
             })
         }

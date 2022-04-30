@@ -330,8 +330,8 @@ const submitCard = async () => {
     textInput.style.backgroundColor = "red"
   } else {
     fetch(url).then((rep) => {
-      sendCards(url)
-      
+      if (rep.status == 200) { sendCards(url) }
+      else { textInput.style.backgroundColor = "red" }
     }).catch((err) => {
       console.log(err)
       textInput.style.backgroundColor = "red"
@@ -355,7 +355,7 @@ btn.innerHTML = "submit"
 btn.onclick = submitCard
 
 
-const br = document.createElement('br')
+// let br = document.createElement('br')
 
 const abtn = document.createElement('button')
 
