@@ -26,7 +26,7 @@ const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
 
 stats.showPanel(0);
-document.body.appendChild(stats.dom);
+// document.body.appendChild(stats.dom);
 
 const sizes = {
   width: window.innerWidth,
@@ -255,11 +255,13 @@ socket.on('connect', () => {
   console.log('success')
   socket.emit('join-room', name, room, cb => {
     console.log(cb)
+    updatePlayerTable(cb.players)
   })
 })
 
 socket.on('update-room', dict => {
   console.log(dict)
+  updatePlayerTable(dict)
 })
 
 socket.on('update-cards', cards => {
@@ -376,5 +378,58 @@ form.addEventListener("submit", e => {
   e.preventDefault()
 })
 document.body.appendChild(form)
+
+
+const tableau = document.createElement('table')
+
+const thead = document.createElement('thead')
+thead.style.backgroundColor = "black"
+thead.style.color = "white"
+const tr = document.createElement('tr')
+
+const TheadCell = ["name", "points", "ready"]
+
+for(let i = 0; i<3; i++){
+  const cell = document.createElement('th')
+  cell.style.border = "1px solid #333"
+  const cellText = document.createTextNode(TheadCell[i])
+  cell.appendChild(cellText)
+  tr.appendChild(cell)
+}
+
+thead.appendChild(tr)
+
+tableau.appendChild(thead)
+
+const tbody = document.createElement('tbody')
+tbody.setAttribute("border", "3")
+tableau.appendChild(tbody)
+
+// document.body.appendChild(tableau)
+// form.appendChild(tableau)
+
+const updatePlayerTable = (array) => {
+
+  tbody.innerHTML = ""
+
+  array.forEach(elements => {
+    console.log(elements)
+    const btr = document.createElement('tr')
+    Object.values(elements).forEach(value => {
+      const cell = document.createElement('td')
+      const cellText = document.createTextNode(value)
+      cell.appendChild(cellText)
+      btr.appendChild(cell)
+    })
+
+    tbody.appendChild(btr)
+
+  })
+
+  const tableau = document.createElement('table')
+  tableau.appendChild(thead)
+  tableau.appendChild(tbody)
+  form.appendChild(tableau)
+}
 
 tick()

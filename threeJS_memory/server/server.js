@@ -44,7 +44,7 @@ const setPlayersNotReady = (room) => {
     });
 }
 
-const getRoomStatus = (room) => {
+const getPlayers = (room) => {
     const players = []
     for (let i = 0; i < rooms[room].players.length; i++) {
         const player = users[rooms[room].players[i]]
@@ -94,10 +94,13 @@ io.on('connect', socket => {
         console.log(`${name} joined ${room}`)
         rooms[room].players.push(socket.id)
         // cardsURL.map((url) => rooms[room].cards.push(url))
-        const roomStatus = getRoomStatus(room)
-        socket.to(room).emit('update-room', roomStatus)
+        const players = getPlayers(room)
+        socket.to(room).emit('update-room', players)
         // console.log(io.sockets.adapter.rooms.get(room))
-        cb(roomStatus)
+        cb({
+            "players": players,
+            "cards": rooms[room].cards
+        })
     })
 
 
@@ -161,7 +164,7 @@ io.on('connect', socket => {
         console.log(`${users[socket.id].name} is ready !!!`)
         users[socket.id].ready = true
         const room = users[socket.id].room
-        io.to(room).emit('update-room', getRoomStatus(room))
+        io.to(room).emit('update-room', getPlayers(room))
 
         if (arePlayerReady(room)) {
             if (rooms[room].started) {
@@ -177,7 +180,7 @@ io.on('connect', socket => {
 
                 rooms[room].started = true
                 setPlayersNotReady(room)
-                io.to(room).emit('update-room', getRoomStatus(room))
+                io.to(room).emit('update-room', getPlayers(room))
 
                 const cards = initCards(room)
                 io.to(room).emit('receive-cards', cards)
@@ -192,7 +195,7 @@ io.on('connect', socket => {
             const room = user.room
             console.log(`${user.name} has left`)
             rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
-            socket.to(room).emit('update-room', getRoomStatus(room))
+            socket.to(room).emit('update-room', getPlayers(room))
             socket.leave(room)
             delete users[user]
             if (rooms[room].players.length == 0) {
