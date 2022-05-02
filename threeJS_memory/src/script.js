@@ -9,10 +9,10 @@ import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
 const axios = require('axios')
 
-// const name = prompt('name')
-// const room = prompt('room')
-const name = 'juju'
-const room = 'xavier'
+const name = prompt('name')
+const room = prompt('room')
+// const name = 'juju'
+// const room = 'xavier'
 const canvas = document.querySelector('canvas.webgl')
 
 const raycaster = new THREE.Raycaster();
@@ -20,7 +20,7 @@ const mouse = new THREE.Vector2();
 const gui = new dat.GUI();
 const stats = new Stats();
 scene.background = new THREE.Color(0xffffff);
-const socket = io("http://192.168.1.25:3000")
+const socket = io("https://julien-game-server.gery.me")
 
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight);
