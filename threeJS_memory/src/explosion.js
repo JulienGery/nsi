@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { scene } from './script.js';
+import { scene } from './tmp.js';
 
 const nombreParticules = 2000;
 const particuleSize = .15

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { scene } from './script.js';
+import { scene } from './tmp.js';
 
 export class Card {
 
