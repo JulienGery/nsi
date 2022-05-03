@@ -156,6 +156,8 @@ io.on('connect', socket => {
                 break;
 
         }
+
+        
     })
 
     socket.on('submit-card', (url, cb) => {
