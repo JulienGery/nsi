@@ -4,7 +4,7 @@ import { TextureLoader } from 'three'
 import { updateTable, addTable } from './tableau.js'
 import { start } from './tmp.js'
 const axios = require('axios')
-export const socket = io("http://julien-game-server.gery.me")
+export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
 const regex = /(?<=axios:\s*)\d+/g
