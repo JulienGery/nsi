@@ -6,8 +6,71 @@ import { start } from './tmp.js'
 const axios = require('axios')
 export const socket = io("http://julien-game-server.gery.me")
 
+<<<<<<< HEAD
 const loader = new TextureLoader();
 const regex = /(?<=axios:\s*)\d+/g
+=======
+const name = prompt('name')
+const room = prompt('room')
+// const name = 'juju'
+// const room = 'xavier'
+const canvas = document.querySelector('canvas.webgl')
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const gui = new dat.GUI();
+const stats = new Stats();
+scene.background = new THREE.Color(0xffffff);
+const socket = io("https://julien-game-server.gery.me")
+
+const pointLight = new THREE.AmbientLight(0xffffff, 1);
+scene.add(pointLight);
+
+stats.showPanel(0);
+// document.body.appendChild(stats.dom);
+
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight
+}
+
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
+
+  // Update camera
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: true
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+const controls = new OrbitControls(camera, canvas)
+controls.enabled = false
+
+scene.add(camera)
+
+camera.position.x = 0
+camera.position.y = 0
+camera.position.z = 20
+
+let game = 0
+let haveRotate = []
+let cardUnder = []
+let explosions = []
+>>>>>>> 3ff3eedb1e82e5efe1c91049fed534b183ee8270
 
 
 const submitCard = async () => {
