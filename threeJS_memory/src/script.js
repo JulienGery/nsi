@@ -96,7 +96,7 @@ form.style.position = "absolute"
 const textInput = document.createElement("input")
 textInput.type = "text"
 textInput.className = 'input'
-textInput.placeholder = "enter url here"
+textInput.placeholder = "add image"
 textInput.id = "url"
 
 const btn = document.createElement("button")
