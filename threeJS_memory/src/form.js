@@ -18,7 +18,6 @@ socket.on('update-room', dict => {
     updateTable(dict)
 })
 
-
 const sendCards = (url) => {
     socket.emit('submit-card', url, cb => {
         console.log(cb)
