@@ -1,6 +1,19 @@
 import * as THREE from 'three'
 import { scene } from './tmp.js';
 
+
+
+const computeBezierCurve = (array, t) => {
+    for (let i = 0; i < array.length - 1; i++) {
+        array[i].slerp(array[i + 1], t)
+    }
+    array.pop()
+    if (array.length == 1) {
+        return array[0]
+    }
+    return computeBezierCurve(array, t)
+}
+
 export class Card {
 
     constructor(pos, texture, name, card, textureURL) {
@@ -24,18 +37,18 @@ export class Card {
 
     rotate(start, end, time) {
         const clock = new THREE.Clock();
-        const interQ = new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize()
+        const quaternions = [start]
+        
+        for (let i = 0; i < 2; i++) {
+            quaternions.push(new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
+        }
+        quaternions.push(end)
 
         const actualRotate = () => {
             const elapsedTime = clock.getElapsedTime();
-
-            const A = start.clone()
-            const B = interQ.clone()
-            A.slerp(interQ, elapsedTime / time)
-            B.slerp(end, elapsedTime / time)
-            A.slerp(B, elapsedTime / time)
-
-            this.card.setRotationFromQuaternion(A)
+            const quaternionsClone = quaternions.map(q => q.clone())
+            const newQ = computeBezierCurve(quaternionsClone, elapsedTime / time)
+            this.card.setRotationFromQuaternion(newQ)
 
             if (elapsedTime < time) {
                 window.requestAnimationFrame(actualRotate)
