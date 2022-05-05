@@ -24,14 +24,18 @@ export class Card {
 
     rotate(start, end, time) {
         const clock = new THREE.Clock();
+        const interQ = new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize()
 
         const actualRotate = () => {
             const elapsedTime = clock.getElapsedTime();
 
-            const lerpq = start.clone()
-            lerpq.slerp(end, elapsedTime / time)
-            
-            this.card.setRotationFromQuaternion(lerpq)
+            const A = start.clone()
+            const B = interQ.clone()
+            A.slerp(interQ, elapsedTime / time)
+            B.slerp(end, elapsedTime / time)
+            A.slerp(B, elapsedTime / time)
+
+            this.card.setRotationFromQuaternion(A)
 
             if (elapsedTime < time) {
                 window.requestAnimationFrame(actualRotate)
