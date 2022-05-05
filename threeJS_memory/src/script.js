@@ -73,7 +73,7 @@ const submitForm = () => {
 
 
 const displayForm = () => {
-    document.body.innerHTML = '<div class="form" id="form"><div class="title">salut</div><div class="input-container ic1"><input id="name" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button></div>'
+    document.body.innerHTML = '<div class="form" id="form"><div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button></div>'
     const button = document.getElementById('button')
     button.onclick = submitForm
 }

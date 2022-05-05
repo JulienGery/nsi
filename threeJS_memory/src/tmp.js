@@ -8,6 +8,10 @@ import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
 import { socket } from './script';
 
+
+const qFront = new THREE.Quaternion(0, 0, 0, 1);
+const qBack = new THREE.Quaternion(0, 1, 0, 0);
+
 export const start = () => {
 
 
@@ -86,9 +90,6 @@ export const start = () => {
 
     function onMouseClick(event) {
 
-        // const qFront = new THREE.Quaternion(0, 0, 0, 1);
-        // const qBack = new THREE.Quaternion(0, 1, 0, 0);
-
         if (haveRotate.length == 2) {
             if (haveRotate[0] < haveRotate[1]) {
                 haveRotate.reverse();
@@ -105,7 +106,7 @@ export const start = () => {
             } else {
                 for (let i = 0; i < haveRotate.length; i++) {
                     socket.emit('action', 'turnback-card', haveRotate[i])
-                    game.allCard[haveRotate[i]].rotate(Math.PI, 0, -1);
+                    game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI/10);
                 }
 
                 removeListener()
@@ -141,7 +142,7 @@ export const start = () => {
     }
 
     const turnCard = (cardIndex) => {
-        game.allCard[cardIndex].rotate(0, Math.PI, 1);
+        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10);
         haveRotate.push(cardIndex);
         moveDown(cardIndex)
     }
@@ -255,7 +256,7 @@ export const start = () => {
                 moveDown(cardIndex)
                 break;
             case 'turn-card':
-                game.allCard[cardIndex].rotate(0, Math.PI, -1)
+                game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10)
                 break;
             case 'pair-found':
                 pairFound(cardIndex)
@@ -264,7 +265,7 @@ export const start = () => {
                 moveUp(cardIndex)
                 break;
             case 'turnback-card':
-                game.allCard[cardIndex].rotate(Math.PI, 0, -1)
+                game.allCard[cardIndex].rotate(qBack, qFront, Math.PI/10)
         }
     })
 
