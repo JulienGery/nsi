@@ -1,4 +1,4 @@
-name: 'Publish new release'
+name: 'Publish new release client'
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  publish-socket-server:
-    name: Build and publish socker server docker image
+  publish-web-client:
+    name: Build and publish web client docker image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
       - uses: docker/build-push-action@v2
         with:
-          context: ./threeJS_memory/server
-          file: ./threeJS_memory/server/Dockerfile
+          context: ./threeJS_memory
+          file: ./threeJS_memory/Dockerfile
           push: true
-          tags: ghcr.io/juliengery/socket-game-server:latest
+          tags: ghcr.io/juliengery/web-client:latest

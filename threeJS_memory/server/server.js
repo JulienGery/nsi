@@ -33,10 +33,6 @@ const initCards = (room) => {
     return cards
 }
 
-// const getCards = (room) => {
-//     return rooms[room].cards
-// }
-
 const setPlayersNotReady = (room) => {
     const players = rooms[room].players
     players.forEach(id => {
@@ -56,6 +52,8 @@ const getPlayers = (room) => {
     }
     return players
 }
+
+
 const arePlayerReady = (room) => {
     const players = rooms[room].players
     for (let i = 0; i < players.length; i++) {
@@ -64,6 +62,23 @@ const arePlayerReady = (room) => {
         }
     }
     return true
+}
+
+
+const onLeave = (socket) => {
+    if (users[socket.id]) {
+        const user = users[socket.id]
+        const room = user.room
+        console.log(`${user.name} has left`)
+        rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
+        socket.to(room).emit('update-room', getPlayers(room))
+        socket.leave(room)
+        delete users[user]
+        if (rooms[room].players.length == 0) {
+            console.log(`delete room ${room}`)
+            delete rooms[room]
+        }
+    }
 }
 
 io.on('connect', socket => {
@@ -79,7 +94,7 @@ io.on('connect', socket => {
                 ]
             }
         } else if (rooms[room].started) {
-            cb("room started")
+            cb(false)
             return
         }
 
@@ -101,6 +116,11 @@ io.on('connect', socket => {
             "players": players,
             "cards": rooms[room].cards
         })
+    })
+
+    socket.on('leave-room', cb => {
+        onLeave(socket)
+        cb(true)
     })
 
 
@@ -126,13 +146,18 @@ io.on('connect', socket => {
                 //TODO add point
                 console.log('pair found\t' + cardIndex)
                 socket.to(room).emit('action', action, cardIndex);
+                users[socket.id].points++;
+                io.to(room).emit('update-room', getPlayers(room))
                 break;
+
             case 'turnback-card':
                 console.log('turnback card\t' + cardIndex)
                 socket.to(room).emit('action', action, cardIndex)
                 break;
 
         }
+
+        
     })
 
     socket.on('submit-card', (url, cb) => {
@@ -190,19 +215,7 @@ io.on('connect', socket => {
     })
 
     socket.on('disconnect', () => {
-        if (users[socket.id]) {
-            const user = users[socket.id]
-            const room = user.room
-            console.log(`${user.name} has left`)
-            rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
-            socket.to(room).emit('update-room', getPlayers(room))
-            socket.leave(room)
-            delete users[user]
-            if (rooms[room].players.length == 0) {
-                console.log(`delete room ${room}`)
-                delete rooms[room]
-            }
-        }
+        onLeave(socket)
     })
 })
 

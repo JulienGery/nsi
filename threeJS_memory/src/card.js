@@ -1,5 +1,18 @@
 import * as THREE from 'three'
-import { scene } from './script.js';
+import { scene } from './tmp.js';
+
+
+
+const computeBezierCurve = (array, t) => {
+    for (let i = 0; i < array.length - 1; i++) {
+        array[i].slerp(array[i + 1], t)
+    }
+    array.pop()
+    if (array.length == 1) {
+        return array[0]
+    }
+    return computeBezierCurve(array, t)
+}
 
 export class Card {
 
@@ -22,23 +35,26 @@ export class Card {
         this.card.position.set(vector.x, vector.y, vector.z)
     }
 
-    rotate(start, end, coef) {
+    rotate(start, end, time) {
         const clock = new THREE.Clock();
+        const quaternions = [start]
+        
+        for (let i = 0; i < 2; i++) {
+            quaternions.push(new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
+        }
+        quaternions.push(end)
 
         const actualRotate = () => {
-            //TODO use quaternion (and see why does it break)
             const elapsedTime = clock.getElapsedTime();
-            this.card.rotation.y = 10 * elapsedTime * coef + start;
+            const quaternionsClone = quaternions.map(q => q.clone())
+            const newQ = computeBezierCurve(quaternionsClone, elapsedTime / time)
+            this.card.setRotationFromQuaternion(newQ)
 
-            // const q = start.slerp(end, elapsedTime*.01)
-            // this.card.setRotationFromQuaternion(q)
-
-            if (elapsedTime < 0.31415926535) {
+            if (elapsedTime < time) {
                 window.requestAnimationFrame(actualRotate)
             }
             else {
-                // this.card.setRotationFromQuaternion(end)
-                this.card.rotation.y = end;
+                this.card.setRotationFromQuaternion(end)
             }
         }
 
@@ -55,7 +71,7 @@ export class Card {
 
             const lerpPos = from.clone()
 
-            lerpPos.lerp(to, elapsedTime/time)
+            lerpPos.lerp(to, elapsedTime / time)
             this.setPlace(lerpPos)
 
             if (elapsedTime < time) {
