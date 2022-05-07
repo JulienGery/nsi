@@ -7,16 +7,16 @@ export const displayToaster = (text = '', backgroundColor = '', color = '', prog
     if(snackbar){
       document.body.removeChild(snackbar)
     }
-    
+
     const toaster = document.createElement('div')
     toaster.id = 'snackbar'
-    toaster.style.backgroundColor = backgroundColor
-    toaster.style.color = color
+    // toaster.style.backgroundColor = backgroundColor
+    // toaster.style.color = color
     toaster.textContent = text
     toaster.className = 'show'
-    const progressBar = document.createElement('div')
-    progressBar.style.backgroundColor = progressBarColor
-    progressBar.className = 'progress'
+    // const progressBar = document.createElement('div')
+    // progressBar.style.backgroundColor = progressBarColor
+    // progressBar.className = 'progress'
     //   toaster.appendChild(progressBar)
     document.body.appendChild(toaster)
 
