@@ -49,7 +49,6 @@ export class Card {
     rotate(start, end, time, vec) {
         const clock = new THREE.Clock();
         const quaternions = [start]
-
         for (let i = 0; i < 1; i++) {
             quaternions.push(vec? new THREE.Quaternion(vec.y*-1, vec.x, 0, 0): new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
         }

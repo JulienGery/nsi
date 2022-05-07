@@ -149,3 +149,4 @@ socket.on('update-cards', cards => {
 form.addEventListener("submit", e => {
     e.preventDefault()
 })
+    
