@@ -12,7 +12,7 @@ import { socket } from './script';
 
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
-let uv = new THREE.Vector2(0, 0);
+let uv;
 
 export const start = () => {
 
