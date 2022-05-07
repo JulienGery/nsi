@@ -1,4 +1,3 @@
-import './toaster.css'
 import './progressBar.css'
 
 export const displayToaster = (text = '', backgroundColor = '', color = '', progressBarColor = '') => {
