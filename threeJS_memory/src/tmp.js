@@ -29,7 +29,7 @@ export const start = () => {
     scene.add(pointLight);
 
     stats.showPanel(0);
-    // document.body.appendChild(stats.dom);
+    document.body.appendChild(stats.dom);
 
     const sizes = {
         width: window.innerWidth,

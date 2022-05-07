@@ -1,6 +1,7 @@
 import { Card } from './card.js'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { displayToaster } from './toaster.js';
 
 
 const gltfLoader = new GLTFLoader();
@@ -31,6 +32,7 @@ export class Game {
 
 
     initTexture(cards) {
+        displayToaster('downloading texture')
         for(let i = 0; i<this.numberCard/2; i++){
             this.downloadTexture(cards[this.findIndex(i, cards)].textureURL, i, cards)
         }
@@ -40,7 +42,6 @@ export class Game {
         loader.loadAsync(URL).then((rep) => {
             this.texture[index] = new THREE.MeshBasicMaterial({color: "#ffffff", map: rep})
             if(!this.texture.includes(undefined) && this.texture.length == this.numberCard/2){
-                console.log('creating cards')
                 this.CreateCard(cards)
             }
         }).catch((err) => {
@@ -50,6 +51,7 @@ export class Game {
     }
 
     CreateCard(cards) {
+        displayToaster('creating card')
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
             gltf.scene.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
             for(let i = 0; i<this.numberCard; i++){

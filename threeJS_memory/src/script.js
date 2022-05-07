@@ -86,8 +86,6 @@ const displayForm = (name = '', room = '') => {
     button.onclick = submitForm
 }
 
-
-
 socket.on('connect', () => {
     console.log('success')
     displayForm()
@@ -116,8 +114,7 @@ btn.onclick = submitCard
 
 const abtn = document.createElement('button')
 abtn.className = 'submit'
-
-abtn.innerHTML = "set ready"
+abtn.textContent ="set ready"
 
 abtn.onclick = function () {
     document.body.innerHTML = '<canvas class="webgl"></canvas>'
