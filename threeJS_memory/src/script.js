@@ -9,7 +9,8 @@ export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
 const regex = /^\d+$/g
-
+let name;
+let room;
 
 const submitCard = async () => {
 
@@ -53,8 +54,8 @@ const sendCards = (url) => {
 }
 
 const submitForm = () => {
-    const name = document.getElementById('name').value
-    const room = document.getElementById('room').value
+    name = document.getElementById('name').value
+    room = document.getElementById('room').value
     if (name && room) {
         socket.emit('join-room', name, room, cb => {
             if (!cb) {
@@ -67,6 +68,8 @@ const submitForm = () => {
                 document.body.appendChild(form)
             }
         })
+    }else{
+      displayToaster("fill form")
     }
 }
 
@@ -96,7 +99,8 @@ socket.on('update-room', dict => {
 
 
 const form = document.createElement('form')
-form.style.position = "absolute"
+// form.style.position = "absolute"
+form.className = 'formImage'
 
 const textInput = document.createElement("input")
 textInput.type = "text"
@@ -109,9 +113,6 @@ btn.innerText = "submit"
 btn.className = 'submit'
 
 btn.onclick = submitCard
-
-
-// let br = document.createElement('br')
 
 const abtn = document.createElement('button')
 abtn.className = 'submit'
@@ -134,7 +135,7 @@ button.className = 'submit'
 button.innerText = "leave"
 button.onclick = function () {
     socket.emit('leave-room', cb => {
-        displayForm()
+        displayForm(name, room)
     })
 }
 form.appendChild(button)

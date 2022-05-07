@@ -98,7 +98,7 @@ socket.on('update-room', dict => {
 
 
 const form = document.createElement('form')
-form.style.position = "absolute"
+// form.style.position = "absolute"
 
 const textInput = document.createElement("input")
 textInput.type = "text"
@@ -134,13 +134,14 @@ form.appendChild(abtn)
 const button = document.createElement('button')
 button.className = 'submit'
 button.innerText = "leave"
+
 button.onclick = function () {
     socket.emit('leave-room', cb => {
         displayForm()
     })
 }
-form.appendChild(button)
 
+form.appendChild(button)
 
 socket.on('update-cards', cards => {
   console.log(cards)
@@ -149,4 +150,3 @@ socket.on('update-cards', cards => {
 form.addEventListener("submit", e => {
     e.preventDefault()
 })
-    
