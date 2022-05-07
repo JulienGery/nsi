@@ -90,8 +90,7 @@ io.on('connect', socket => {
                 "players": [],
                 "cards": [
                     // "https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/snkellefaitpeur.png",
-                    // "https://img-19.commentcamarche.net/WNCe54PoGxObY8PCXUxMGQ0Gwss=/480x270/smart/d8c10e7fd21a485c909a5b4c5d99e611/ccmcms-commentcamarche/20456790.jpg"
-                ]
+                    ]
             }
         } else if (rooms[room].started) {
             cb(false)
@@ -108,10 +107,8 @@ io.on('connect', socket => {
         socket.join(room)
         console.log(`${name} joined ${room}`)
         rooms[room].players.push(socket.id)
-        // cardsURL.map((url) => rooms[room].cards.push(url))
         const players = getPlayers(room)
         socket.to(room).emit('update-room', players)
-        // console.log(io.sockets.adapter.rooms.get(room))
         cb({
             "players": players,
             "cards": rooms[room].cards
@@ -215,6 +212,12 @@ io.on('connect', socket => {
     })
 
     socket.on('disconnect', () => {
+        const room = users[socket.id].room
+        if(rooms[room].started && rooms[room].players[rooms[room].playerTurn] == socket.id){
+            rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
+        const playerTurn = rooms[room].playerTurn
+        io.to(rooms[room].players[playerTurn]).emit('next-player')
+        }
         onLeave(socket)
     })
 })
