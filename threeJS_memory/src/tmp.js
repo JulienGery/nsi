@@ -3,6 +3,7 @@ import * as THREE from 'three'
 export const scene = new THREE.Scene();
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 // import * as dat from 'dat.gui'
+import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
@@ -11,6 +12,7 @@ import { socket } from './script';
 
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
+let uv = new THREE.Vector2(0, 0);
 
 export const start = () => {
 
@@ -84,8 +86,7 @@ export const start = () => {
     function pickCard() {
 
         raycaster.setFromCamera(mouse, camera);
-        return raycaster.intersectObjects([...Array(game.allCard.length).keys()].map(i => scene.children[i + 2]), true);
-
+        return raycaster.intersectObjects(game.allCard.map(card => card.card), true);
     }
 
     function onMouseClick(event) {
@@ -142,7 +143,7 @@ export const start = () => {
     }
 
     const turnCard = (cardIndex) => {
-        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10);
+        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10, uv);
         haveRotate.push(cardIndex);
         moveDown(cardIndex)
     }
@@ -163,6 +164,7 @@ export const start = () => {
             for (let i = 0; i < game.allCard.length; i++) {
                 //getting index of the card under the mouse in allCard and moving it up and moving the older card down
                 if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+                    uv = intersects[0].uv.sub(new THREE.Vector2(0.5, 0.5));
                     if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
                         if (cardUnder.length > 0) {
                             socket.emit('action', 'move-down', cardUnder[0])
@@ -197,7 +199,7 @@ export const start = () => {
 
 
     const addListener = () => {
-        console.log('my turn')
+        displayToaster("it's your turn")
         window.addEventListener('click', onMouseClick)
         window.addEventListener('pointermove', onMove)
 

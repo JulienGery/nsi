@@ -1,13 +1,14 @@
 import { io } from 'socket.io-client'
 import './form.css'
 import { TextureLoader } from 'three'
+import { displayToaster } from './toaster.js'
 import { updateTable, addTable } from './tableau.js'
 import { start } from './tmp.js'
 const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
-const regex = /(?<=axios:\s*)\d+/g
+const regex = /^\d+$/g
 
 
 const submitCard = async () => {
@@ -21,7 +22,6 @@ const submitCard = async () => {
         axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
             const data = response.data;
-
             data.forEach(element => sendCards(element.download_url))
 
         }).catch((err) => {
@@ -44,7 +44,7 @@ const submitCard = async () => {
 
 const sendCards = (url) => {
     socket.emit('submit-card', url, cb => {
-        console.log(cb)
+        // console.log(cb)
         if (cb) {
             textInput.style.backgroundColor = "green"
             textInput.value = ""
@@ -57,9 +57,8 @@ const submitForm = () => {
     const room = document.getElementById('room').value
     if (name && room) {
         socket.emit('join-room', name, room, cb => {
-            console.log(cb)
             if (!cb) {
-                console.log('game started')
+                displayToaster('game already started', 'red', 'white', '#08d')
             }
             else {
                 addTable()
@@ -72,8 +71,14 @@ const submitForm = () => {
 }
 
 
-const displayForm = () => {
-    document.body.innerHTML = '<div class="form" id="form"><div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button></div>'
+const displayForm = (name = '', room = '') => {
+    document.body.innerHTML = '<div class="form" id="form"><div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" value="'+name+'" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" value="'+room+'" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button></div>'
+    const roomInput = document.getElementById('room')
+    roomInput.addEventListener('keypress', (event) =>{
+      if(event.key == 'Enter'){
+        submitForm()
+      }
+    })
     const button = document.getElementById('button')
     button.onclick = submitForm
 }

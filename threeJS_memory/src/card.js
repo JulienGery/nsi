@@ -14,6 +14,17 @@ const computeBezierCurve = (array, t) => {
     return computeBezierCurve(array, t)
 }
 
+const computeBezierCurveLine = (array, t) => {
+    for( let i = 0; i<array.length -  1; i++){
+        array[i].lerp(array[i +1], t)
+    }
+    array.pop()
+    if(array.length == 1){
+        return array[0]
+    }
+    return computeBezierCurveLine(array, t)
+}
+
 export class Card {
 
     constructor(pos, texture, name, card, textureURL) {
@@ -35,19 +46,23 @@ export class Card {
         this.card.position.set(vector.x, vector.y, vector.z)
     }
 
-    rotate(start, end, time) {
+    rotate(start, end, time, vec) {
         const clock = new THREE.Clock();
         const quaternions = [start]
         
-        for (let i = 0; i < 2; i++) {
-            quaternions.push(new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
+        for (let i = 0; i < 1; i++) {
+            console.log(vec? "pass": "fail")
+            quaternions.push(vec? new THREE.Quaternion(vec.y, vec.x, 0, 0): new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
         }
+        console.log(quaternions)
         quaternions.push(end)
 
         const actualRotate = () => {
             const elapsedTime = clock.getElapsedTime();
             const quaternionsClone = quaternions.map(q => q.clone())
+            
             const newQ = computeBezierCurve(quaternionsClone, elapsedTime / time)
+
             this.card.setRotationFromQuaternion(newQ)
 
             if (elapsedTime < time) {
@@ -62,22 +77,23 @@ export class Card {
 
     }
 
-    async moveTo(from, to, time = 1) {
-
+    async moveTo(start, end, time = 1) {
+        const array = [start, end]
         const clock = new THREE.Clock();
 
         const actualMouveTo = async () => {
             const elapsedTime = clock.getElapsedTime();
+            if (elapsedTime <= time) {
+                const arrayClone = array.map(e => e.clone())
 
-            const lerpPos = from.clone()
+                // const lerpPos = start.clone()
 
-            lerpPos.lerp(to, elapsedTime / time)
-            this.setPlace(lerpPos)
-
-            if (elapsedTime < time) {
+                // lerpPos.lerp(end, elapsedTime / time)
+                const lerpPos = computeBezierCurveLine(arrayClone, elapsedTime / time)
+                this.setPlace(lerpPos)            
                 window.requestAnimationFrame(actualMouveTo);
             } else {
-                this.setPlace(to)
+                this.setPlace(end)
             }
         }
         window.requestAnimationFrame(actualMouveTo)
