@@ -47,6 +47,7 @@ const sendCards = (url) => {
     socket.emit('submit-card', url, cb => {
         // console.log(cb)
         if (cb) {
+          text.textContent = `card count ${cb.length}`
             textInput.style.backgroundColor = "green"
             textInput.value = ""
         } else { textInput.style.backgroundColor = "red" }
@@ -63,6 +64,7 @@ const submitForm = () => {
             }
             else {
                 addTable()
+                text.textContent = `card count ${cb.cards.length}`
                 updateTable(cb.players)
                 document.body.removeChild(document.getElementById('form'))
                 document.body.appendChild(form)
@@ -122,7 +124,11 @@ abtn.onclick = function () {
     socket.emit('ready')
     start()
 }
+const text = document.createElement('div')
+text.className = 'title'
+text.style.textAlign = 'center'
 
+form.appendChild(text)
 form.appendChild(textInput)
 form.appendChild(btn)
 form.appendChild(abtn)
@@ -137,9 +143,8 @@ button.onclick = function () {
 }
 form.appendChild(button)
 
-
 socket.on('update-cards', cards => {
-  console.log(cards)
+  text.textContent = `card count ${cards.length}`
 })
 
 form.addEventListener("submit", e => {
