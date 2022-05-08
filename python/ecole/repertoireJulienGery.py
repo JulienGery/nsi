@@ -1,16 +1,17 @@
 import csv
 
+repertoire = {}
+
 try :                                               #pour eviter les erreurs si le fichier n'exite pas
     with open('julienGery.csv', 'r') as f:
-        repertoire = {}
         reader = csv.DictReader(f)
         for i in reader:
             values = list(i.values())               #création d'une liste [nom, numéro]
             repertoire[values[0]] =  values[1]      #ajout au dictionnaire
 except:
-    repertoire = {}
+    pass
     
-# le repertoire est construit de la manière nom: numéro
+# le repertoire est construit sous la forme {nom: numéro}
 
 def rechercheRepertoire():
     """
@@ -24,7 +25,7 @@ def rechercheRepertoire():
 
 def ecritRepertoire():
     """
-    écrit un nom dans le répertoire
+    écrit un nom dans le répertoire. ne retourne rien
     """
     while True:
         name = input("Nom (0 pour terminer) : ")
@@ -51,7 +52,7 @@ def menu():
             else:
                 rechercheRepertoire()
         except ValueError:
-            print('saisie incorrect')
+            print('saisie incorrecte')
 
-if __name__ == "__main__":                                                      #cette ligne ne sert a rien
-    menu()                                                                      #lance le menu
+
+menu()                                                                          #lance le menu
