@@ -73,7 +73,7 @@ export class Game {
     spread() {
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard; j++) {
-                this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet), .1);
+                this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet), Math.random() * .2 + .1);
             }
         }
     }

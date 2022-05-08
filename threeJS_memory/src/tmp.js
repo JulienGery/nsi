@@ -149,12 +149,12 @@ export const start = () => {
     }
 
     const moveUp = (i) => {
-        const pos = game.allCard[i].pos.clone()
+        const pos = game.allCard[i].pos
         game.allCard[i].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
     }
 
     const moveDown = (cardIndex) => {
-        const pos = game.allCard[cardIndex].pos.clone()
+        const pos = game.allCard[cardIndex].pos
         game.allCard[cardIndex].moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
     }
 
@@ -217,7 +217,7 @@ export const start = () => {
 
         window.removeEventListener('click', beforeSpread)
 
-        setTimeout(() => { controls.enabled = true }, 150);
+        setTimeout(() => { controls.enabled = true }, 350);
 
     }
 
