@@ -1,4 +1,4 @@
-.progress{
+.progress {
     position: relative;
     background-color: blue;
     width: 0%;
@@ -6,12 +6,12 @@
     animation: progres 2.7s linear
 }
 
-@keyframes progres{
-    0%{
+@keyframes progres {
+    0% {
         width: 100%;
     }
-    
-    100%{
+
+    100% {
         width: 0px;
     }
 }

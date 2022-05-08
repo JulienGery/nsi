@@ -29,7 +29,7 @@ export class Explosion {
         const color = new THREE.Color()
         const colors = []
         for (let i = 0; i < nombreParticules; i++) {
-            color.setHSL(Math.random() + .1, Math.random() + .1, Math.random() + .1);
+            color.setHSL(Math.random() * .9 + .1, Math.random() * .9 + .1, Math.random() * .9 + .1);
             colors.push(color.r, color.g, color.b);
             const vec = randomUnitVector()
             vec.multiplyScalar(.1)
@@ -47,7 +47,7 @@ export class Explosion {
             const speed = this.speeds[i]
 
             // const V = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
-            const V = Math.exp(-elapsedTime*.2+2)*Math.cos(elapsedTime+5)
+            const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime + 5)
             const startVector = this.vectors[i]
             const vec = this.vectors[i].clone().multiplyScalar(V)
             // console.log(vec)

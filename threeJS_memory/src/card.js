@@ -15,11 +15,11 @@ const computeBezierCurve = (array, t) => {
 }
 
 const computeBezierCurveLine = (array, t) => {
-    for( let i = 0; i<array.length -  1; i++){
-        array[i].lerp(array[i +1], t)
+    for (let i = 0; i < array.length - 1; i++) {
+        array[i].lerp(array[i + 1], t)
     }
     array.pop()
-    if(array.length == 1){
+    if (array.length == 1) {
         return array[0]
     }
     return computeBezierCurveLine(array, t)
@@ -50,15 +50,15 @@ export class Card {
         const clock = new THREE.Clock();
         const quaternions = [start]
         for (let i = 0; i < 1; i++) {
-            quaternions.push(vec? new THREE.Quaternion(vec.y*-1, vec.x, 0, 0): new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
+            quaternions.push(vec ? new THREE.Quaternion(vec.y * -1, vec.x, 0, 0) : new THREE.Quaternion(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize())
         }
-    
+
         quaternions.push(end)
 
         const actualRotate = () => {
             const elapsedTime = clock.getElapsedTime();
             const quaternionsClone = quaternions.map(q => q.clone())
-            
+
             const newQ = computeBezierCurve(quaternionsClone, elapsedTime / time)
 
             this.card.setRotationFromQuaternion(newQ)
@@ -88,7 +88,7 @@ export class Card {
 
                 // lerpPos.lerp(end, elapsedTime / time)
                 const lerpPos = computeBezierCurveLine(arrayClone, elapsedTime / time)
-                this.setPlace(lerpPos)            
+                this.setPlace(lerpPos)
                 window.requestAnimationFrame(actualMouveTo);
             } else {
                 this.setPlace(end)

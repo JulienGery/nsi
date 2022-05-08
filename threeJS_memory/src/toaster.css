@@ -12,7 +12,7 @@
     left: 50%;
     top: 30px;
     font-size: 17px;
-  }
+}
 
 #snackbar.show {
     visibility: visible;
@@ -20,11 +20,25 @@
 }
 
 @keyframes fadein {
-    from{top: 0; opacity: 0;}
-    to{top: 30px; opacity: 1;}
+    from {
+        top: 0;
+        opacity: 0;
+    }
+
+    to {
+        top: 30px;
+        opacity: 1;
+    }
 }
 
 @keyframes fadeout {
-    from{top: 30px; opacity: 1;}
-    to{top: 0px; opacity: 0;}
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+
+    to {
+        top: 0px;
+        opacity: 0;
+    }
 }
