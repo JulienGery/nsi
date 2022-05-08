@@ -7,7 +7,7 @@ import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
-import { socket } from './script';
+import { socket } from './form.js';
 
 
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
