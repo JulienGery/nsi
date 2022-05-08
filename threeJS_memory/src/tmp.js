@@ -110,13 +110,12 @@ export const start = () => {
                     game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI / 10);
                 }
 
-
-                if (cardUnder.length > 0) {
-                    socket.emit('action', 'move-down', cardUnder[0])
-                    onMoveDown()
-                }
                 socket.emit('next-player', cb =>{
                     if(!cb){
+                        if (cardUnder.length > 0) {
+                            socket.emit('action', 'move-down', cardUnder[0])
+                            onMoveDown()
+                        }
                         removeListener();
                         haveRotate = [];
                     return

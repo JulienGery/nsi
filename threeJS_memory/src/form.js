@@ -58,6 +58,7 @@ class JoinRoomForm {
 
     removeForm() {
         document.body.removeChild(this.form)
+        this.isDisplayed = false
     }
 
 }
@@ -152,6 +153,7 @@ class RoomForm {
 
     removeForm() {
         document.body.removeChild(this.form)
+        this.isDisplayed = false
     }
 }
 
