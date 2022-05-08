@@ -102,11 +102,25 @@ const form = document.createElement('form')
 // form.style.position = "absolute"
 form.className = 'formImage'
 
+const inputContainer = document.createElement('div')
+inputContainer.className = 'input-container ic1'
+
 const textInput = document.createElement("input")
 textInput.type = "text"
 textInput.className = 'input'
-textInput.placeholder = "add image"
+textInput.placeholder = " "
 textInput.id = "url"
+
+const cut = document.createElement('div')
+cut.className = 'cut'
+
+const placeholder = document.createElement('label')
+placeholder.className = "placeholder"
+placeholder.textContent = 'add image'
+
+inputContainer.appendChild(textInput)
+inputContainer.appendChild(cut)
+inputContainer.appendChild(placeholder)
 
 const btn = document.createElement("button")
 btn.innerText = "submit"
@@ -129,7 +143,7 @@ text.className = 'title'
 text.style.textAlign = 'center'
 
 form.appendChild(text)
-form.appendChild(textInput)
+form.appendChild(inputContainer)
 form.appendChild(btn)
 form.appendChild(abtn)
 

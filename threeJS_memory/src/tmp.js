@@ -107,7 +107,7 @@ export const start = () => {
             } else {
                 for (let i = 0; i < haveRotate.length; i++) {
                     socket.emit('action', 'turnback-card', haveRotate[i])
-                    game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI/10);
+                    game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI / 10);
                 }
 
                 removeListener()
@@ -143,7 +143,7 @@ export const start = () => {
     }
 
     const turnCard = (cardIndex) => {
-        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10, uv);
+        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI / 10, uv);
         haveRotate.push(cardIndex);
         moveDown(cardIndex)
     }
@@ -211,11 +211,11 @@ export const start = () => {
     }
 
     const gameStart = () => {
+        window.removeEventListener('pointermove', updateMouse)
 
         game.spread()
 
         window.removeEventListener('click', beforeSpread)
-        window.removeEventListener('pointermove', updateMouse)
 
         setTimeout(() => { controls.enabled = true }, 150);
 
@@ -258,7 +258,7 @@ export const start = () => {
                 moveDown(cardIndex)
                 break;
             case 'turn-card':
-                game.allCard[cardIndex].rotate(qFront, qBack, Math.PI/10)
+                game.allCard[cardIndex].rotate(qFront, qBack, Math.PI / 10)
                 break;
             case 'pair-found':
                 pairFound(cardIndex)
@@ -267,7 +267,7 @@ export const start = () => {
                 moveUp(cardIndex)
                 break;
             case 'turnback-card':
-                game.allCard[cardIndex].rotate(qBack, qFront, Math.PI/10)
+                game.allCard[cardIndex].rotate(qBack, qFront, Math.PI / 10)
         }
     })
 

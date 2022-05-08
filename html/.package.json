@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "complex.js": "^2.0.15",
+    "expr-eval": "^2.0.2"
+  }
+}
