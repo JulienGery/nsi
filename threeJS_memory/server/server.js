@@ -168,7 +168,7 @@ io.on('connect', socket => {
         cb(false)
     })
 
-    socket.on('next-player', () => {
+    socket.on('next-player', cb => {
 
         const room = users[socket.id].room
 
@@ -178,7 +178,13 @@ io.on('connect', socket => {
         // console.log(rooms[room].players[playerTurn].name)
         // console.log(playerTurn)
         console.log(`next-player is ${users[rooms[room].players[playerTurn]].name}`)
-        io.to(rooms[room].players[playerTurn]).emit('next-player')
+        if(rooms[room].players[playerTurn] != socket.id){
+            socket.to(rooms[room].players[playerTurn]).emit('next-player')
+            cb(false)
+        }else{
+            cb(true)
+        }
+        
     })
 
     socket.on('ready', () => {
