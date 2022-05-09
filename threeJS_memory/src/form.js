@@ -17,6 +17,10 @@ class JoinRoomForm {
         this.name = ''
         this.room = ''
         this.isDisplayed = false
+        this.form = document.createElement('div')
+        this.form.className = 'form'
+        this.form.id = 'form'
+        this.form.innerHTML = '<div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" value="' + this.name + '" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" value="' + this.room + '" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button>'
     }
 
     submitForm() {
@@ -34,25 +38,25 @@ class JoinRoomForm {
                 roomForm.displayForm()
             }
             })
+        }else{
+            displayToaster('fill form')
         }
     }
 
     displayForm() {
         if(!this.isDisplayed){
             this.isDisplayed = true
-            document.body.innerHTML += '<div class="form" id="form"><div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" value="' + this.name + '" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" value="' + this.room + '" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button></div>'
-
+            document.body.appendChild(this.form)
             this.button = document.getElementById('button')
             this.button.onclick = this.submitForm.bind(this)
-
             this.form = document.getElementById('form')
-            
             this.roomInput = document.getElementById('room')
             this.roomInput.addEventListener('keypress', event => {
                 if (event.key == 'Enter') {
                     this.submitForm()
                 }
             })
+            console.log(this)
         }
     }
 
@@ -66,6 +70,10 @@ class JoinRoomForm {
 class RoomForm {
     constructor(){
         this.isDisplayed = false
+        this.form = document.createElement('div')
+        this.form.className = 'formImage'
+        this.form.id = 'roomForm'
+        this.form.innerHTML = '<div class="title" id="cardsCount" style="text-align: center;">card count 0</div><div class="input-container ic1"><input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label></div><button class="submit" id="submitButton">submit</button><button class="submit" id="setReady">set ready</button><button class="submit" id="leaveButton">leave</button>'
     }
 
     submitCard(jsp = '') {
@@ -115,7 +123,9 @@ class RoomForm {
 
     setReady() {
         this.removeForm()
-        document.body.innerHTML += '<canvas class="webgl"></canvas>'
+        const canvas = document.createElement('canvas')
+        canvas.className = "webgl"
+        document.body.appendChild(canvas)
         socket.emit('ready')
         start()
     }
@@ -130,8 +140,7 @@ class RoomForm {
     displayForm() {
         if(!this.isDisplayed){
             this.isDisplayed = true
-            document.body.innerHTML += '<div class="formImage" id="roomForm"><div class="title" id="cardsCount" style="text-align: center;">card count 0</div><div class="input-container ic1"><input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label></div><button class="submit" id="submitButton">submit</button><button class="submit" id="setReady">set ready</button><button class="submit" id="leaveButton">leave</button></div>'
-
+            document.body.appendChild(this.form)
             this.form = document.getElementById('roomForm')
 
             this.cardsCount = document.getElementById('cardsCount')
@@ -170,4 +179,9 @@ socket.on('connect', () => {
 
 socket.on('update-room', dict => {
     updateTable(dict)
+    // addTable()
+})
+
+socket.on('update-cards', cards => {
+    roomForm.updateCard(cards.length)
 })
