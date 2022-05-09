@@ -188,15 +188,8 @@ io.on('connect', socket => {
         rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
         const playerTurn = rooms[room].playerTurn
 
-        // console.log(rooms[room].players[playerTurn].name)
-        // console.log(playerTurn)
         console.log(`next-player is ${users[rooms[room].players[playerTurn]].name}`)
-        if(rooms[room].players[playerTurn] != socket.id){
-            socket.to(rooms[room].players[playerTurn]).emit('next-player')
-            cb(false)
-        }else{
-            cb(true)
-        }
+        socket.to(rooms[room].players[playerTurn]).emit('next-player')    
         
     })
 
