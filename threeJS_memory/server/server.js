@@ -173,7 +173,8 @@ io.on('connect', socket => {
             case 'remove':
                 if(cards.includes(url)){
                     cards.splice(cards.indexOf(url), 1)
-                    cb('update-cards', cards)                
+                    socket.to(room).emit('update-cards', cards)
+                    cb(cards)               
                 }
                 cb(false)
                 break
