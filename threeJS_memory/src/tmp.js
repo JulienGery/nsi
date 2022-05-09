@@ -117,7 +117,7 @@ export const start = () => {
                         onMoveDown()
                     }
                     socket.emit('next-player')
-                    return
+                    retubitern
                 }                
             }
             haveRotate = [];

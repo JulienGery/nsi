@@ -36,6 +36,7 @@ class JoinRoomForm {
                 updateTable(cb.players)
                 this.removeForm()
                 roomForm.displayForm()
+                roomForm.updateCard(cb.cards)
             }
             })
         }else{
