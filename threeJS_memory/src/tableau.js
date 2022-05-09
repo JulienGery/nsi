@@ -1,4 +1,5 @@
 import './tableau.css'
+export let playerNumbers;
 
 const innerHTML = '<div class="col col-2">Name</div><div class="col col-3" style="padding-left: 2%;padding-right: 2%;;">points</div><div class="col col-4">ready</div>'
 
@@ -14,9 +15,9 @@ header.innerHTML = innerHTML
 
 
 export const updateTable = (dict) => {
-
-    ul.innerHTML = ''
-    ul.appendChild(header)
+    playerNumbers = dict.length;
+    ul.innerHTML = '';
+    ul.appendChild(header);
 
     Object.values(dict).forEach(element => {
 

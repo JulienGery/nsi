@@ -8,7 +8,7 @@ import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
 import { Game } from './Game.js'
 import { socket } from './form.js';
-
+import { playerNumbers } from './tableau.js';
 
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
@@ -109,18 +109,16 @@ export const start = () => {
                     socket.emit('action', 'turnback-card', haveRotate[i])
                     game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI / 10);
                 }
-
-                socket.emit('next-player', cb =>{
-                    if(!cb){
-                        if (cardUnder.length > 0) {
-                            socket.emit('action', 'move-down', cardUnder[0])
-                            onMoveDown()
-                        }
-                        removeListener();
-                        haveRotate = [];
-                    return
+                if(playerNumbers > 1){
+                    removeListener();
+                    haveRotate = [];
+                    if (cardUnder.length > 0) {
+                        socket.emit('action', 'move-down', cardUnder[0])
+                        onMoveDown()
                     }
-                })                
+                    socket.emit('next-player')
+                    return
+                }                
             }
             haveRotate = [];
         }
