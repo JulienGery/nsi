@@ -12,6 +12,7 @@ import { playerNumbers } from './tableau.js';
 
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
+const centerCard = new THREE.Vector2(0.5, 0.5);
 let uv;
 
 export const start = () => {
@@ -117,7 +118,7 @@ export const start = () => {
                         onMoveDown()
                     }
                     socket.emit('next-player')
-                    retubitern
+                    return
                 }                
             }
             haveRotate = [];
@@ -143,7 +144,7 @@ export const start = () => {
     }
 
     const turnCard = (cardIndex) => {
-        game.allCard[cardIndex].rotate(qFront, qBack, Math.PI / 10, uv);
+        game.allCard[cardIndex].rotate(game.allCard[cardIndex].card.quaternion, qBack, Math.PI / 10, uv);
         haveRotate.push(cardIndex);
         moveDown(cardIndex)
     }
@@ -164,14 +165,18 @@ export const start = () => {
             for (let i = 0; i < game.allCard.length; i++) {
                 //getting index of the card under the mouse in allCard and moving it up and moving the older card down
                 if (game.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
-                    uv = intersects[0].uv.sub(new THREE.Vector2(0.5, 0.5));
-                    if (!cardUnder.includes(i, 0) && !haveRotate.includes(i, 0)) {
+                    uv = intersects[0].uv.sub(centerCard);
+                    if (!cardUnder.includes(i, 0)) {
                         if (cardUnder.length > 0) {
                             socket.emit('action', 'move-down', cardUnder[0])
                             onMoveDown()
                         }
                         socket.emit('action', 'move-up', i)
-                        onMoveUp(i)
+                        if(!haveRotate.includes(i, 0)){
+                            onMoveUp(i)
+                        }else{
+                            cardUnder.push(i)
+                        }
                     }
 
                     break

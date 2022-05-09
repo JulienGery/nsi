@@ -29,15 +29,15 @@ class JoinRoomForm {
 
         if (this.name && this.room) {
             socket.emit('join-room', this.name, this.room, cb => {
-            if(!cb){
-                displayToaster('game already started')
-            }else{
-                addTable()
-                updateTable(cb.players)
-                this.removeForm()
-                roomForm.displayForm()
-                roomForm.updateCard(cb.cards)
-            }
+                if(!cb){
+                    displayToaster('game already started')
+                }else{
+                    addTable()
+                    updateTable(cb.players)
+                    this.removeForm()
+                    roomForm.displayForm()
+                    roomForm.updateCard(cb.cards)
+                }
             })
         }else{
             displayToaster('fill form')
@@ -96,7 +96,7 @@ class RoomForm {
                 array.forEach(async(index) => this.removeCards(this.cards[index]))
                 return
             }
-
+            //else
             axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
                 const data = response.data;
