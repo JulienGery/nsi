@@ -91,7 +91,7 @@ export const start = () => {
     }
 
     function onMouseClick(event) {
-
+        
         if (haveRotate.length == 2) {
             if (haveRotate[0] < haveRotate[1]) {
                 haveRotate.reverse();
@@ -107,9 +107,12 @@ export const start = () => {
                 }
             } else {
                 for (let i = 0; i < haveRotate.length; i++) {
+                    if(playerNumbers > 1){
                     socket.emit('action', 'turnback-card', haveRotate[i])
-                    game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI / 10);
-                }
+                    } else if (!cardUnder.includes(haveRotate[i])){
+                        game.allCard[haveRotate[i]].rotate(qBack, qFront, Math.PI / 10);
+                    }
+            }
                 if(playerNumbers > 1){
                     removeListener();
                     haveRotate = [];
@@ -121,7 +124,12 @@ export const start = () => {
                     return
                 }                
             }
-            haveRotate = [];
+            if(!haveRotate.includes(cardUnder[0])){
+                haveRotate = [];
+            }else{
+                haveRotate = [...cardUnder]
+                return
+            }
         }
 
         if (cardUnder.length >= 1) {
