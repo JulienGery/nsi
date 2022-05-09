@@ -157,15 +157,27 @@ io.on('connect', socket => {
         
     })
 
-    socket.on('submit-card', (url, cb) => {
+    socket.on('submit-card', (action, url, cb) => {
         console.log(url)
         const room = users[socket.id].room
-        if (!rooms[room].cards.includes(url)) {
-            rooms[room].cards.push(url)
-            socket.to(room).emit('update-cards', rooms[room].cards)
-            cb(rooms[room].cards)
+        const cards = rooms[room].cards
+        switch (action){
+            case 'add':
+                if (!cards.includes(url)) {
+                    cards.push(url)
+                    socket.to(room).emit('update-cards', cards)
+                    cb(cards)
+                }
+                cb(false)
+                break
+            case 'remove':
+                if(cards.includes(url)){
+                    cards.splice(cards.indexOf(url), 1)
+                    cb('update-cards', cards)                
+                }
+                cb(false)
+                break
         }
-        cb(false)
     })
 
     socket.on('next-player', cb => {
