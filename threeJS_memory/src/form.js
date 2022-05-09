@@ -8,7 +8,7 @@ const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
-const regex = /^\d+(?:\s*)$/g
+const regex = /^-?\d+(?:\s*)$/g
 
 
 class JoinRoomForm {
@@ -56,7 +56,6 @@ class JoinRoomForm {
                     this.submitForm()
                 }
             })
-            console.log(this)
         }
     }
 
@@ -69,6 +68,7 @@ class JoinRoomForm {
 
 class RoomForm {
     constructor(){
+        this.cards = []
         this.isDisplayed = false
         this.form = document.createElement('div')
         this.form.className = 'formImage'
@@ -76,12 +76,26 @@ class RoomForm {
         this.form.innerHTML = '<div class="title" id="cardsCount" style="text-align: center;">card count 0</div><div class="input-container ic1"><input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label></div><button class="submit" id="submitButton">submit</button><button class="submit" id="setReady">set ready</button><button class="submit" id="leaveButton">leave</button>'
     }
 
-    submitCard(jsp = '') {
+    submitCard() {
         const url = this.urlInput.value
         const number = url.match(regex)
-        
         if (number) {
             this.urlInput.value = ''
+            if(number<0){
+                const array = []
+                while (array.length != Math.abs(number) && array.length < this.cards.length) {
+                    const randomNumber = Math.floor(Math.random() * this.cards.length)
+                    if(!array.includes(randomNumber)){
+                        array.push(randomNumber)
+                    }
+                } 
+
+                array.sort((a, b) => b-a)
+                
+                array.forEach(async(index) => this.removeCards(this.cards[index]))
+                return
+            }
+
             axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
                 const data = response.data;
@@ -105,15 +119,16 @@ class RoomForm {
         }
     }
 
-    updateCard(number) {
-        this.cardsCount.textContent = `cards count ${number}`
+    updateCard(cards) {
+        this.cards = cards
+        this.cardsCount.textContent = `cards count ${this.cards.length}`
     }
 
 
     sendCards(url) {
-        socket.emit('submit-card', url, cb => {
+        socket.emit('submit-card', 'add', url, cb => {
             if (cb) {
-                this.updateCard(cb.length)
+                this.updateCard(cb)
                 this.urlInput.style.backgroundColor = 'green'
             } else {
                 this.urlInput.style.backgroundColor = 'red'
@@ -121,13 +136,26 @@ class RoomForm {
         })
     }
 
+    removeCards(url){
+        socket.emit('submit-card', 'remove', url, cb => {
+            console.log(cb)
+            if(cb){
+                this.updateCard(cb)
+            }
+        })
+    }
+
     setReady() {
-        this.removeForm()
-        const canvas = document.createElement('canvas')
-        canvas.className = "webgl"
-        document.body.appendChild(canvas)
-        socket.emit('ready')
-        start()
+        if(this.cards.length){
+            this.removeForm()
+            const canvas = document.createElement('canvas')
+            canvas.className = "webgl"
+            document.body.appendChild(canvas)
+            socket.emit('ready')
+            start()
+        }else{
+            displayToaster("can't start, no cards")
+        }
     }
 
     leaveRoom() {
@@ -183,5 +211,5 @@ socket.on('update-room', dict => {
 })
 
 socket.on('update-cards', cards => {
-    roomForm.updateCard(cards.length)
+    roomForm.updateCard(cards)
 })
