@@ -3,7 +3,7 @@ import './form.css'
 import { TextureLoader } from 'three'
 import { displayToaster } from './toaster.js'
 import { updateTable, addTable } from './tableau.js'
-import { start } from './tmp.js'
+import { start } from './Game.js'
 const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
 
