@@ -148,7 +148,7 @@ io.on('connect', socket => {
                 if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points);
                     rooms[room].cards.pop()
-                    io.to(room).emit(rooms[room].card.length)
+                    io.to(room).emit('debug',rooms[room].card.length)
                     if(rooms[room].cards.length == 0){
                         io.to(room).emit('end')
                     }
@@ -218,7 +218,7 @@ io.on('connect', socket => {
                     const players = rooms[room].players
                     rooms[room].playerTurn = Math.floor(players.length * Math.random())
                     io.to(players[rooms[room].playerTurn]).emit('next-player')
-                }, 350);
+                }, 550);
             } else {
                 console.log(`send cards to room ${room}`)
 
