@@ -141,14 +141,16 @@ io.on('connect', socket => {
 
             case 'pair-found':
                 //TODO add point
-                console.log('pair found\t' + cardIndex)
+                console.log('pair found\t' + cardIndex);
                 socket.to(room).emit('action', action, cardIndex);
                 users[socket.id].points += .5;
-                const players = getPlayers(room)
+                const players = getPlayers(room);
                 if(Number.isInteger(users[socket.id].points)){
-                    players.sort((a, b) => b.points-a.points)
+                    players.sort((a, b) => b.points-a.points);
                 }
-                io.to(room).emit('update-room', players)
+                io.to(room).emit('update-room', players);
+                rooms[room].cards.splice(cardIndex, 1)
+                io.to(room).emit('update-cards', rooms[room].cards)
                 break;
 
             case 'turnback-card':
