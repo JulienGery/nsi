@@ -168,7 +168,7 @@ class Game {
         }
         card.remove();
         if(this.allCard.length == 0){
-            this.end()
+            setTimeout(this.end.bind(this), Math.floor(Math.random() * 550 + 550))
         }
     }
 
@@ -320,7 +320,7 @@ class Game {
 
     end(){
         explosions.push(new Explosion(Math.random() * this.sqrtNumberCard * 2.3 - this.offSet.x, Math.random() * this.Ypos * 3.7 - this.offSet.y))
-        setTimeout(this.end.bind(this), Math.floor(Math.random() * 800 + 300))
+        setTimeout(this.end.bind(this), Math.floor(Math.random() * 550 + 550))
     }
 
     tick(){
