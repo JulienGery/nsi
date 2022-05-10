@@ -170,7 +170,6 @@ class Game {
     }
 
     turnCard(cardIndex){
-        console.log(this.allCard[cardIndex].uuid)
         const card = this.allCard[cardIndex]
         card.rotate(card.card.quaternion, qBack, Math.PI / 10, uv)
         this.turnedCards.push(cardIndex)
