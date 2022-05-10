@@ -145,8 +145,9 @@ io.on('connect', socket => {
                 socket.to(room).emit('action', action, cardIndex);
                 users[socket.id].points++;
                 const players = getPlayers(room)
-                if(Number.isInteger(users[socket.id].points)){
+                if(users[socket.id].points % 2 == 0){
                     players.sort((a, b) => b.points-a.points)
+                    users[socket.id].points--
                 }
                 io.to(room).emit('update-room', players)
                 break;
