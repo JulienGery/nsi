@@ -136,7 +136,8 @@ class Game {
         for (let i = 0; i < this.allCard.length; i++) {
             this.allCard[i].show()
         }
-        window.addEventListener('click', this.mouseClick)
+        // window.addEventListener('click', this.mouseClick)
+        this.setReady()
     }
 
     spread() {
@@ -197,14 +198,9 @@ class Game {
     }
 
     onMouseClick(event){
-        console.log('click')
-        console.log(this.turnedCards)
        if(this.turnedCards.length == 2){
-           console.log('array size == 2')
            this.turnedCards.sort((a, b) => b-a)
-           console.log(this.turnedCards)
            if(this.allCard[this.turnedCards[0]].name == this.allCard[this.turnedCards[1]].name){
-               console.log('putain de merde')
                this.turnedCards.forEach(card => {
                    socket.emit('action', 'pair-found', card)
                    this.pairFound(card)
@@ -214,7 +210,6 @@ class Game {
                })
            } else {//TODO rework here
                this.turnedCards.forEach(card => {
-                   console.log(this)
                    if(this.numberPlayer > 1){
                        socket.emit('action', 'turnback-card', card);
                        this.allCard[card].rotate(qBack, qFront, Math.PI / 10)
@@ -262,7 +257,6 @@ class Game {
     onMouseOver(){
         const intersects = this.pickCard();
         
-        // console.log(this)
         if(intersects.length == 1){
             for(let i = 0; i<this.allCard.length; i++){
                 if(this.allCard[i].uuid == intersects[0].object.parent.parent.uuid){
@@ -284,7 +278,6 @@ class Game {
                 }
             }
         } else if(!isNaN(this.cardUnder)){
-            console.log(this.cardUnder)
             socket.emit('action', 'move-down', this.cardUnder)
             this.onMoveDown()
         }

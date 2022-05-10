@@ -9,6 +9,7 @@ export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
+let gameStart = false
 
 
 class JoinRoomForm {
@@ -45,7 +46,7 @@ class JoinRoomForm {
     }
 
     displayForm() {
-        if(!this.isDisplayed){
+        if(!this.isDisplayed && !gameStart){
             this.isDisplayed = true
             document.body.appendChild(this.form)
             this.button = document.getElementById('button')
@@ -149,6 +150,7 @@ class RoomForm {
     setReady() {
         if(this.cards.length){
             this.removeForm()
+            gameStart = true
             const canvas = document.createElement('canvas')
             canvas.className = "webgl"
             document.body.appendChild(canvas)
@@ -167,7 +169,7 @@ class RoomForm {
     }
 
     displayForm() {
-        if(!this.isDisplayed){
+        if(!this.isDisplayed && !gameStart){
             this.isDisplayed = true
             document.body.appendChild(this.form)
             this.form = document.getElementById('roomForm')
