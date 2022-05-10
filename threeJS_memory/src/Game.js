@@ -217,7 +217,7 @@ class Game {
                    console.log(this)
                    if(this.numberPlayer > 1){
                        socket.emit('action', 'turnback-card', card);
-                       this.turnCard(card)
+                       this.allCard[card].rotate(qBack, qFront, Math.PI / 10)
                        return
                     }
                     if(card != this.cardUnder){
