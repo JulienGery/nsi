@@ -167,6 +167,9 @@ class Game {
             this.cardUnder = NaN
         }
         card.remove();
+        if(this.allCard.length == 0){
+            this.end()
+        }
     }
 
     turnCard(cardIndex){
@@ -315,18 +318,22 @@ class Game {
         this.numberPlayer = number
     }
 
+    end(){
+        explosions.push(new Explosion(Math.random() * this.sqrtNumberCard * 2.3 - this.offSet.x, Math.random() * this.Ypos * 3.7 - this.offSet.y))
+        setTimeout(this.end.bind(this), Math.floor(Math.random() * 800 + 300))
+    }
+
     tick(){
         stats.begin();
-
-        explosions.forEach(explosion => {
+        for(let i = 0; i<explosions.length; i++){
+            const explosion = explosions[i]
             if(explosion.clock.getElapsedTime() > 3){
                 explosion.remove()
-                explosions.splice(0, 1)
+                explosions.splice(i, 1)
             } else if(explosion.clock.getElapsedTime() > .5){
                 explosion.scaleDown()
             } else { explosion.update() }
-        })
-        
+        }        
         renderer.render(scene, camera);
         stats.end();
         window.requestAnimationFrame(this.tick.bind(this))
