@@ -149,10 +149,10 @@ io.on('connect', socket => {
                 const players = getPlayers(room);
                 if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points);
-                    rooms[room].cards.pop()
-                    if(rooms[room].cards.length == 0){
-                        io.to(room).emit('end')
-                    }
+                    // rooms[room].cards.pop()
+                    // if(rooms[room].cards.length == 0){
+                    //     io.to(room).emit('end')
+                    // }
                 }
                 io.to(room).emit('update-room', players);
                 break;
