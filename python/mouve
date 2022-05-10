@@ -1,5 +1,0 @@
-files=("antonin_dict.py" "antonin_tableau.py" "carte.py" "des_aleatoire.py" "antonin.py" "asci_art.py" "checkerboard.py")
-for file in ${files[@]};
-do
-	git mv ./$file ./ecole/
-done
