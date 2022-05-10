@@ -3,7 +3,7 @@ import './form.css'
 import { TextureLoader } from 'three'
 import { displayToaster } from './toaster.js'
 import { updateTable, addTable } from './tableau.js'
-import { start } from './Game.js'
+import { start, game } from './Game.js'
 const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
 
@@ -140,7 +140,6 @@ class RoomForm {
 
     removeCards(url){
         socket.emit('submit-card', 'remove', url, cb => {
-            console.log(cb)
             if(cb){
                 this.updateCard(cb)
             }
@@ -210,7 +209,9 @@ socket.on('connect', () => {
 
 socket.on('update-room', dict => {
     updateTable(dict)
-    // addTable()
+    if(game){
+        game.updatePlayer(dict.length)
+    }
 })
 
 socket.on('update-cards', cards => {

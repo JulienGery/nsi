@@ -12,6 +12,8 @@ import { socket } from './form.js';
 import { playerNumbers } from './tableau.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
+
+export let game;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
 const texture2 = loader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte_julien_2_Plan_de_travail_1.jpg') //front
@@ -308,6 +310,10 @@ class Game {
         setTimeout(() => controls.enabled = true)
     }
 
+    updatePlayer(number){
+        this.numberPlayer = number
+    }
+
     tick(){
         stats.begin();
 
@@ -326,10 +332,6 @@ class Game {
     }
 
 }
-
-let game;
-
-
 
 socket.on('receive-cards', (cards) => {
     game = new Game(cards);
