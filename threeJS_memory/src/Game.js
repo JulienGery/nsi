@@ -12,7 +12,6 @@ import { socket } from './form.js';
 import { playerNumbers } from './tableau.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-
 export let game;
 const gltfLoader = new GLTFLoader();
 const loader = new THREE.TextureLoader();
@@ -28,20 +27,21 @@ const qBack = new THREE.Quaternion(0, 1, 0, 0);
 let uv;
 const pointLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(pointLight)
-const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
-}
+
 
 
 export const start = () => {
+    const sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
 
     const canvas = document.querySelector('canvas.webgl')
     document.body.appendChild(stats.dom)
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    antialias: true
-})
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 window.addEventListener('resize', () => {
