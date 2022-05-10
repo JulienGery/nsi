@@ -148,6 +148,7 @@ io.on('connect', socket => {
                 if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points);
                     rooms[room].cards.pop()
+                    io.to(room).emit(rooms[room].card.length)
                     if(rooms[room].cards.length == 0){
                         io.to(room).emit('end')
                     }
