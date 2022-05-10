@@ -150,7 +150,6 @@ io.on('connect', socket => {
                 }
                 io.to(room).emit('update-room', players);
                 rooms[room].cards.splice(cardIndex, 1)
-                io.to(room).emit('update-cards', rooms[room].cards)
                 break;
 
             case 'turnback-card':
