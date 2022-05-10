@@ -170,6 +170,7 @@ class Game {
     }
 
     turnCard(cardIndex){
+        console.log(this.allCard[cardIndex].uuid)
         const card = this.allCard[cardIndex]
         card.rotate(card.card.quaternion, qBack, Math.PI / 10, uv)
         this.turnedCards.push(cardIndex)
@@ -210,6 +211,7 @@ class Game {
                        this.cardUnder--
                    }
                })
+               this.turnedCards = []
            } else {//TODO rework here
                this.turnedCards.forEach(card => {
                    if(this.numberPlayer > 1){
@@ -232,14 +234,14 @@ class Game {
                     socket.emit('next-player')
                     return
                }
-            }
-            if(!this.turnedCards.includes(this.cardUnder)){
-                this.turnedCards = [];
-            } else if(!isNaN(this.cardUnder)) {
-                this.turnedCards = [this.cardUnder]
-                return
-            }
             
+                if(!this.turnedCards.includes(this.cardUnder)){
+                    this.turnedCards = [];
+                } else if(!isNaN(this.cardUnder)) {
+                    this.turnedCards = [this.cardUnder]
+                    return
+                }
+            }
         }
 
         if(!isNaN(this.cardUnder)){

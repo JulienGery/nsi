@@ -132,6 +132,7 @@ class RoomForm {
             if (cb) {
                 this.updateCard(cb)
                 this.urlInput.style.backgroundColor = 'green'
+                this.urlInput.value = ''
             } else {
                 this.urlInput.style.backgroundColor = 'red'
             }
