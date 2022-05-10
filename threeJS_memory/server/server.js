@@ -66,19 +66,19 @@ const arePlayerReady = (room) => {
 
 
 const onLeave = (socket) => {
-    if (users[socket.id]) {
-        const user = users[socket.id]
-        const room = user.room
-        console.log(`${user.name} has left`)
-        rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
-        socket.to(room).emit('update-room', getPlayers(room))
-        socket.leave(room)
-        delete users[user]
-        if (rooms[room].players.length == 0) {
-            console.log(`delete room ${room}`)
-            delete rooms[room]
-        }
+    
+    const user = users[socket.id]
+    const room = user.room
+    console.log(`${user.name} has left`)
+    rooms[room].players.splice(rooms[room].players.indexOf(socket.id), 1)
+    socket.to(room).emit('update-room', getPlayers(room))
+    socket.leave(room)
+    delete users[user]
+    if (rooms[room].players.length == 0) {
+        console.log(`delete room ${room}`)
+        delete rooms[room]
     }
+    
 }
 
 io.on('connect', socket => {
@@ -116,8 +116,10 @@ io.on('connect', socket => {
     })
 
     socket.on('leave-room', cb => {
-        onLeave(socket)
-        cb(true)
+        if (users[socket.id]){
+            onLeave(socket)
+            cb(true)
+        }
     })
 
 
@@ -148,13 +150,11 @@ io.on('connect', socket => {
                 if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points);
                     rooms[room].cards.pop()
-                    io.to(room).emit('debug',rooms[room].card.length)
                     if(rooms[room].cards.length == 0){
                         io.to(room).emit('end')
                     }
                 }
                 io.to(room).emit('update-room', players);
-                rooms[room].cards.splice(cardIndex, 1)
                 break;
 
             case 'turnback-card':
@@ -234,13 +234,15 @@ io.on('connect', socket => {
     })
 
     socket.on('disconnect', () => {
-        const room = users[socket.id].room
-        if(rooms[room].started && rooms[room].players[rooms[room].playerTurn] == socket.id){
-            rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
-        const playerTurn = rooms[room].playerTurn
-        io.to(rooms[room].players[playerTurn]).emit('next-player')
+        if(users[socket.id]){
+            const room = users[socket.id].room
+            if(rooms[room].started && rooms[room].players[rooms[room].playerTurn] == socket.id){
+                rooms[room].playerTurn = (rooms[room].playerTurn + 1) % rooms[room].players.length
+            const playerTurn = rooms[room].playerTurn
+            io.to(rooms[room].players[playerTurn]).emit('next-player')
+            }
+            onLeave(socket)
         }
-        onLeave(socket)
     })
 })
 

@@ -368,5 +368,5 @@ socket.on('action', (action, cardIndex) => {
 socket.on('next-player', () => game.addListener())
 socket.on('start-game', () => game.gameStart())
 socket.on('end', () => game.end())
-socket.on('debug', (text) =>  console.log(text))
+
 }
