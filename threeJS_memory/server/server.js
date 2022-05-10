@@ -143,11 +143,10 @@ io.on('connect', socket => {
                 //TODO add point
                 console.log('pair found\t' + cardIndex)
                 socket.to(room).emit('action', action, cardIndex);
-                users[socket.id].points++;
+                users[socket.id].points += .5;
                 const players = getPlayers(room)
-                if(users[socket.id].points % 2 == 0){
+                if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points)
-                    // users[socket.id].points--
                 }
                 io.to(room).emit('update-room', players)
                 break;
