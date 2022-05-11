@@ -5,8 +5,8 @@ import { displayToaster } from './toaster.js'
 import { updateTable, addTable } from './tableau.js'
 import { start, game } from './Game.js'
 const axios = require('axios')
-// export const socket = io("https://julien-game-server.gery.me")
-export const socket = io("http://localhost:3000")
+export const socket = io("https://julien-game-server.gery.me")
+// export const socket = io("http://localhost:3000")
 
 const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
