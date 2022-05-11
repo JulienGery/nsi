@@ -4,7 +4,7 @@ import { Card } from './card.js'
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff)
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-// import * as dat from 'dat.gui'
+
 import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
@@ -74,6 +74,7 @@ camera.position.z = 20
 class Game {
 
     constructor(cards) {
+        this.endBind = this.end.bind(this)
         this.numberPlayer = playerNumbers;
         this.numberCard = cards.length;
         this.turnedCards = []
@@ -328,7 +329,7 @@ class Game {
         explosionPosition.applyQuaternion(camera.quaternion)
         explosionPosition.add(cameraPostion)
         explosions.push(new Explosion(explosionPosition.x, explosionPosition.y, explosionPosition.z))
-        setTimeout(this.end.bind(this), Math.floor(Math.random() * 550 + 550))
+        setTimeout(this.endBind, Math.floor(Math.random() * 550 + 550))
     }
 
     tick(){
