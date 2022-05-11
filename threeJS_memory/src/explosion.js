@@ -10,10 +10,11 @@ function randomUnitVector() {
 }
 
 export class Explosion {
-    constructor(x, y) {
+    constructor(x, y, z = 0) {
         this.clock = new THREE.Clock()
         this.x = x
         this.y = y
+        this.z = z
         this.speeds = []
         this.vectors = []
         this.createGeometry()
@@ -34,7 +35,7 @@ export class Explosion {
             const vec = randomUnitVector()
             vec.multiplyScalar(.1)
             this.vectors.push(vec)
-            vertices.push(vec.x + this.x, vec.y + this.y, vec.z)
+            vertices.push(vec.x + this.x, vec.y + this.y, vec.z + this.z)
             this.speeds.push(Math.random() * 2)
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))

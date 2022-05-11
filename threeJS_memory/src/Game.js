@@ -25,7 +25,8 @@ const centerCard = new THREE.Vector2(.5, .5)
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
 let uv;
-const pointLight = new THREE.AmbientLight(0xffffff, 1);
+const pointLight = new THREE.AmbientLight(0xffffff, 1);        // console.log(cameraPostion)
+const coefSizesToXYZ = 0.03166561114 * .7;
 scene.add(pointLight)
 
 
@@ -168,7 +169,7 @@ class Game {
         }
         card.remove();
         if(this.allCard.length == 0){
-            setTimeout(this.end.bind(this), Math.floor(Math.random() * 550 + 550))
+            setTimeout(this.end.bind(this), 1000)
         }
     }
 
@@ -319,7 +320,14 @@ class Game {
     }
 
     end(){
-        explosions.push(new Explosion(Math.random() * this.sqrtNumberCard * 2.3 - this.offSet.x, Math.random() * this.Ypos * 3.7 - this.offSet.y))
+        const cameraPostion = camera.position.clone()
+        const cameraDirection = new THREE.Vector3();
+        camera.getWorldDirection(cameraDirection)
+        cameraPostion.add(cameraDirection.multiplyScalar(40))
+        const explosionPosition = new THREE.Vector3(coefSizesToXYZ * sizes.width * (Math.random() * 2 - 1), coefSizesToXYZ * sizes.height * (Math.random() * 2 - 1), 0)
+        explosionPosition.applyQuaternion(camera.quaternion)
+        explosionPosition.add(cameraPostion)
+        explosions.push(new Explosion(explosionPosition.x, explosionPosition.y, explosionPosition.z))
         setTimeout(this.end.bind(this), Math.floor(Math.random() * 550 + 550))
     }
 
