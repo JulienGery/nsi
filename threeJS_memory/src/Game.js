@@ -4,7 +4,7 @@ import { Card } from './card.js'
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff)
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-
+import { roomForm, joinRoomForm } from './form.js';
 import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
@@ -37,7 +37,10 @@ export const start = () => {
         height: window.innerHeight
     }
 
-    const canvas = document.querySelector('canvas.webgl')
+    const canvas = document.createElement('canvas')
+    canvas.className = "webgl"
+    document.body.appendChild(canvas)
+    console.log(canvas)
     document.body.appendChild(stats.dom)
     const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
@@ -74,7 +77,8 @@ camera.position.z = 20
 class Game {
 
     constructor(cards) {
-        this.endBind = this.end.bind(this)
+        this.isRunning = true
+        this.endExplosionBind = this.endExplosion.bind(this)
         this.numberPlayer = playerNumbers;
         this.numberCard = cards.length;
         this.turnedCards = []
@@ -321,6 +325,38 @@ class Game {
     }
 
     end(){
+        this.endExplosion()
+        const joinBackRoom = document.createElement('button')
+        const leaveButton = document.createElement('button')
+        joinBackRoom.textContent = 'joinBackRoom'
+        leaveButton.textContent = 'leave'
+        socket.removeListener('receive-cards')
+        socket.removeListener('next-player')
+        socket.removeListener('start-game')
+        socket.removeListener('action')
+        const tmpPutain = () => {
+            this.isRunning = false
+            clearTimeout(this.endExplosionBind)
+            console.log(this)
+        }
+        joinBackRoom.onclick = function(){
+            tmpPutain()
+            // clearTimeout(this.endExplosionBind)
+            document.body.removeChild(canvas)
+            game = null
+            scene.children = []
+            console.log(scene.children)
+            document.body.removeChild(joinBackRoom)
+            roomForm.displayForm()
+            roomForm.updateCard([])
+        }
+        joinBackRoom.style.backgroundColor = 'red'
+        joinBackRoom.style.zIndex = 7
+        document.body.appendChild(joinBackRoom)
+    }
+
+    endExplosion(){
+        console.log('explosion')
         const cameraPostion = camera.position.clone()
         const cameraDirection = new THREE.Vector3();
         camera.getWorldDirection(cameraDirection)
@@ -329,7 +365,9 @@ class Game {
         explosionPosition.applyQuaternion(camera.quaternion)
         explosionPosition.add(cameraPostion)
         explosions.push(new Explosion(explosionPosition.x, explosionPosition.y, explosionPosition.z))
-        setTimeout(this.endBind, Math.floor(Math.random() * 550 + 550))
+        if(this.isRunning){
+            setTimeout(this.endExplosionBind, Math.floor(Math.random() * 550 + 550))
+        }
     }
 
     tick(){
@@ -351,7 +389,10 @@ class Game {
 }
 
 socket.on('receive-cards', (cards) => {
+    console.log(cards)
     game = new Game(cards);
+    console.log(game.allCard)
+    console.log(scene.children)
 })
 
 socket.on('action', (action, cardIndex) => {
@@ -373,6 +414,7 @@ socket.on('action', (action, cardIndex) => {
             break;
     }
 })
+
 
 socket.on('next-player', () => game.addListener())
 socket.on('start-game', () => game.gameStart())

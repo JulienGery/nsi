@@ -42,14 +42,14 @@ const setPlayersNotReady = (room) => {
 
 const getPlayers = (room) => {
     const players = []
-    for (let i = 0; i < rooms[room].players.length; i++) {
-        const player = users[rooms[room].players[i]]
+    rooms[room].players.forEach(id => {
+        const player = users[id]
         players.push({
             "name": player.name,
             "points": player.points,
             "ready": player.ready
         })
-    }
+    })  
     return players
 }
 
@@ -146,17 +146,19 @@ io.on('connect', socket => {
                 console.log('pair found\t' + cardIndex);
                 socket.to(room).emit('action', action, cardIndex);
                 users[socket.id].points += .5;
-                const players = getPlayers(room);
+                let players = getPlayers(room);
                 if(Number.isInteger(users[socket.id].points)){
                     players.sort((a, b) => b.points-a.points);
                     rooms[room].cards.pop()
                     if(rooms[room].cards.length == 0){
-                        // io.to(room).emit('end')
+                        
                         rooms[room].started = false
                         setPlayersNotReady(room)
-                        // io.to(room).emit('update-card', rooms[room].cards)
+                        players = getPlayers(room)
+                        
                     }
                 }
+
                 io.to(room).emit('update-room', players);
                 break;
 

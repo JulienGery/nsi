@@ -5,11 +5,11 @@ import { displayToaster } from './toaster.js'
 import { updateTable, addTable } from './tableau.js'
 import { start, game } from './Game.js'
 const axios = require('axios')
-export const socket = io("https://julien-game-server.gery.me")
+// export const socket = io("https://julien-game-server.gery.me")
+export const socket = io("http://localhost:3000")
 
 const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
-let gameStart = false
 
 
 class JoinRoomForm {
@@ -46,7 +46,7 @@ class JoinRoomForm {
     }
 
     displayForm() {
-        if(!this.isDisplayed && !gameStart){
+        if(!this.isDisplayed){
             this.isDisplayed = true
             document.body.appendChild(this.form)
             this.button = document.getElementById('button')
@@ -149,13 +149,10 @@ class RoomForm {
 
     setReady() {
         if(this.cards.length){
-            this.removeForm()
-            gameStart = true
-            const canvas = document.createElement('canvas')
-            canvas.className = "webgl"
-            document.body.appendChild(canvas)
-            socket.emit('ready')
+            this.removeForm()  
             start()
+            socket.emit('ready')
+            console.log('starting game')
         }else{
             displayToaster("can't start, no cards")
         }
@@ -169,25 +166,26 @@ class RoomForm {
     }
 
     displayForm() {
-        if(!this.isDisplayed && !gameStart){
+        if(!this.isDisplayed){
             this.isDisplayed = true
             document.body.appendChild(this.form)
-            this.form = document.getElementById('roomForm')
+            if(!this.submitButton){
+                
+                this.cardsCount = document.getElementById('cardsCount')
+                this.urlInput = document.getElementById('url')
+                this.urlInput.addEventListener('keypress', e => {
+                    if(e.key == 'Enter'){
+                        this.submitCard()
+                    }
+                })
+                this.submitButton = document.getElementById('submitButton')
+                this.submitButton.onclick = this.submitCard.bind(this)
 
-            this.cardsCount = document.getElementById('cardsCount')
-            this.urlInput = document.getElementById('url')
-            this.urlInput.addEventListener('keypress', e => {
-                if(e.key == 'Enter'){
-                    this.submitCard()
-                }
-            })
-            this.submitButton = document.getElementById('submitButton')
-            this.submitButton.onclick = this.submitCard.bind(this)
-
-            this.setReadyButton = document.getElementById('setReady')
-            this.setReadyButton.onclick = this.setReady.bind(this)
-            this.leaveButton = document.getElementById('leaveButton')
-            this.leaveButton.onclick = this.leaveRoom.bind(this)
+                this.setReadyButton = document.getElementById('setReady')
+                this.setReadyButton.onclick = this.setReady.bind(this)
+                this.leaveButton = document.getElementById('leaveButton')
+                this.leaveButton.onclick = this.leaveRoom.bind(this)
+            }
         }
     }
 
@@ -199,8 +197,8 @@ class RoomForm {
 
 
 
-const joinRoomForm = new JoinRoomForm();
-const roomForm = new RoomForm();
+export const joinRoomForm = new JoinRoomForm();
+export const roomForm = new RoomForm();
 
 
 socket.on('connect', () => {
@@ -216,5 +214,6 @@ socket.on('update-room', dict => {
 })
 
 socket.on('update-cards', cards => {
+    console.log(cards)
     roomForm.updateCard(cards)
 })
