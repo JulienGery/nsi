@@ -220,6 +220,7 @@ io.on('connect', socket => {
                     const players = rooms[room].players
                     rooms[room].playerTurn = Math.floor(players.length * Math.random())
                     io.to(players[rooms[room].playerTurn]).emit('next-player')
+                    setPlayersNotReady(room)
                 }, 550);
             } else {
                 console.log(`send cards to room ${room}`)
