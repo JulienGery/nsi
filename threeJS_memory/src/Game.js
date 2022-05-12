@@ -4,7 +4,7 @@ import { Card } from './card.js'
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff)
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { roomForm, joinRoomForm, endGameForm } from './form.js';
+import { testEndGameForm, } from './form.js';
 import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
@@ -146,6 +146,7 @@ class Game {
             this.allCard[i].show()
         }
         // window.addEventListener('click', this.mouseClick)
+        this.updateIntersect()
         this.setReady()
     }
 
@@ -174,6 +175,7 @@ class Game {
             this.cardUnder = NaN
         }
         card.remove();
+        this.updateIntersect()
         if(this.allCard.length == 0){
             setTimeout(this.end.bind(this), 1000)
         }
@@ -262,9 +264,13 @@ class Game {
         }
     }
 
+    updateIntersect(){
+        this.intersects = this.allCard.map(card => card.card)
+    }
+
     pickCard(){
         raycaster.setFromCamera(mouse, camera);
-        return raycaster.intersectObjects(this.allCard.map(card => card.card), true);
+        return raycaster.intersectObjects(this.intersects, true);
     }
 
     onMouseOver(){
@@ -325,6 +331,8 @@ class Game {
         this.numberPlayer = number
     }
 
+    
+
     end(){
         this.endExplosion()
         socket.removeListener('next-player')
@@ -337,15 +345,12 @@ class Game {
             document.body.removeChild(canvas)
             game = null
             document.body.removeChild(stats.dom)
+            testEndGameForm.removeForm()
         }
-        endGameForm.setFunction(() => {
+        testEndGameForm.setFunction(() => {
             fEndForm()
-            roomForm.updateCard([])
-        }, () => {
-            fEndForm()
-            socket.removeAllListeners()
-        })
-        endGameForm.displayForm()
+        }, () => fEndForm())
+        testEndGameForm.displayForm()
     }
 
     endExplosion(){

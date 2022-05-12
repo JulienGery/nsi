@@ -8,10 +8,7 @@ const computeBezierCurve = (array, t) => {
         array[i].slerp(array[i + 1], t)
     }
     array.pop()
-    if (array.length == 1) {
-        return array[0]
-    }
-    return computeBezierCurve(array, t)
+    return array.length == 1? array[0] : computeBezierCurve(array, t)
 }
 
 const computeBezierCurveLine = (array, t) => {
@@ -19,10 +16,8 @@ const computeBezierCurveLine = (array, t) => {
         array[i].lerp(array[i + 1], t)
     }
     array.pop()
-    if (array.length == 1) {
-        return array[0]
-    }
-    return computeBezierCurveLine(array, t)
+    
+    return array.length == 1? array[0] : computeBezierCurveLine(array, t)
 }
 
 export class Card {
@@ -79,15 +74,13 @@ export class Card {
         const array = [start, end]
         const clock = new THREE.Clock();
 
-        const actualMouveTo = async () => {
+        const actualMouveTo = () => {
             const elapsedTime = clock.getElapsedTime();
             if (elapsedTime <= time) {
+
                 const arrayClone = array.map(e => e.clone())
-
-                // const lerpPos = start.clone()
-
-                // lerpPos.lerp(end, elapsedTime / time)
                 const lerpPos = computeBezierCurveLine(arrayClone, elapsedTime / time)
+
                 this.setPlace(lerpPos)
                 window.requestAnimationFrame(actualMouveTo);
             } else {

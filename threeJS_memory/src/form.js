@@ -11,69 +11,64 @@ export const socket = io("https://julien-game-server.gery.me")
 const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
 
-
-
-class EndGameForm{
-    constructor(){
-        // this.isDisplayed = false
-        this.form =document.createElement('div')
+class Form{
+    constructor(array){
+        this.form = document.createElement('div')
         this.form.className = 'form'
-        this.innerHTML = '<button type="text" class="submit" id="join">rejoin</button><button type="text" class="submit" id="leave">leave</button>'
-        this.form.innerHTML = this.innerHTML
-        this.form.style.height = '240px'
-        this.form.style.zIndex = 7
+        this.isDisplayed = false
+        array.forEach(dict => this.createForm(dict))
     }
 
+
+    createForm(dict){
+        const name = dict.name
+        this[name] = document.createElement(dict.type)
+        this[name].className = dict.className
+        this[name].innerHTML = dict.innerHTML
+        if(dict.textContent){
+            this[name].textContent = dict.textContent
+        }
+        if(dict.onclick){
+            this[name].onclick = dict.onclick
+        }
+        if(dict.eventListener){
+            const eventListener = dict.eventListener
+            this[name].addEventListener(eventListener.type, eventListener.function)
+        }
+        if(dict.style){
+            this[name].style = dict.style
+        }
+        this[dict.parent].appendChild(this[name])
+        // console.log(this)
+    }
+
+    
+
     displayForm(){
-        document.body.appendChild(this.form)
-        if(!this.joinButton){
-            this.joinButton = document.getElementById('join')
-            this.joinButton.onclick = () => {
-                this.removeForm()
-                this.joinRoom()
-                roomForm.displayForm()
-            }
-            this.leaveButton = document.getElementById('leave')
-            this.leaveButton.onclick = () => {
-                socket.emit('leave-room', cb => {
-                    this.leaveRoom()
-                    this.removeForm()
-                    joinRoomForm.displayForm()
-                })
-            }
+        if(!this.isDisplayed){
+            this.isDisplayed = true
+            document.body.appendChild(this.form)
         }
     }
 
     removeForm(){
+        this.isDisplayed = false
         document.body.removeChild(this.form)
     }
-
-    setFunction(joinRoom, leaveRoom){
-        console.log(joinRoom)
-        console.log(leaveRoom)
-        this.joinRoom = joinRoom
-        this.leaveRoom = leaveRoom
-    }
-
-    
 }
-class JoinRoomForm {
 
-    constructor() {
+class TestForm extends Form{
+    constructor(array){
+        super(array)
         this.name = ''
         this.room = ''
-        this.isDisplayed = false
-        this.form = document.createElement('div')
-        this.form.className = 'form'
-        this.form.id = 'form'
-        this.form.innerHTML = '<div class="title">three js memory</div><div class="input-container ic1"><input id="name" class="input" type="text" value="' + this.name + '" placeholder=" " /><div class="cut"></div><label for="name" class="placeholder">name</label></div><div class="input-container ic2"><input id="room" class="input" value="' + this.room + '" type="text" placeholder=" " /><div class="cut"></div><label for="room" class="placeholder">room</label></div><button type="text" class="submit" id="button">submit</button>'
     }
 
-    submitForm() {
-        this.name = document.getElementById('name').value
-        this.room = this.roomInput.value
-
-        if (this.name && this.room) {
+    submitForm(){
+        this.name = this.inputName.children[0].value
+        this.room = this.inputRoom.children[0].value
+        if(this.room && this.name){
+            this.updateNameAndRoom()
             socket.emit('join-room', this.name, this.room, cb => {
                 if(!cb){
                     displayToaster('game already started')
@@ -81,8 +76,8 @@ class JoinRoomForm {
                     addTable()
                     updateTable(cb.players)
                     this.removeForm()
-                    roomForm.displayForm()
-                    roomForm.updateCard(cb.cards)
+                    testRoomForm.displayForm()
+                    testRoomForm.updateCard(cb.cards)
                 }
             })
         }else{
@@ -90,46 +85,26 @@ class JoinRoomForm {
         }
     }
 
-    displayForm() {
-        if(!this.isDisplayed){
-            this.isDisplayed = true
-            document.body.appendChild(this.form)
-            if(!this.button){
-                this.button = document.getElementById('button')
-                this.button.onclick = this.submitForm.bind(this)
-                this.form = document.getElementById('form')
-                this.roomInput = document.getElementById('room')
-                this.roomInput.addEventListener('keypress', event => {
-                    if (event.key == 'Enter') {
-                        this.submitForm()
-                    }
-                })
-            }
-        }
+    updateNameAndRoom(){
+        this.inputName.children[0].value = this.name
+        this.inputRoom.children[0].value = this.room
     }
-
-    removeForm() {
-        document.body.removeChild(this.form)
-        this.isDisplayed = false
-    }
-
 }
 
-class RoomForm {
-    constructor(){
-        this.cards = []
-        this.isDisplayed = false
-        this.form = document.createElement('div')
+
+
+class TestRoomForm extends Form{
+    constructor(array){
+        super(array)
         this.form.className = 'formImage'
-        this.form.id = 'roomForm'
-        this.form.innerHTML = '<div class="title" id="cardsCount" style="text-align: center;">card count 0</div><div class="input-container ic1"><input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label></div><button class="submit" id="submitButton">submit</button><button class="submit" id="setReady">set ready</button><button class="submit" id="leaveButton">leave</button>'
+        this.cards = []
     }
 
-    submitCard() {
-        const url = this.urlInput.value
+    submitForm(){
+        const url = this.urlInput.children[0].value
         const number = url.match(regex)
         if (number) {
-            this.urlInput.value = ''
+            this.urlInput.children[0].value = ''
             if(number<0){
                 const array = []
                 while (array.length != Math.abs(number) && array.length < this.cards.length) {
@@ -139,12 +114,12 @@ class RoomForm {
                     }
                 } 
 
-                array.sort((a, b) => b-a)
+                // array.sort((a, b) => b-a)
                 
                 array.forEach(async(index) => this.removeCards(this.cards[index]))
                 return
             }
-            //else
+            
             axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
                 const data = response.data;
@@ -157,31 +132,24 @@ class RoomForm {
         }
 
         if (!url) {
-            this.urlInput.style.backgroundColor = "red"
+            this.urlInput.children[0].style.backgroundColor = "red"
         } else {
             loader.loadAsync(url).then((rep) => {
                 this.sendCards(url)
             }).catch((err) => {
                 console.log(err)
-                this.urlInput.style.backgroundColor = "red"
+                this.urlInput.children[0].style.backgroundColor = "red"
             })
         }
     }
-
-    updateCard(cards) {
-        this.cards = cards
-        this.cardsCount.textContent = `cards count ${this.cards.length}`
-    }
-
 
     sendCards(url) {
         socket.emit('submit-card', 'add', url, cb => {
             if (cb) {
                 this.updateCard(cb)
-                this.urlInput.style.backgroundColor = 'green'
-                this.urlInput.value = ''
+                this.urlInput.children[0].style.backgroundColor = 'green'
             } else {
-                this.urlInput.style.backgroundColor = 'red'
+                this.urlInput.children[0].style.backgroundColor = 'red'
             }
         })
     }
@@ -204,55 +172,164 @@ class RoomForm {
             displayToaster("can't start, no cards")
         }
     }
-
-    leaveRoom() {
+    
+    leave(){
         socket.emit('leave-room', cb => {
-            console.log(cb)
             this.removeForm()
             removeTable()
-            joinRoomForm.displayForm()
+            testForm.displayForm()
         })
     }
 
-    displayForm() {
-        if(!this.isDisplayed){
-            this.isDisplayed = true
-            document.body.appendChild(this.form)
-            if(!this.submitButton){
-                
-                this.cardsCount = document.getElementById('cardsCount')
-                this.urlInput = document.getElementById('url')
-                this.urlInput.addEventListener('keypress', e => {
-                    if(e.key == 'Enter'){
-                        this.submitCard()
-                    }
-                })
-                this.submitButton = document.getElementById('submitButton')
-                this.submitButton.onclick = this.submitCard.bind(this)
-
-                this.setReadyButton = document.getElementById('setReady')
-                this.setReadyButton.onclick = this.setReady.bind(this)
-                this.leaveButton = document.getElementById('leaveButton')
-                this.leaveButton.onclick = this.leaveRoom.bind(this)
-            }
-        }
+    updateCard(cards){
+        this.cards = cards
+        this.cardCount.textContent = `card count ${cards.length}`
     }
 
-    removeForm() {
-        document.body.removeChild(this.form)
-        this.isDisplayed = false
+}
+
+class TestEndGameForm extends Form{
+    constructor(array){
+        super(array)
+        this.form.style.height = '240px'
+        this.form.style.zIndex = 7
+    }
+
+    joinRoom(){
+        this.joinRoomFunction()
+        testRoomForm.updateCard([])
+        testRoomForm.displayForm()
+    }
+
+    leave(){
+        this.leaveFunction()
+        socket.removeAllListeners()
+        testForm.displayForm()
+    }
+
+
+    setFunction(joinRoom, leave){
+        this.joinRoomFunction = joinRoom
+        this.leaveFunction = leave
     }
 }
 
 
-export const endGameForm = new EndGameForm();
-export const joinRoomForm = new JoinRoomForm();
-export const roomForm = new RoomForm();
+const testForm = new TestForm([{
+    "name": "title",
+    "type": "div",
+    "className": "title",
+    "innerHTML": "",
+    "textContent": "three js memory",
+    "parent": "form",
+},
+{
+    "name": "inputName",
+    "type": "div",
+    "className": "input-container ic1",
+    "innerHTML": '<input id="name" class="input" type="text" value="" placeholder=" "><div class="cut"></div><label for="name" class="placeholder">name</label>',
+    "parent": 'form'
+},
+{
+    "name": "inputRoom",
+    "type": "div",
+    "className": "input-container ic2",
+    "innerHTML": '<input id="room" class="input" value="" type="text" placeholder=" "><div class="cut"></div><label for="room" class="placeholder">room</label>',
+    "eventListener": {
+        "type": 'keypress',
+        "function": (e) => {
+            if(e.key == 'Enter'){
+                testForm.submitForm()
+            }
+        }
+    },
+    "parent": "form"
+},
+{
+    "name": "submitButton",
+    "type": "button",
+    "className": "submit",
+    "textContent": "submit",
+    "onclick": () => testForm.submitForm(),
+    "parent": "form"
+}
+])
+
+
+const testRoomForm = new TestRoomForm([
+    {
+        "name": "cardCount",
+        "type": "div",
+        "className": "title",
+        "textContent": "card count",
+        "parent": "form",
+        "style": "text-align: center;"
+    },
+    {
+        "name": "urlInput",
+        "type": "div",
+        "className": "input-container ic1",
+        "innerHTML": '<input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label>',
+        "eventListener":{
+            "type": "keypress",
+            "function": (e) => {
+                if(e.key == 'Enter'){
+                    testRoomForm.submitForm()
+                }
+            }
+        },
+        "parent": "form"
+    },
+    {
+        "name": "submitButton",
+        "type": "button",
+        "className": "submit",
+        "onclick": () => testRoomForm.submitForm(),
+        "textContent": "submit",
+        "parent": "form"
+    },
+    {
+        "name": "setReadyButton",
+        "type": "button",
+        "className": "submit",
+        "onclick": () => testRoomForm.setReady(),
+        "textContent": "set ready",
+        "parent": "form"
+    },
+    {
+        "name": "leaveButton",
+        "type": "button",
+        "className": "submit",
+        "onclick": () => testRoomForm.leave(),
+        "textContent": "leave",
+        "parent": "form"
+    }
+])
+
+export const testEndGameForm = new TestEndGameForm([
+    {
+        "name": "joinButton",
+        "type": "button",
+        "className": "submit",
+        "textContent": "joinRoom",
+        "onclick": () => testEndGameForm.joinRoom(),
+        "parent": "form"
+    },
+    {
+        "name": "leaveButton",
+        "type": "button",
+        "className": "submit",
+        "textContent": "leave",
+        "onclick": () => {testEndGameForm.leave(game)},
+        "parent": "form"
+    }
+    
+])
 
 
 socket.on('connect', () => {
     console.log('success')
-    joinRoomForm.displayForm()
+    testForm.displayForm()
 })
 
 socket.on('update-room', dict => {
@@ -264,5 +341,5 @@ socket.on('update-room', dict => {
 
 socket.on('update-cards', cards => {
     console.log(cards)
-    roomForm.updateCard(cards)
+    testRoomForm.updateCard(cards)
 })
