@@ -203,8 +203,11 @@ class TestEndGameForm extends Form{
 
     leave(){
         this.leaveFunction()
-        socket.removeAllListeners()
-        testForm.displayForm()
+        socket.emit('leave-room', cb => {
+            socket.removeAllListeners()
+            testForm.displayForm()
+            removeTable()
+        })
     }
 
 
