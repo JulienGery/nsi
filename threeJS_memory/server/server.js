@@ -77,6 +77,26 @@ const onLeave = (socket) => {
     if (rooms[room].players.length == 0) {
         console.log(`delete room ${room}`)
         delete rooms[room]
+    }else if (arePlayerReady(room)){
+        if (rooms[room].started) {
+            console.log(`start game in room ${room}`)
+            io.to(room).emit('start-game')
+            setTimeout(() => {
+                const players = rooms[room].players
+                rooms[room].playerTurn = Math.floor(players.length * Math.random())
+                io.to(players[rooms[room].playerTurn]).emit('next-player')
+            }, 550);
+        } else {
+            console.log(`send cards to room ${room}`)
+
+            rooms[room].started = true
+            setPlayersNotReady(room)
+            io.to(room).emit('update-room', getPlayers(room))
+
+            const cards = initCards(room)
+            io.to(room).emit('receive-cards', cards)
+        }
+
     }
     
 }

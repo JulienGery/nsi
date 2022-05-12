@@ -2,7 +2,7 @@ import { io } from 'socket.io-client'
 import './form.css'
 import { TextureLoader } from 'three'
 import { displayToaster } from './toaster.js'
-import { updateTable, addTable } from './tableau.js'
+import { updateTable, addTable, removeTable } from './tableau.js'
 import { start, game } from './Game.js'
 const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
@@ -12,6 +12,51 @@ const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
 
 
+
+class EndGameForm{
+    constructor(){
+        // this.isDisplayed = false
+        this.form =document.createElement('div')
+        this.form.className = 'form'
+        this.innerHTML = '<button type="text" class="submit" id="join">rejoin</button><button type="text" class="submit" id="leave">leave</button>'
+        this.form.innerHTML = this.innerHTML
+        this.form.style.height = '240px'
+        this.form.style.zIndex = 7
+    }
+
+    displayForm(){
+        document.body.appendChild(this.form)
+        if(!this.joinButton){
+            this.joinButton = document.getElementById('join')
+            this.joinButton.onclick = () => {
+                this.removeForm()
+                this.joinRoom()
+                roomForm.displayForm()
+            }
+            this.leaveButton = document.getElementById('leave')
+            this.leaveButton.onclick = () => {
+                socket.emit('leave-room', cb => {
+                    this.leaveRoom()
+                    this.removeForm()
+                    joinRoomForm.displayForm()
+                })
+            }
+        }
+    }
+
+    removeForm(){
+        document.body.removeChild(this.form)
+    }
+
+    setFunction(joinRoom, leaveRoom){
+        console.log(joinRoom)
+        console.log(leaveRoom)
+        this.joinRoom = joinRoom
+        this.leaveRoom = leaveRoom
+    }
+
+    
+}
 class JoinRoomForm {
 
     constructor() {
@@ -49,15 +94,17 @@ class JoinRoomForm {
         if(!this.isDisplayed){
             this.isDisplayed = true
             document.body.appendChild(this.form)
-            this.button = document.getElementById('button')
-            this.button.onclick = this.submitForm.bind(this)
-            this.form = document.getElementById('form')
-            this.roomInput = document.getElementById('room')
-            this.roomInput.addEventListener('keypress', event => {
-                if (event.key == 'Enter') {
-                    this.submitForm()
-                }
-            })
+            if(!this.button){
+                this.button = document.getElementById('button')
+                this.button.onclick = this.submitForm.bind(this)
+                this.form = document.getElementById('form')
+                this.roomInput = document.getElementById('room')
+                this.roomInput.addEventListener('keypress', event => {
+                    if (event.key == 'Enter') {
+                        this.submitForm()
+                    }
+                })
+            }
         }
     }
 
@@ -160,7 +207,9 @@ class RoomForm {
 
     leaveRoom() {
         socket.emit('leave-room', cb => {
+            console.log(cb)
             this.removeForm()
+            removeTable()
             joinRoomForm.displayForm()
         })
     }
@@ -196,7 +245,7 @@ class RoomForm {
 }
 
 
-
+export const endGameForm = new EndGameForm();
 export const joinRoomForm = new JoinRoomForm();
 export const roomForm = new RoomForm();
 

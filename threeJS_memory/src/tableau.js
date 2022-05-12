@@ -35,3 +35,7 @@ table.appendChild(ul)
 export const addTable = () => {
     document.body.appendChild(table)
 }
+
+export const removeTable = () => {
+    document.body.removeChild(table)
+}
