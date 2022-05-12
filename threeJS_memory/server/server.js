@@ -169,15 +169,13 @@ io.on('connect', socket => {
                 users[socket.id].points += .5;
                 let players = getPlayers(room);
                 if(Number.isInteger(users[socket.id].points)){
-                    players.sort((a, b) => b.points-a.points);
                     rooms[room].cards.pop()
                     if(rooms[room].cards.length == 0){
-                        
                         rooms[room].started = false
                         setPlayersNotReady(room)
                         players = getPlayers(room)
-                        
                     }
+                    players.sort((a, b) => b.points-a.points);
                 }
 
                 io.to(room).emit('update-room', players);
