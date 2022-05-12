@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { scene } from './Game.js';
 
-
+//TODO rename && comment
 
 const computeBezierCurve = (array, t) => {
     for (let i = 0; i < array.length - 1; i++) {

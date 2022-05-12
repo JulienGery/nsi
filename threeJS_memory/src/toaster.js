@@ -2,7 +2,7 @@ import './progressBar.css'
 import './toaster.css'
 
 export const displayToaster = (text = '', backgroundColor = '', color = '', progressBarColor = '') => {
-
+  //TODO rework here
   const snackbar = document.getElementById('snackbar')
   if (snackbar) {
     document.body.removeChild(snackbar)
