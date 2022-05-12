@@ -9,6 +9,25 @@ const io = require("socket.io")(3000, {
     }
 })
 
+const whenPlayersAreReady = (room) => {
+    if (rooms[room].started) {
+        console.log(`start game in room ${room}`)
+        io.to(room).emit('start-game')
+        setTimeout(() => {
+            const players = rooms[room].players
+            rooms[room].playerTurn = Math.floor(players.length * Math.random())
+            io.to(players[rooms[room].playerTurn]).emit('next-player')
+        }, 550);
+    } else {
+        console.log(`send cards to room ${room}`)
+        rooms[room].started = true
+        setPlayersNotReady(room)
+        io.to(room).emit('update-room', getPlayers(room))
+        const cards = initCards(room)
+        io.to(room).emit('receive-cards', cards)
+    }
+}
+
 const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -78,25 +97,7 @@ const onLeave = (socket) => {
         console.log(`delete room ${room}`)
         delete rooms[room]
     }else if (arePlayerReady(room)){
-        if (rooms[room].started) {
-            console.log(`start game in room ${room}`)
-            io.to(room).emit('start-game')
-            setTimeout(() => {
-                const players = rooms[room].players
-                rooms[room].playerTurn = Math.floor(players.length * Math.random())
-                io.to(players[rooms[room].playerTurn]).emit('next-player')
-            }, 550);
-        } else {
-            console.log(`send cards to room ${room}`)
-
-            rooms[room].started = true
-            setPlayersNotReady(room)
-            io.to(room).emit('update-room', getPlayers(room))
-
-            const cards = initCards(room)
-            io.to(room).emit('receive-cards', cards)
-        }
-
+        whenPlayersAreReady(room)
     }
     
 }
@@ -236,24 +237,7 @@ io.on('connect', socket => {
         io.to(room).emit('update-room', getPlayers(room))
 
         if (arePlayerReady(room)) {
-            if (rooms[room].started) {
-                console.log(`start game in room ${room}`)
-                io.to(room).emit('start-game')
-                setTimeout(() => {
-                    const players = rooms[room].players
-                    rooms[room].playerTurn = Math.floor(players.length * Math.random())
-                    io.to(players[rooms[room].playerTurn]).emit('next-player')
-                }, 550);
-            } else {
-                console.log(`send cards to room ${room}`)
-
-                rooms[room].started = true
-                setPlayersNotReady(room)
-                io.to(room).emit('update-room', getPlayers(room))
-
-                const cards = initCards(room)
-                io.to(room).emit('receive-cards', cards)
-            }
+            whenPlayersAreReady(room)
         }
 
     })
