@@ -5,14 +5,15 @@ import { displayToaster } from './toaster.js'
 import { updateTable, addTable, removeTable } from './tableau.js'
 import { start, game } from './Game.js'
 const axios = require('axios')
-export const socket = io("https://julien-game-server.gery.me")
-// export const socket = io("http://localhost:3000")
+// export const socket = io("https://julien-game-server.gery.me")
+export const socket = io("http://localhost:3000")
+
 
 const loader = new TextureLoader();
 const regex = /^-?\d+(?:\s*)$/g
 
-class Form{
-    constructor(array){
+class Form {
+    constructor(array) {
         this.form = document.createElement('div')
         this.form.className = 'form'
         this.isDisplayed = false
@@ -20,59 +21,59 @@ class Form{
     }
 
 
-    createForm(dict){
+    createForm(dict) {
         const name = dict.name
         this[name] = document.createElement(dict.type)
         this[name].className = dict.className
         this[name].innerHTML = dict.innerHTML
-        if(dict.textContent){
+        if (dict.textContent) {
             this[name].textContent = dict.textContent
         }
-        if(dict.onclick){
+        if (dict.onclick) {
             this[name].onclick = dict.onclick
         }
-        if(dict.eventListener){
+        if (dict.eventListener) {
             const eventListener = dict.eventListener
             this[name].addEventListener(eventListener.type, eventListener.function)
         }
-        if(dict.style){
+        if (dict.style) {
             this[name].style = dict.style
         }
         this[dict.parent].appendChild(this[name])
         // console.log(this)
     }
 
-    
 
-    displayForm(){
-        if(!this.isDisplayed){
+
+    displayForm() {
+        if (!this.isDisplayed) {
             this.isDisplayed = true
             document.body.appendChild(this.form)
         }
     }
 
-    removeForm(){
+    removeForm() {
         this.isDisplayed = false
         document.body.removeChild(this.form)
     }
 }
 
-class TestForm extends Form{
-    constructor(array){
+class TestForm extends Form {
+    constructor(array) {
         super(array)
         this.name = ''
         this.room = ''
     }
 
-    submitForm(){
+    submitForm() {
         this.name = this.inputName.children[0].value
         this.room = this.inputRoom.children[0].value
-        if(this.room && this.name){
+        if (this.room && this.name) {
             this.updateNameAndRoom()
             socket.emit('join-room', this.name, this.room, cb => {
-                if(!cb){
+                if (!cb) {
                     displayToaster('game already started')
-                }else{
+                } else {
                     addTable()
                     updateTable(cb.players)
                     this.removeForm()
@@ -80,12 +81,12 @@ class TestForm extends Form{
                     testRoomForm.updateCard(cb.cards)
                 }
             })
-        }else{
+        } else {
             displayToaster('fill form')
         }
     }
 
-    updateNameAndRoom(){
+    updateNameAndRoom() {
         this.inputName.children[0].value = this.name
         this.inputRoom.children[0].value = this.room
     }
@@ -93,33 +94,33 @@ class TestForm extends Form{
 
 
 
-class TestRoomForm extends Form{
-    constructor(array){
+class TestRoomForm extends Form {
+    constructor(array) {
         super(array)
         this.form.className = 'formImage'
         this.cards = []
     }
 
-    submitForm(){
+    submitForm() {
         const url = this.urlInput.children[0].value
         const number = url.match(regex)
         if (number) {
             this.urlInput.children[0].value = ''
-            if(number<0){
+            if (number < 0) {
                 const array = []
                 while (array.length != Math.abs(number) && array.length < this.cards.length) {
                     const randomNumber = Math.floor(Math.random() * this.cards.length)
-                    if(!array.includes(randomNumber)){
+                    if (!array.includes(randomNumber)) {
                         array.push(randomNumber)
                     }
-                } 
+                }
 
                 // array.sort((a, b) => b-a)
-                
-                array.forEach(async(index) => this.removeCards(this.cards[index]))
+
+                array.forEach(async (index) => this.removeCards(this.cards[index]))
                 return
             }
-            
+
             axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
                 const data = response.data;
@@ -154,26 +155,26 @@ class TestRoomForm extends Form{
         })
     }
 
-    removeCards(url){
+    removeCards(url) {
         socket.emit('submit-card', 'remove', url, cb => {
-            if(cb){
+            if (cb) {
                 this.updateCard(cb)
             }
         })
     }
 
     setReady() {
-        if(this.cards.length){
-            this.removeForm()  
+        if (this.cards.length) {
+            this.removeForm()
             start()
             socket.emit('ready')
             console.log('starting game')
-        }else{
+        } else {
             displayToaster("can't start, no cards")
         }
     }
-    
-    leave(){
+
+    leave() {
         socket.emit('leave-room', cb => {
             this.removeForm()
             removeTable()
@@ -181,37 +182,37 @@ class TestRoomForm extends Form{
         })
     }
 
-    updateCard(cards){
+    updateCard(cards) {
         this.cards = cards
         this.cardCount.textContent = `card count ${cards.length}`
     }
 
 }
 
-class TestEndGameForm extends Form{
-    constructor(array){
+class TestEndGameForm extends Form {
+    constructor(array) {
         super(array)
         this.form.style.height = '240px'
         this.form.style.zIndex = 7
     }
 
-    joinRoom(){
+    joinRoom() {
         this.joinRoomFunction()
         testRoomForm.updateCard([])
         testRoomForm.displayForm()
     }
 
-    leave(){
+    leave() {
         this.leaveFunction()
         socket.emit('leave-room', cb => {
-            socket.removeAllListeners()
+            // socket.removeAllListeners()
             testForm.displayForm()
             removeTable()
         })
     }
 
 
-    setFunction(joinRoom, leave){
+    setFunction(joinRoom, leave) {
         this.joinRoomFunction = joinRoom
         this.leaveFunction = leave
     }
@@ -241,7 +242,7 @@ const testForm = new TestForm([{
     "eventListener": {
         "type": 'keypress',
         "function": (e) => {
-            if(e.key == 'Enter'){
+            if (e.key == 'Enter') {
                 testForm.submitForm()
             }
         }
@@ -273,10 +274,10 @@ const testRoomForm = new TestRoomForm([
         "type": "div",
         "className": "input-container ic1",
         "innerHTML": '<input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label>',
-        "eventListener":{
+        "eventListener": {
             "type": "keypress",
             "function": (e) => {
-                if(e.key == 'Enter'){
+                if (e.key == 'Enter') {
                     testRoomForm.submitForm()
                 }
             }
@@ -323,10 +324,10 @@ export const testEndGameForm = new TestEndGameForm([
         "type": "button",
         "className": "submit",
         "textContent": "leave",
-        "onclick": () => {testEndGameForm.leave(game)},
+        "onclick": () => { testEndGameForm.leave(game) },
         "parent": "form"
     }
-    
+
 ])
 
 
@@ -337,7 +338,7 @@ socket.on('connect', () => {
 
 socket.on('update-room', dict => {
     updateTable(dict)
-    if(game){
+    if (game) {
         game.updatePlayer(dict.length)
     }
 })
