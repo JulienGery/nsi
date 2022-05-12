@@ -205,13 +205,12 @@ class TestEndGameForm extends Form {
     leave() {
         this.leaveFunction()
         socket.emit('leave-room', cb => {
-            // socket.removeAllListeners()
             testForm.displayForm()
             removeTable()
         })
     }
 
-
+    //TODO find a better solution
     setFunction(joinRoom, leave) {
         this.joinRoomFunction = joinRoom
         this.leaveFunction = leave
@@ -324,7 +323,7 @@ export const testEndGameForm = new TestEndGameForm([
         "type": "button",
         "className": "submit",
         "textContent": "leave",
-        "onclick": () => { testEndGameForm.leave(game) },
+        "onclick": () => testEndGameForm.leave(),
         "parent": "form"
     }
 
