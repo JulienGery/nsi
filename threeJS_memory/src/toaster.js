@@ -21,6 +21,9 @@ export const displayToaster = (text = '', backgroundColor = '', color = '', prog
   document.body.appendChild(toaster)
 
   setTimeout(() => {
-    document.body.removeChild(toaster)
+    const snackbar = document.getElementById('snackbar')
+    if (snackbar) {
+      document.body.removeChild(snackbar)
+    }
   }, 2900)
 }

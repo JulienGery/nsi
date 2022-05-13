@@ -70,6 +70,10 @@ export const start = () => {
     const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
     const controls = new OrbitControls(camera, canvas)
     controls.enabled = false;
+    // controls.minPolarAngle = - Math.PI
+    // controls.maxPolarAngle = Math.PI
+    // controls.minAzimuthAngle = - Math.PI / 2
+    // controls.maxAzimuthAngle = Math.PI / 2
 
     scene.add(camera)
 
@@ -97,7 +101,6 @@ export const start = () => {
             this.mouseClick = this.setReady.bind(this);
             this.mouseMove = this.updateMouse.bind(this)
             window.addEventListener('pointermove', this.mouseMove)
-            controls.addEventListener('change', this.onCameraChange.bind(this))
             this.tick()
 
         }
@@ -110,13 +113,6 @@ export const start = () => {
             }
             return -1
         }
-
-        onCameraChange() {
-            this.allCard.forEach(card => {
-                
-            })
-        }
-
 
         initTexture(cards) {
             displayToaster('downloading texture')
