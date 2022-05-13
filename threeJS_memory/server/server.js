@@ -17,7 +17,7 @@ const whenPlayersAreReady = (room) => {
             const players = rooms[room].players
             rooms[room].playerTurn = Math.floor(players.length * Math.random())
             io.to(players[rooms[room].playerTurn]).emit('next-player')
-        }, 550);
+        }, 650);
     } else {
         console.log(`send cards to room ${room}`)
         rooms[room].started = true
