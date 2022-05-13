@@ -10,7 +10,7 @@ export const socket = io("https://julien-game-server.gery.me")
 
 
 const loader = new TextureLoader();
-const regex = /^-?\d+(?:\s*)$/g
+const regex = /^(?:\s*)-?\d+(?:\s*)$/g
 
 class Form {
     constructor(array) {

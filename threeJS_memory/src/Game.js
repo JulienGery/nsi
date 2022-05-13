@@ -25,11 +25,16 @@ const centerCard = new THREE.Vector2(.5, .5)
 const qFront = new THREE.Quaternion(0, 0, 0, 1);
 const qBack = new THREE.Quaternion(0, 1, 0, 0);
 let uv;
-const pointLight = new THREE.AmbientLight(0xffffff, 1);
+// const pointLight = new THREE.AmbientLight(0xffffff, 1);
 const coefSizesToXYZ = 0.03166561114 * .7;
 // scene.add(pointLight)
 
-
+THREE.Vector3.prototype[Symbol.iterator] = function* (){
+    yield this.x;
+    yield this.y;
+    yield this.z
+}   
+console.log(new THREE.Vector3())
 
 export const start = () => {
     const sizes = {
@@ -91,9 +96,9 @@ class Game {
         this.offSet = new THREE.Vector3((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2, 0)
         this.initTexture(cards);
         this.mouseClick = this.setReady.bind(this);
-        
         this.mouseMove = this.updateMouse.bind(this)
         window.addEventListener('pointermove', this.mouseMove)
+        controls.addEventListener('change', this.onCameraChange)
         this.tick()
 
     }
@@ -105,6 +110,10 @@ class Game {
             }
         }
         return -1
+    }
+
+    onCameraChange(){
+        console.log(...mouse)
     }
 
 
@@ -170,7 +179,7 @@ class Game {
 
     pairFound(cardIndex){
         const card = this.allCard.splice(cardIndex, 1)[0]
-        explosions.push(new Explosion(card.pos.x, card.pos.y))
+        explosions.push(new Explosion(...card.pos))
         if(this.cardUnder == cardIndex){
             this.cardUnder = NaN
         }
@@ -361,7 +370,7 @@ class Game {
         const explosionPosition = new THREE.Vector3(coefSizesToXYZ * sizes.width * (Math.random() * 2 - 1), coefSizesToXYZ * sizes.height * (Math.random() * 2 - 1), 0)
         explosionPosition.applyQuaternion(camera.quaternion)
         explosionPosition.add(cameraPostion)
-        explosions.push(new Explosion(explosionPosition.x, explosionPosition.y, explosionPosition.z))
+        explosions.push(new Explosion(...explosionPosition))
         setTimeout(this.endExplosionBind, Math.floor(Math.random() * 550 + 550))
         
     }
