@@ -35,67 +35,27 @@ THREE.Vector3.prototype[Symbol.iterator] = function* () {
     yield this.z
 }
 
-
+/**
+ * 
+ * @param {*} element element in the array
+ * @param {Array} array array
+ * @returns {Number|NaN} return index or NaN
+ */
 const findIndex = (element, array) => {
     for (let i = 0; i < array.length; i++) {
         if (array[i].name == element) {
             return i
         }
     }
-    return -1
+    return NaN
 }
 
-// export const start = () => {Controls
-    // const sizes = {
-    //     width: window.innerWidth,
-    //     height: window.innerHeight
-    // }
-    // scene.children = []
-
-    // const canvas = document.createElement('canvas')
-    // canvas.className = "webgl"
-    // document.body.appendChild(canvas)
-    // document.body.appendChild(stats.dom)
-    // const renderer = new THREE.WebGLRenderer({
-    //     canvas: canvas,
-    //     antialias: true
-    // })
-    // renderer.setSize(sizes.width, sizes.height)
-    // renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    // window.addEventListener('resize', () => {
-    //     // Update sizes
-    //     sizes.width = window.innerWidth
-    //     sizes.height = window.innerHeight
-
-    //     // Update camera
-    //     camera.aspect = sizes.width / sizes.height
-    //     camera.updateProjectionMatrix()
-
-    //     // Update renderer
-    //     renderer.setSize(sizes.width, sizes.height)
-    //     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    // })
-
-    // const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-    // const controls = new OrbitControls(camera, canvas)
-    // controls.enabled = false;
-    // // controls.minPolarAngle = - Math.PI
-    // // controls.maxPolarAngle = Math.PI
-    // // controls.minAzimuthAngle = - Math.PI / 2
-    // // controls.maxAzimuthAngle = Math.PI / 2
-
-    // scene.add(camera)
-
-    // camera.position.x = 0
-    // camera.position.y = 0
-    // camera.position.z = 20
-
-
+/**
+ * @class
+ */
 export class Game {
 
     constructor(cards) {
-        // this.isRunning = true
         this.init()
         this.endExplosionBind = this.endExplosion.bind(this)
         this.tickBind = this.tick.bind(this)
@@ -112,7 +72,7 @@ export class Game {
         this.mouseClick = this.setReady.bind(this);
         this.mouseMove = this.updateMouse.bind(this)
         window.addEventListener('pointermove', this.mouseMove)
-        this.tick()
+        // this.tick()
 
     }
 
@@ -121,7 +81,7 @@ export class Game {
             width: window.innerWidth,
             height: window.innerHeight
         }
-        scene.children = []
+        scene.clear()
         this.canvas = document.createElement('canvas')
         this.canvas.className = "webgl"
         document.body.appendChild(this.canvas)
@@ -149,11 +109,11 @@ export class Game {
             this.sizes.height = window.innerHeight
     
             // Update camera
-            this.camera.aspect = sizes.width / sizes.height
+            this.camera.aspect = this.sizes.width / this.sizes.height
             this.camera.updateProjectionMatrix()
     
             // Update renderer
-            this.renderer.setSize(sizes.width, sizes.height)
+            this.renderer.setSize(this.sizes.width, this.sizes.height)
             this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     
         })
@@ -192,7 +152,12 @@ export class Game {
             this.downloadTexture(cards[findIndex(i, cards)].textureURL, i, cards)
         }
     }
-
+    /**
+     * 
+     * @param {String} URL 
+     * @param {Number} index 
+     * @param {Object} cards dict-like
+     */
     async downloadTexture(URL, index, cards) {
         loader.loadAsync(URL).then((rep) => {
             this.texture[index] = new THREE.MeshBasicMaterial({ color: "#ffffff", map: rep })
@@ -204,7 +169,10 @@ export class Game {
             this.downloadTexture(URL, index, cards); //recall on error
         })
     }
-
+    /**
+     * 
+     * @param {Object} cards 
+     */
     CreateCard(cards) {
         displayToaster('creating card')
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
@@ -222,12 +190,18 @@ export class Game {
     placeCard() {
         for (let i = 0; i < this.allCard.length; i++) {
             this.allCard[i].show()
+            for(let j = 0; j<this.allCard[i].card.children[0].children.length; j++){
+                this.allCard[i].card.children[0].children[j].onAfterRender()
+            }
         }
-        // window.addEventListener('click', this.mouseClick)
+        this.tick()
+        displayToaster('click in order to set ready')
+        window.addEventListener('click', this.mouseClick)
         this.updateIntersect()
-        this.setReady()
     }
-
+    /**
+     * spread cards
+     */
     spread() {
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard; j++) {
@@ -235,17 +209,27 @@ export class Game {
             }
         }
     }
+    /**
+     * update mouse vector
+     * @param {Event} event 
+     */
 
     updateMouse(event) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     }
-
+    /**
+     * update mouse and call onMouseOver
+     * @param {Event} event 
+     */
     onMove(event) {
         this.updateMouse(event)
         this.onMouseOver()
     }
-
+    /**
+     * create explosion and remove card
+     * @param {Number} cardIndex 
+     */
     pairFound(cardIndex) {
         const card = this.allCard.splice(cardIndex, 1)[0]
         explosions.push(new Explosion(...card.pos))
@@ -258,32 +242,45 @@ export class Game {
             setTimeout(this.end.bind(this), 1000)
         }
     }
-
+    /**
+     * turn card, moveDown and push index into this.turnedCards
+     * @param {Number} cardIndex 
+     */
     turnCard(cardIndex) {
         const card = this.allCard[cardIndex]
         card.rotate(card.card.quaternion, qBack, Math.PI / 10, uv)
         this.turnedCards.push(cardIndex)
         this.moveDown(cardIndex)
     }
-
+    /**
+     * move up card
+     * @param {Number} cardIndex 
+     */
     moveUp(cardIndex) {
         const card = this.allCard[cardIndex]
         const pos = card.pos
         card.moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
-
     }
-
+    /**
+     * moveDown
+     * @param {Number} cardIndex 
+     */
     moveDown(cardIndex) {
         const card = this.allCard[cardIndex]
         const pos = card.pos
         card.moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
     }
-
+    /**
+     * call moveDown and set this.cardUnder to NaN
+     */
     onMoveDown() {
         this.moveDown(this.cardUnder)
         this.cardUnder = NaN
     }
-
+    /**
+     * call move up and set this.cardUnder to cardIndex
+     * @param {Number} cardIndex 
+     */
     onMoveUp(cardIndex) {
         this.moveUp(cardIndex)
         this.cardUnder = cardIndex
@@ -371,10 +368,11 @@ export class Game {
                             this.cardUnder = i
                         }
                     }
-                    break
+                    return
                 }
             }
-        } else if (!isNaN(this.cardUnder)) {
+        } 
+        if (!isNaN(this.cardUnder)) {
             socket.emit('action', 'move-down', this.cardUnder)
             this.onMoveDown()
         }

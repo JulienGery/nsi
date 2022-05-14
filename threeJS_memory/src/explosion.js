@@ -4,10 +4,56 @@ import { scene } from './Game.js';
 const nombreParticules = 2000;
 const particuleSize = .15
 
-function randomUnitVector() {
-    const vec = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalize();
-    return vec;
+/**
+ * return a random unit vector in a sphere and store into this
+ * @returns {THREE.Vector3}
+ */
+THREE.Vector3.prototype.randomUnitVector = function(){
+    this.x = Math.random() * 2 - 1;
+    this.y = Math.random() * 2 - 1;
+    this.z = Math.random() * 2 - 1;
+    this.normalize();
+    return this;
 }
+
+/**
+ * 
+ * @param {Number} index 
+ * @returns {Array} [X, Y, Z]
+ */
+THREE.BufferAttribute.prototype.getXYZ = function(index){
+    return [this.getX(index), this.getY(index), this.getZ(index)]
+}
+/**
+ * needs to be same length
+ * @param {Array<Number>} array1 
+ * @param {Array<Number>} array2 
+ * @returns 
+ */
+function somme(array1, array2){
+    return array1.map((e, idx) => e+array2[idx])
+}
+/**
+ * 
+ * @param  {...Array<Number>} args all arrays of n size
+ * @returns {Array} sum of arrays
+ */
+function ArraySum(...args){
+
+    switch (args.length){
+        case 1:
+            return args[0]
+        case 2:
+            return somme(...args)
+        default:
+            return somme(ArraySum(...args.slice(0, Math.ceil(args.length/2))), ArraySum(...args.slice(Math.ceil(args.length/2), Infinity)))
+            
+    }
+}
+
+
+const multiply = (coef) => (array) => array.map(e => coef*e)
+
 
 export class Explosion {
     constructor(x, y, z = 0) {
@@ -24,6 +70,12 @@ export class Explosion {
         this.position = this.geometry.attributes.position
     }
 
+    [Symbol.iterator] = function*(){
+        yield this.x;
+        yield this.y;
+        yield this.z;
+    }
+
     createGeometry() {
         this.geometry = new THREE.BufferGeometry();
         const vertices = []
@@ -32,10 +84,9 @@ export class Explosion {
         for (let i = 0; i < nombreParticules; i++) {
             color.setHSL(Math.random() * .9 + .1, Math.random() * .9 + .1, Math.random() * .9 + .1);
             colors.push(color.r, color.g, color.b);
-            const vec = randomUnitVector()
-            vec.multiplyScalar(.1)
+            const vec = new THREE.Vector3().randomUnitVector().multiplyScalar(.1)
             this.vectors.push(vec)
-            vertices.push(vec.x + this.x, vec.y + this.y, vec.z + this.z)
+            vertices.push(...ArraySum([...vec], [...this]))
             this.speeds.push(Math.random() * 2)
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
@@ -48,14 +99,10 @@ export class Explosion {
             const speed = this.speeds[i]
 
             // const V = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
-            const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime + 5)
+            const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime - 1.28318530718)
             const startVector = this.vectors[i]
             const vec = this.vectors[i].clone().multiplyScalar(V)
-            // console.log(vec)
-            const X = this.position.getX(i)
-            const Y = this.position.getY(i)
-            const Z = this.position.getZ(i)
-            this.position.setXYZ(i, vec.x * speed + startVector.x + X, vec.y * speed + startVector.y + Y, vec.z * speed + startVector.z + Z)
+            this.position.setXYZ(i, ...ArraySum(multiply(speed)([...vec]), [...startVector], this.position.getXYZ(i)))
         }
         this.position.needsUpdate = true;
     }

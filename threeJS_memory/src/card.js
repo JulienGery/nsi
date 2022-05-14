@@ -2,26 +2,60 @@ import * as THREE from 'three'
 import { scene } from './Game.js';
 
 //TODO rename && comment
-
-const computeBezierCurve = (array, t) => {
+/**
+ * 
+ * @param {Array<THREE.Quaternion>} array 
+ * @param {Number} t between 0 and 1
+ * @returns {THREE.Quaternion} result of bezier curve
+ */
+const computeBezierCurveQuaternion = (array, t) => {
     for (let i = 0; i < array.length - 1; i++) {
         array[i].slerp(array[i + 1], t)
     }
     array.pop()
-    return array.length == 1? array[0] : computeBezierCurve(array, t)
+    return array.length == 1? array[0] : computeBezierCurveQuaternion(array, t)
 }
-
-const computeBezierCurveLine = (array, t) => {
+/**
+ * 
+ * @param {Array<THREE.Vector3>} array 
+ * @param {Number} t 
+ * @returns {THREE.Vector3} result of bezier curve
+ */
+const computeBezierCurveVector = (array, t) => {
     for (let i = 0; i < array.length - 1; i++) {
         array[i].lerp(array[i + 1], t)
     }
     array.pop()
     
-    return array.length == 1? array[0] : computeBezierCurveLine(array, t)
+    return array.length == 1? array[0] : computeBezierCurveVector(array, t)
 }
 
-export class Card {
+/**
+ * 
+ * @param {Array<THREE.Quaternion|THREE.Vector3>} array 
+ * @param {Number} t 
+ * @returns {THREE.Quaternion|THREE.Vector3}
+ */
 
+const computeBezierCurve = (array, t) => {
+    switch (array[0].isQuaternion){
+        case true:
+            return computeBezierCurveQuaternion(array, t)
+        default:
+            return computeBezierCurveVector(array, t)
+    }
+}
+
+
+export class Card {
+    /**
+     * 
+     * @param {THREE.Vector3} pos 
+     * @param {THREE.MeshBasicMaterial} texture 
+     * @param {Number} name 
+     * @param {THREE.Group} card scene of glft
+     * @param {String} textureURL optional
+     */
     constructor(pos, texture, name, card, textureURL) {
         this.pos = pos //vector 3
         this.textureURL = textureURL //textureURL
@@ -34,13 +68,24 @@ export class Card {
 
     show() {
         scene.add(this.card)//add card to the scene
+        // this.card.children[0].children[0].onAfterRender(renderer, scene, camera, )
+        console.log('rendering the card')
     }
-
+    /**
+     * set place of the card
+     * @param {THREE.Vector3} vector 
+     */
     setPlace(vector) {
         this.pos = vector
-        this.card.position.set(vector.x, vector.y, vector.z)
+        this.card.position.set(...vector)
     }
-
+    /**
+     * rotate card
+     * @param {THREE.Quaternion} start 
+     * @param {THREE.Quaternion} end 
+     * @param {Number} time 
+     * @param {THREE.Vector2} vec 
+     */
     rotate(start, end, time, vec) {
         const clock = new THREE.Clock();
         const quaternions = [start]
@@ -49,7 +94,9 @@ export class Card {
         }
 
         quaternions.push(end)
-
+        /**
+         * actual rotation function
+         */
         const actualRotate = () => {
             const elapsedTime = clock.getElapsedTime();
             const quaternionsClone = quaternions.map(q => q.clone())
@@ -69,18 +116,22 @@ export class Card {
         window.requestAnimationFrame(actualRotate);
 
     }
-
+    /**
+     * 
+     * @param {THREE.Vector3} start 
+     * @param {THREE.Vector3} end 
+     * @param {Number} time 
+     */
     async moveTo(start, end, time = 1) {
         const array = [start, end]
         const clock = new THREE.Clock();
-
         const actualMouveTo = () => {
             const elapsedTime = clock.getElapsedTime();
             if (elapsedTime <= time) {
 
                 const arrayClone = array.map(e => e.clone())
-                const lerpPos = computeBezierCurveLine(arrayClone, elapsedTime / time)
-
+                const lerpPos = computeBezierCurve(arrayClone, elapsedTime / time)
+                // this.card.position.set(...lerpPos)
                 this.setPlace(lerpPos)
                 window.requestAnimationFrame(actualMouveTo);
             } else {
