@@ -47,7 +47,7 @@ function ArraySum(...args){
             return somme(...args)
         default:
             return somme(ArraySum(...args.slice(0, Math.ceil(args.length/2))), ArraySum(...args.slice(Math.ceil(args.length/2), Infinity)))
-            
+
     }
 }
 
@@ -64,10 +64,6 @@ export class Explosion {
         this.speeds = []
         this.vectors = []
         this.createGeometry()
-        this.PointsMaterial = new THREE.PointsMaterial({ vertexColors: true, size: particuleSize })
-        this.points = new THREE.Points(this.geometry, this.PointsMaterial)
-        scene.add(this.points)
-        this.position = this.geometry.attributes.position
     }
 
     [Symbol.iterator] = function*(){
@@ -76,7 +72,7 @@ export class Explosion {
         yield this.z;
     }
 
-    createGeometry() {
+    async createGeometry() {
         this.geometry = new THREE.BufferGeometry();
         const vertices = []
         const color = new THREE.Color()
@@ -91,6 +87,10 @@ export class Explosion {
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
         this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+        this.PointsMaterial = new THREE.PointsMaterial({ vertexColors: true, size: particuleSize })
+        this.points = new THREE.Points(this.geometry, this.PointsMaterial)
+        scene.add(this.points)
+        this.position = this.geometry.attributes.position
     }
 
     async update() {
