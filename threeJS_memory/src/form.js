@@ -3,7 +3,7 @@ import './form.css'
 import { TextureLoader } from 'three'
 import { displayToaster } from './toaster.js'
 import { updateTable, addTable, removeTable } from './tableau.js'
-import { start, game } from './Game.js'
+import { Game } from './Game.js'
 const axios = require('axios')
 export const socket = io("https://julien-game-server.gery.me")
 // export const socket = io("http://localhost:3000")
@@ -11,6 +11,7 @@ export const socket = io("https://julien-game-server.gery.me")
 
 const loader = new TextureLoader();
 const regex = /^(?:\s*)-?\d+(?:\s*)$/g
+let game;
 
 class Form {
     constructor(array) {
@@ -166,7 +167,6 @@ class TestRoomForm extends Form {
     setReady() {
         if (this.cards.length) {
             this.removeForm()
-            start()
             socket.emit('ready')
             console.log('starting game')
         } else {
@@ -345,4 +345,8 @@ socket.on('update-room', dict => {
 socket.on('update-cards', cards => {
     console.log(cards)
     testRoomForm.updateCard(cards)
+})
+
+socket.on('receive-cards', (cards) => {
+    game = new Game(cards);
 })
