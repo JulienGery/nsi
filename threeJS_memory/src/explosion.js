@@ -65,7 +65,7 @@ export class Explosion {
         this.createGeometry()
     }
 
-    [Symbol.iterator] = function*(){
+    *[Symbol.iterator]() {
         yield this.x;
         yield this.y;
         yield this.z;
@@ -93,6 +93,7 @@ export class Explosion {
     }
 
     async update() {
+        console.log(this.position.count)
         const elapsedTime = this.clock.getElapsedTime()
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
