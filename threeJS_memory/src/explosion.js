@@ -22,7 +22,7 @@ THREE.Vector3.prototype.randomUnitVector = function(){
  * @returns {Array} [X, Y, Z]
  */
 THREE.BufferAttribute.prototype.getXYZ = function(index){
-    return [this.getX(index), this.getY(index), this.getZ(index)]
+    return new THREE.Vector3(this.getX(index), this.getY(index), this.getZ(index))
 }
 /**
  * needs to be same length
@@ -54,7 +54,6 @@ function ArraySum(...args){
 
 const multiply = (coef) => (array) => array.map(e => coef*e)
 
-
 export class Explosion {
     constructor(x, y, z = 0) {
         this.clock = new THREE.Clock()
@@ -82,7 +81,7 @@ export class Explosion {
             colors.push(color.r, color.g, color.b);
             const vec = new THREE.Vector3().randomUnitVector().multiplyScalar(.1)
             this.vectors.push(vec)
-            vertices.push(...ArraySum([...vec], [...this]))
+            vertices.push(...vec.clone().add(new THREE.Vector3(...this)))
             this.speeds.push(Math.random() * 2)
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
@@ -102,8 +101,9 @@ export class Explosion {
             const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime - 1.28318530718)
             const startVector = this.vectors[i]
             const vec = this.vectors[i].clone().multiplyScalar(V)
-            this.position.setXYZ(i, ...ArraySum(multiply(speed)([...vec]), [...startVector], this.position.getXYZ(i)))
-        }
+            vec.multiplyScalar(speed).add(startVector).add(this.position.getXYZ(i))
+            this.position.setXYZ(i, ...vec)
+            }
         this.position.needsUpdate = true;
     }
     remove() {
