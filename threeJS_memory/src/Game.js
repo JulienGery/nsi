@@ -99,10 +99,10 @@ export class Game {
         this.camera = new THREE.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 0.1, 100)
         this.controls = new OrbitControls(this.camera, this.canvas)
         this.controls.enabled = false;
-        // this.controls.minPolarAngle = - Math.PI
-        // this.controls.maxPolarAngle = Math.PI
-        // this.controls.minAzimuthAngle = - Math.PI / 2
-        // this.controls.maxAzimuthAngle = Math.PI / 2
+        this.controls.minPolarAngle = - Math.PI
+        this.controls.maxPolarAngle = Math.PI
+        this.controls.minAzimuthAngle = - Math.PI / 2
+        this.controls.maxAzimuthAngle = Math.PI / 2
         window.addEventListener('resize', () => {
             // Update sizes
             this.sizes.width = window.innerWidth
@@ -122,6 +122,7 @@ export class Game {
         this.camera.position.x = 0
         this.camera.position.y = 0
         this.camera.position.z = 20
+
         socket.on('action', (action, cardIndex) => {
             switch (action) {
                 case 'move-down':
