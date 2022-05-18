@@ -4,7 +4,7 @@ import { Card } from './card.js'
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff)
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { testEndGameForm, } from './form.js';
+import { endGameForm, } from './form.js';
 import { displayToaster } from './toaster.js'
 import Stats from 'stats.js'
 import { Explosion } from './explosion.js'
@@ -148,7 +148,7 @@ export class Game {
     }
 
     initTexture(cards) {
-        displayToaster('downloading texture')
+        displayToaster('téléchargement des images')
         for (let i = 0; i < this.numberCard / 2; i++) {
             this.downloadTexture(cards[findIndex(i, cards)].textureURL, i, cards)
         }
@@ -175,7 +175,7 @@ export class Game {
      * @param {Object} cards 
      */
     CreateCard(cards) {
-        displayToaster('creating card')
+        displayToaster('creation des cartes')
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
             gltf.scene.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
             for (let i = 0; i < this.numberCard; i++) {
@@ -196,7 +196,7 @@ export class Game {
             }
         }
         this.tick()
-        displayToaster('click in order to set ready')
+        displayToaster('cliquer pour vous mettre prêt')
         window.addEventListener('click', this.mouseClick)
         this.updateIntersect()
     }
@@ -384,7 +384,7 @@ export class Game {
     }
 
     addListener() {
-        displayToaster("it's your turn")
+        displayToaster("à votre tour")
         this.mouseClick = this.onMouseClick.bind(this)
         window.addEventListener('click', this.mouseClick)
         this.mouseMove = this.onMove.bind(this)
@@ -422,12 +422,12 @@ export class Game {
             document.body.removeChild(this.canvas)
             // game = null
             document.body.removeChild(stats.dom)
-            testEndGameForm.removeForm()
+            endGameForm.removeForm()
         }
-        testEndGameForm.setFunction(() => {
+        endGameForm.setFunction(() => {
             fEndForm()
         }, () => fEndForm())
-        testEndGameForm.displayForm()
+        endGameForm.displayForm()
     }
 
     endExplosion() {

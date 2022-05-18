@@ -59,7 +59,7 @@ class Form {
     }
 }
 
-class TestForm extends Form {
+class JoinRoomForm extends Form {
     constructor(array) {
         super(array)
         this.name = ''
@@ -73,17 +73,17 @@ class TestForm extends Form {
             this.updateNameAndRoom()
             socket.emit('join-room', this.name, this.room, cb => {
                 if (!cb) {
-                    displayToaster('game already started')
+                    displayToaster('le jeu a déjà commencé')
                 } else {
                     addTable()
                     updateTable(cb.players)
                     this.removeForm()
-                    testRoomForm.displayForm()
-                    testRoomForm.updateCard(cb.cards)
+                    roomForm.displayForm()
+                    roomForm.updateCard(cb.cards)
                 }
             })
         } else {
-            displayToaster('fill form')
+            displayToaster('remplir le formulaire')
         }
     }
 
@@ -95,7 +95,7 @@ class TestForm extends Form {
 
 
 
-class TestRoomForm extends Form {
+class RoomForm extends Form {
     constructor(array) {
         super(array)
         this.form.className = 'formImage'
@@ -121,15 +121,16 @@ class TestRoomForm extends Form {
                 array.forEach(async (index) => this.removeCards(this.cards[index]))
                 return
             }
+            if(number != 0){
+                axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
 
-            axios.get("https://picsum.photos/v2/list?page=" + Math.floor(Math.random() * 1000 / number) + "&limit=" + number).then((response) => {
+                    const data = response.data;
+                    data.forEach(element => this.sendCards(element.download_url))
 
-                const data = response.data;
-                data.forEach(element => this.sendCards(element.download_url))
-
-            }).catch((err) => {
-                console.log(err)
-            })
+                }).catch((err) => {
+                    console.log(err)
+                })
+            }
             return
         }
 
@@ -149,6 +150,7 @@ class TestRoomForm extends Form {
         socket.emit('submit-card', 'add', url, cb => {
             if (cb) {
                 this.updateCard(cb)
+                this.urlInput.children[0].value = ''
                 this.urlInput.children[0].style.backgroundColor = 'green'
             } else {
                 this.urlInput.children[0].style.backgroundColor = 'red'
@@ -168,9 +170,8 @@ class TestRoomForm extends Form {
         if (this.cards.length) {
             this.removeForm()
             socket.emit('ready')
-            console.log('starting game')
         } else {
-            displayToaster("can't start, no cards")
+            displayToaster("ajouter une carte pour lancer la partie")
         }
     }
 
@@ -178,7 +179,7 @@ class TestRoomForm extends Form {
         socket.emit('leave-room', cb => {
             this.removeForm()
             removeTable()
-            testForm.displayForm()
+            joinRoomForm.displayForm()
         })
     }
 
@@ -189,7 +190,7 @@ class TestRoomForm extends Form {
 
 }
 
-class TestEndGameForm extends Form {
+class EndGameForm extends Form {
     constructor(array) {
         super(array)
         this.form.style.height = '240px'
@@ -198,14 +199,14 @@ class TestEndGameForm extends Form {
 
     joinRoom() {
         this.joinRoomFunction()
-        testRoomForm.updateCard([])
-        testRoomForm.displayForm()
+        roomForm.updateCard([])
+        roomForm.displayForm()
     }
 
     leave() {
         this.leaveFunction()
         socket.emit('leave-room', cb => {
-            testForm.displayForm()
+            joinRoomForm.displayForm()
             removeTable()
         })
     }
@@ -218,7 +219,7 @@ class TestEndGameForm extends Form {
 }
 
 
-const testForm = new TestForm([{
+const joinRoomForm = new JoinRoomForm([{
     "name": "title",
     "type": "div",
     "className": "title",
@@ -230,19 +231,19 @@ const testForm = new TestForm([{
     "name": "inputName",
     "type": "div",
     "className": "input-container ic1",
-    "innerHTML": '<input id="name" class="input" type="text" value="" placeholder=" "><div class="cut"></div><label for="name" class="placeholder">name</label>',
+    "innerHTML": '<input id="name" class="input" type="text" value="" placeholder=" "><div class="cut"></div><label for="name" class="placeholder">nom</label>',
     "parent": 'form'
 },
 {
     "name": "inputRoom",
     "type": "div",
     "className": "input-container ic2",
-    "innerHTML": '<input id="room" class="input" value="" type="text" placeholder=" "><div class="cut"></div><label for="room" class="placeholder">room</label>',
+    "innerHTML": '<input id="room" class="input" value="" type="text" placeholder=" "><div class="cut"></div><label for="room" class="placeholder">salle</label>',
     "eventListener": {
         "type": 'keypress',
         "function": (e) => {
             if (e.key == 'Enter') {
-                testForm.submitForm()
+                joinRoomForm.submitForm()
             }
         }
     },
@@ -253,13 +254,13 @@ const testForm = new TestForm([{
     "type": "button",
     "className": "submit",
     "textContent": "submit",
-    "onclick": () => testForm.submitForm(),
+    "onclick": () => joinRoomForm.submitForm(),
     "parent": "form"
 }
 ])
 
 
-const testRoomForm = new TestRoomForm([
+const roomForm = new RoomForm([
     {
         "name": "cardCount",
         "type": "div",
@@ -272,12 +273,12 @@ const testRoomForm = new TestRoomForm([
         "name": "urlInput",
         "type": "div",
         "className": "input-container ic1",
-        "innerHTML": '<input type="text" class="input" placeholder=" " id="url"><div class="cut"></div><label class="placeholder">add image</label>',
+        "innerHTML": '<input type="text" class="input" placeholder=" " id="url"><div class="cut" style="width: 120px"></div><label class="placeholder">ajouter une image</label>',
         "eventListener": {
             "type": "keypress",
             "function": (e) => {
                 if (e.key == 'Enter') {
-                    testRoomForm.submitForm()
+                    roomForm.submitForm()
                 }
             }
         },
@@ -287,43 +288,43 @@ const testRoomForm = new TestRoomForm([
         "name": "submitButton",
         "type": "button",
         "className": "submit",
-        "onclick": () => testRoomForm.submitForm(),
-        "textContent": "submit",
+        "onclick": () => roomForm.submitForm(),
+        "textContent": "soumettre",
         "parent": "form"
     },
     {
         "name": "setReadyButton",
         "type": "button",
         "className": "submit",
-        "onclick": () => testRoomForm.setReady(),
-        "textContent": "set ready",
+        "onclick": () => roomForm.setReady(),
+        "textContent": "prêt",
         "parent": "form"
     },
     {
         "name": "leaveButton",
         "type": "button",
         "className": "submit",
-        "onclick": () => testRoomForm.leave(),
-        "textContent": "leave",
+        "onclick": () => roomForm.leave(),
+        "textContent": "partir",
         "parent": "form"
     }
 ])
 
-export const testEndGameForm = new TestEndGameForm([
+export const endGameForm = new EndGameForm([
     {
         "name": "joinButton",
         "type": "button",
         "className": "submit",
-        "textContent": "joinRoom",
-        "onclick": () => testEndGameForm.joinRoom(),
+        "textContent": "rejoindre",
+        "onclick": () => endGameForm.joinRoom(),
         "parent": "form"
     },
     {
         "name": "leaveButton",
         "type": "button",
         "className": "submit",
-        "textContent": "leave",
-        "onclick": () => testEndGameForm.leave(),
+        "textContent": "partir",
+        "onclick": () => endGameForm.leave(),
         "parent": "form"
     }
 
@@ -331,8 +332,7 @@ export const testEndGameForm = new TestEndGameForm([
 
 
 socket.on('connect', () => {
-    console.log('success')
-    testForm.displayForm()
+    joinRoomForm.displayForm()
 })
 
 socket.on('update-room', dict => {
@@ -343,8 +343,7 @@ socket.on('update-room', dict => {
 })
 
 socket.on('update-cards', cards => {
-    console.log(cards)
-    testRoomForm.updateCard(cards)
+    roomForm.updateCard(cards)
 })
 
 socket.on('receive-cards', (cards) => {

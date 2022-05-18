@@ -93,7 +93,6 @@ export class Explosion {
     }
 
     async update() {
-        console.log(this.position.count)
         const elapsedTime = this.clock.getElapsedTime()
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]

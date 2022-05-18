@@ -68,8 +68,6 @@ export class Card {
 
     show() {
         scene.add(this.card)//add card to the scene
-        // this.card.children[0].children[0].onAfterRender(renderer, scene, camera, )
-        console.log('rendering the card')
     }
     /**
      * set place of the card
