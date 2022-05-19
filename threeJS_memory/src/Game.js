@@ -434,7 +434,7 @@ export class Game {
         const cameraPostion = this.camera.position.clone()
         const cameraDirection = new THREE.Vector3();
         this.camera.getWorldDirection(cameraDirection)
-        cameraPostion.add(cameraDirection.multiplyScalar(40))
+        cameraPostion.add(cameraDirection.multiplyScalar(35))
         const explosionPosition = new THREE.Vector3(coefSizesToXYZ * this.sizes.width * (Math.random() * 2 - 1), coefSizesToXYZ * this.sizes.height * (Math.random() * 2 - 1), 0)
         explosionPosition.applyQuaternion(this.camera.quaternion)
         explosionPosition.add(cameraPostion)

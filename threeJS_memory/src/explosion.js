@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { scene } from './Game.js';
 
 const nombreParticules = 2000;
-const particuleSize = .15
+const particuleSize = .15;
 const g = -7.216100404249
 
 /**
@@ -99,9 +99,9 @@ export class Explosion {
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
             const V = 5*Math.exp(-0.2*elapsedTime+2)*(-0.03846153846*Math.cos(elapsedTime - 1.28318530718)+0.1923076923*Math.sin(elapsedTime- 1.28318530718))-g
-            const vec = this.vectors[i].clone().multiplyScalar(V * 150 * speed).add(this.vector)
+            const vec = this.vectors[i].clone().multiplyScalar(V * 110 * speed).add(this.vector)
             this.position.setXYZ(i, ...vec)
-            }
+        }
         this.position.needsUpdate = true;
     }
     remove() {
