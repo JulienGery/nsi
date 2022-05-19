@@ -83,7 +83,7 @@ class JoinRoomForm extends Form {
                 }
             })
         } else {
-            displayToaster('remplir le formulaire')
+            displayToaster('remplisser le formulaire')
         }
     }
 
@@ -185,7 +185,7 @@ class RoomForm extends Form {
 
     updateCard(cards) {
         this.cards = cards
-        this.cardCount.textContent = `card count ${cards.length}`
+        this.cardCount.textContent = `nombre de paire ${cards.length}`
     }
 
 }

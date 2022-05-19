@@ -98,15 +98,8 @@ export class Explosion {
         const elapsedTime = this.clock.getElapsedTime()
         for (let i = 0; i < nombreParticules; i++) {
             const speed = this.speeds[i]
-
-            // const V = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
-            // const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime - 1.28318530718)
-            // const startVector = this.vectors[i]
-            // const V = 5ℯ^(-((1)/(5)) x + 2) (-((1)/(26)) cos(x + 5) + ((5)/(26)) sin(x + 5))
             const V = 5*Math.exp(-0.2*elapsedTime+2)*(-0.03846153846*Math.cos(elapsedTime - 1.28318530718)+0.1923076923*Math.sin(elapsedTime- 1.28318530718))-g
-            // console.log(V)
             const vec = this.vectors[i].clone().multiplyScalar(V * 150 * speed).add(this.vector)
-            // vec.multiplyScalar(speed).add(startVector).add(this.position.getXYZ(i))
             this.position.setXYZ(i, ...vec)
             }
         this.position.needsUpdate = true;
