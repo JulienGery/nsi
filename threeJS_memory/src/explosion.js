@@ -3,6 +3,7 @@ import { scene } from './Game.js';
 
 const nombreParticules = 2000;
 const particuleSize = .15
+const g = -7.216100404249
 
 /**
  * return a random unit vector in a sphere and store into this
@@ -60,16 +61,17 @@ export class Explosion {
         this.x = x
         this.y = y
         this.z = z
+        this.vector = new THREE.Vector3(this.x, this.y, this.z)
         this.speeds = []
         this.vectors = []
         this.createGeometry()
     }
 
-    *[Symbol.iterator]() {
-        yield this.x;
-        yield this.y;
-        yield this.z;
-    }
+    // *[Symbol.iterator]() {
+    //     yield this.x;
+    //     yield this.y;
+    //     yield this.z;
+    // }
 
     async createGeometry() {
         this.geometry = new THREE.BufferGeometry();
@@ -81,7 +83,7 @@ export class Explosion {
             colors.push(color.r, color.g, color.b);
             const vec = new THREE.Vector3().randomUnitVector().multiplyScalar(.1)
             this.vectors.push(vec)
-            vertices.push(...vec.clone().add(new THREE.Vector3(...this)))
+            vertices.push(...vec.clone().add(this.vector))
             this.speeds.push(Math.random() * 2)
         }
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3))
@@ -98,10 +100,13 @@ export class Explosion {
             const speed = this.speeds[i]
 
             // const V = Math.exp(-elapsedTime - .5) * Math.sin(elapsedTime - .5) - a + (-Math.cos(elapsedTime - .5) * Math.exp(-elapsedTime - .5) - b)
-            const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime - 1.28318530718)
-            const startVector = this.vectors[i]
-            const vec = this.vectors[i].clone().multiplyScalar(V)
-            vec.multiplyScalar(speed).add(startVector).add(this.position.getXYZ(i))
+            // const V = Math.exp(-elapsedTime * .2 + 2) * Math.cos(elapsedTime - 1.28318530718)
+            // const startVector = this.vectors[i]
+            // const V = 5ℯ^(-((1)/(5)) x + 2) (-((1)/(26)) cos(x + 5) + ((5)/(26)) sin(x + 5))
+            const V = 5*Math.exp(-0.2*elapsedTime+2)*(-0.03846153846*Math.cos(elapsedTime - 1.28318530718)+0.1923076923*Math.sin(elapsedTime- 1.28318530718))-g
+            // console.log(V)
+            const vec = this.vectors[i].clone().multiplyScalar(V * 150 * speed).add(this.vector)
+            // vec.multiplyScalar(speed).add(startVector).add(this.position.getXYZ(i))
             this.position.setXYZ(i, ...vec)
             }
         this.position.needsUpdate = true;
