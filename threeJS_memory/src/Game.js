@@ -64,7 +64,7 @@ export class Game {
         this.turnedCards = []
         this.cardUnder = NaN
         this.texture = []
-        this.allCard = []
+        this.gameCards = []
         this.sqrtNumberCard = Math.floor(Math.sqrt(this.numberCard / 2) * 2);
         this.Ypos = Math.ceil(this.numberCard / this.sqrtNumberCard);
         this.offSet = new THREE.Vector3((this.sqrtNumberCard - 1) * 2.3 / 2, (this.Ypos - 1) * 3.7 / 2, 0)
@@ -129,7 +129,7 @@ export class Game {
                     this.moveDown(cardIndex)
                     break;
                 case 'turn-card':
-                    this.allCard[cardIndex].rotate(qFront, qBack, Math.PI / 10)
+                    this.gameCards[cardIndex].rotate(qFront, qBack, Math.PI / 10)
                     break;
                 case 'pair-found':
                     this.pairFound(cardIndex)
@@ -138,13 +138,27 @@ export class Game {
                     this.moveUp(cardIndex)
                     break;
                 case 'turnback-card':
-                    this.allCard[cardIndex].rotate(qBack, qFront, Math.PI / 10)
+                    this.gameCards[cardIndex].rotate(qBack, qFront, Math.PI / 10)
                     break;
             }
         })
     
         socket.on('next-player', () => this.addListener())
         socket.once('start-game', () => this.gameStart())
+
+        const fEndForm = () => {
+            this.tickBind = this.clearScene.bind(this)
+            this.endExplosionBind = this.tickBind
+            clearTimeout(this.endExplosionBind)
+            document.body.removeChild(this.canvas)
+            // game = null
+            document.body.removeChild(stats.dom)
+            endGameForm.removeForm()
+        }
+        endGameForm.setFunction(() => {
+            fEndForm()
+        }, () => fEndForm())
+        
     }
 
     initTexture(cards) {
@@ -179,7 +193,7 @@ export class Game {
         gltfLoader.load('https://raw.githubusercontent.com/JulienGery/nsi/main/threeJS_memory/static/carte.gltf', (gltf) => {
             gltf.scene.children[0].children[1].material = new THREE.MeshBasicMaterial({ color: "#ffffff", map: texture2 })
             for (let i = 0; i < this.numberCard; i++) {
-                this.allCard[i] = new Card(new THREE.Vector3(0, 0, 0), this.texture[cards[i].name], cards[i].name, gltf.scene, cards[i].textureURL)
+                this.gameCards[i] = new Card(new THREE.Vector3(0, 0, 0), this.texture[cards[i].name], cards[i].name, gltf.scene, cards[i].textureURL)
             }
             this.placeCard();
         }, (progess) => {
@@ -189,10 +203,10 @@ export class Game {
     }
 
     placeCard() {
-        for (let i = 0; i < this.allCard.length; i++) {
-            this.allCard[i].show()
-            for(let j = 0; j<this.allCard[i].card.children[0].children.length; j++){
-                this.allCard[i].card.children[0].children[j].onAfterRender()
+        for (let i = 0; i < this.gameCards.length; i++) {
+            this.gameCards[i].show()
+            for(let j = 0; j<this.gameCards[i].card.children[0].children.length; j++){
+                this.gameCards[i].card.children[0].children[j].onAfterRender()
             }
         }
         this.tick()
@@ -206,7 +220,7 @@ export class Game {
     spread() {
         for (let i = 0; i < this.sqrtNumberCard; i++) {
             for (let j = 0; j < this.Ypos && i * this.Ypos + j < this.numberCard; j++) {
-                this.allCard[i * this.Ypos + j].moveTo(this.allCard[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet), Math.random() * .2 + .1);
+                this.gameCards[i * this.Ypos + j].moveTo(this.gameCards[i * this.Ypos + j].pos, new THREE.Vector3(i * 2.3, j * 3.7, 0).sub(this.offSet), Math.random() * .2 + .1);
             }
         }
     }
@@ -232,14 +246,15 @@ export class Game {
      * @param {Number} cardIndex 
      */
     pairFound(cardIndex) {
-        const card = this.allCard.splice(cardIndex, 1)[0]
-        explosions.push(new Explosion(...card.pos))
+        const card = this.gameCards.splice(cardIndex, 1)[0]
         if (this.cardUnder == cardIndex) {
             this.cardUnder = NaN
         }
-        card.remove();
+        // card.remove();
+        card.scale(card.card.scale.x, 0, .15)
+        setTimeout(() => explosions.push(new Explosion(...card.pos)), 150 + 25)
         this.updateIntersect()
-        if (this.allCard.length == 0) {
+        if (this.gameCards.length == 0) {
             setTimeout(this.end.bind(this), 1000)
         }
     }
@@ -248,7 +263,7 @@ export class Game {
      * @param {Number} cardIndex 
      */
     turnCard(cardIndex) {
-        const card = this.allCard[cardIndex]
+        const card = this.gameCards[cardIndex]
         card.rotate(card.card.quaternion, qBack, Math.PI / 10, uv)
         this.turnedCards.push(cardIndex)
         this.moveDown(cardIndex)
@@ -258,16 +273,18 @@ export class Game {
      * @param {Number} cardIndex 
      */
     moveUp(cardIndex) {
-        const card = this.allCard[cardIndex]
+        const card = this.gameCards[cardIndex]
+        card.scale(card.vScale.x, 1.0992)
         const pos = card.pos
-        card.moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
+        // card.moveTo(pos, new THREE.Vector3(pos.x, pos.y, 1), .3)
     }
     /**
      * moveDown
      * @param {Number} cardIndex 
      */
     moveDown(cardIndex) {
-        const card = this.allCard[cardIndex]
+        const card = this.gameCards[cardIndex]
+        card.scale(card.vScale.x, 1)
         const pos = card.pos
         card.moveTo(pos, new THREE.Vector3(pos.x, pos.y, 0), .3)
     }
@@ -290,7 +307,7 @@ export class Game {
     onMouseClick(event) {
         if (this.turnedCards.length == 2) {
             this.turnedCards.sort((a, b) => b - a)
-            if (this.allCard[this.turnedCards[0]].name == this.allCard[this.turnedCards[1]].name) {
+            if (this.gameCards[this.turnedCards[0]].name == this.gameCards[this.turnedCards[1]].name) {
                 this.turnedCards.forEach(card => {
                     socket.emit('action', 'pair-found', card)
                     this.pairFound(card)
@@ -303,11 +320,11 @@ export class Game {
                 this.turnedCards.forEach(card => {
                     if (this.numberPlayer > 1) {
                         socket.emit('action', 'turnback-card', card);
-                        this.allCard[card].rotate(qBack, qFront, Math.PI / 10)
+                        this.gameCards[card].rotate(qBack, qFront, Math.PI / 10)
                         return
                     }
                     if (card != this.cardUnder) {
-                        this.allCard[card].rotate(qBack, qFront, Math.PI / 10)
+                        this.gameCards[card].rotate(qBack, qFront, Math.PI / 10)
                     }
 
                 })
@@ -336,12 +353,13 @@ export class Game {
             if (!this.turnedCards.includes(cardIndex, 0)) {
                 socket.emit('action', 'turn-card', cardIndex)
                 this.turnCard(cardIndex)
+                // console.log(this.gameCards[cardIndex])
             }
         }
     }
 
     updateIntersect() {
-        this.intersects = this.allCard.map(card => card.card)
+        this.intersects = this.gameCards.map(card => card.card)
     }
 
     pickCard() {
@@ -353,8 +371,8 @@ export class Game {
         const intersects = this.pickCard();
 
         if (intersects.length == 1) {
-            for (let i = 0; i < this.allCard.length; i++) {
-                if (this.allCard[i].uuid == intersects[0].object.parent.parent.uuid) {
+            for (let i = 0; i < this.gameCards.length; i++) {
+                if (this.gameCards[i].uuid == intersects[0].object.parent.parent.uuid) {
                     uv = intersects[0].uv.sub(centerCard);
                     if (this.cardUnder != i) {
                         if (!isNaN(this.cardUnder)) {
@@ -415,18 +433,6 @@ export class Game {
         socket.removeListener('next-player')
         socket.removeListener('action')
         this.removeListener()
-        const fEndForm = () => {
-            this.tickBind = this.clearScene.bind(this)
-            this.endExplosionBind = this.tickBind
-            clearTimeout(this.endExplosionBind)
-            document.body.removeChild(this.canvas)
-            // game = null
-            document.body.removeChild(stats.dom)
-            endGameForm.removeForm()
-        }
-        endGameForm.setFunction(() => {
-            fEndForm()
-        }, () => fEndForm())
         endGameForm.displayForm()
     }
 

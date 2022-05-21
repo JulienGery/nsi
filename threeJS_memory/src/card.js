@@ -64,6 +64,7 @@ export class Card {
         // this.card.children[0].children[2].material = new THREE.MeshBasicMaterial({ color: "#000000"}) //side
         this.name = name; //name which define pairs
         this.uuid = this.card.uuid //get the uuid of the shape for convenience
+        this.vScale = this.card.scale
     }
 
     show() {
@@ -138,6 +139,28 @@ export class Card {
         }
         window.requestAnimationFrame(actualMouveTo)
 
+    }
+    /**
+     * 
+     * @param {Number} start 
+     * @param {Number} end 
+     * @param {Number} time 
+     */
+    scale(start, end, time = .2){
+        const clock = new THREE.Clock();
+        const dt = end-start
+        const test = () => {
+            const elapsedTime = clock.getElapsedTime()
+            const coef = start + dt * elapsedTime / time
+            this.card.scale.set(coef, coef, 1)
+            if(elapsedTime<time){
+                window.requestAnimationFrame(test)
+            }else{
+                this.card.scale.set(end, end, 1)
+            }
+            
+        }
+        test()
     }
 
     remove() {

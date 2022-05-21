@@ -20,40 +20,11 @@ THREE.Vector3.prototype.randomUnitVector = function(){
 /**
  * 
  * @param {Number} index 
- * @returns {Array} [X, Y, Z]
+ * @returns {THREE.Vector3} X, Y, Z
  */
 THREE.BufferAttribute.prototype.getXYZ = function(index){
     return new THREE.Vector3(this.getX(index), this.getY(index), this.getZ(index))
 }
-// /**
-//  * needs to be same length
-//  * @param {Array<Number>} array1 
-//  * @param {Array<Number>} array2 
-//  * @returns 
-//  */
-// function somme(array1, array2){
-//     return array1.map((e, idx) => e+array2[idx])
-// }
-// /**
-//  * 
-//  * @param  {...Array<Number>} args all arrays of n size
-//  * @returns {Array} sum of arrays
-//  */
-// function ArraySum(...args){
-
-//     switch (args.length){
-//         case 1:
-//             return args[0]
-//         case 2:
-//             return somme(...args)
-//         default:
-//             return somme(ArraySum(...args.slice(0, Math.ceil(args.length/2))), ArraySum(...args.slice(Math.ceil(args.length/2), Infinity)))
-
-//     }
-// }
-
-
-// const multiply = (coef) => (array) => array.map(e => coef*e)
 
 export class Explosion {
     constructor(x, y, z = 0) {
@@ -66,12 +37,6 @@ export class Explosion {
         this.vectors = []
         this.createGeometry()
     }
-
-    // *[Symbol.iterator]() {
-    //     yield this.x;
-    //     yield this.y;
-    //     yield this.z;
-    // }
 
     async createGeometry() {
         this.geometry = new THREE.BufferGeometry();

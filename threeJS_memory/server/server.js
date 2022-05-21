@@ -24,7 +24,7 @@ const whenPlayersAreReady = (room) => {
         setPlayersNotReady(room)
         io.to(room).emit('update-room', getPlayers(room))
         const cards = initCards(room)
-        io.to(room).emit('receive-cards', cards)
+        io.to(room).emit('receive-cards', cards)    
     }
 }
 
@@ -163,7 +163,6 @@ io.on('connect', socket => {
                 break;
 
             case 'pair-found':
-                //TODO add point
                 console.log('pair found\t' + cardIndex);
                 socket.to(room).emit('action', action, cardIndex);
                 users[socket.id].points += .5;
